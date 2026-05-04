@@ -92,21 +92,21 @@ body {
 }
 .hero-details {
   display:flex; gap:32px; justify-content:center; flex-wrap:wrap;
-  margin-bottom:36px; animation:fadeInUp 1s ease .7s both;
+  margin-bottom:40px; animation:fadeInUp 1s ease .7s both;
 }
 .hero-detail {
   text-align:center;
 }
 .hero-detail-value {
-  font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:600;
-  color:var(--gold-light); line-height:1.2;
+  font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem, 4vw, 3.2rem); font-weight:700;
+  color:var(--gold-light); line-height:1.1;
 }
 .hero-detail-label {
-  font-size:.65rem; letter-spacing:2px; text-transform:uppercase;
-  color:rgba(255,255,255,.5); margin-top:4px; font-weight:500;
+  font-size:.7rem; letter-spacing:2.5px; text-transform:uppercase;
+  color:rgba(255,255,255,.6); margin-top:6px; font-weight:500;
 }
 .hero-divider {
-  width:1px; height:40px; background:rgba(255,255,255,.15); align-self:center;
+  width:1px; height:56px; background:rgba(255,255,255,.2); align-self:center;
 }
 .hero-actions {
   display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
