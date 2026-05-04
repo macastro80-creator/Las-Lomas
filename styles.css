@@ -41,14 +41,11 @@ body {
   background:rgba(255,255,255,.95); backdrop-filter:blur(20px);
   padding:16px 48px; box-shadow:0 1px 0 var(--warm-gray-100);
 }
-.nav.scrolled .nav-logo, .nav.scrolled .nav-logo span { color:var(--warm-gray-800); }
+.nav.scrolled .nav-logo-img { filter:none; }
 .nav.scrolled .nav-links a { color:var(--warm-gray-500); }
 .nav.scrolled .nav-links a:hover { color:var(--gold); }
-.nav-logo {
-  font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700;
-  letter-spacing:6px; text-transform:uppercase; color:var(--white);
-}
-.nav-logo span { color:rgba(255,255,255,.7); font-weight:400; }
+.nav-logo { display:flex; align-items:center; text-decoration:none; }
+.nav-logo-img { height:36px; width:auto; filter:brightness(0) invert(1); transition:filter .3s; }
 .nav-links { display:flex; gap:32px; list-style:none; }
 .nav-links a {
   color:rgba(255,255,255,.8); text-decoration:none; font-size:.8rem;
@@ -163,8 +160,8 @@ body {
 
 /* ── Thesis ── */
 .thesis { background:var(--white); }
-.thesis-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; margin-top:56px; }
-.thesis-visual { position:relative; border-radius:4px; overflow:hidden; aspect-ratio:4/3; }
+.thesis-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; margin-top:56px; }
+.thesis-visual { position:sticky; top:120px; border-radius:4px; overflow:hidden; aspect-ratio:3/4; }
 .thesis-visual img { width:100%; height:100%; object-fit:cover; transition:transform .8s ease; }
 .thesis-visual:hover img { transform:scale(1.03); }
 .thesis-visual-badge {
@@ -290,6 +287,21 @@ body {
 .footer-links { display:flex; gap:24px; justify-content:center; list-style:none; margin-top:14px; }
 .footer-links a { color:var(--text-muted); text-decoration:none; font-size:.78rem; transition:color .3s; }
 .footer-links a:hover { color:var(--gold); }
+.footer-contact { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+.footer-contact .cta-input {
+  background:var(--cream); border:1px solid var(--warm-gray-200); color:var(--text-heading);
+  padding:12px 18px; border-radius:2px; font-size:.85rem; min-width:180px; flex:1; max-width:260px;
+}
+.footer-contact .cta-input::placeholder { color:var(--warm-gray-300); }
+.footer-contact .cta-input:focus { border-color:var(--gold); outline:none; }
+.btn-whatsapp {
+  display:inline-flex; align-items:center; gap:8px;
+  background:#25D366; color:var(--white); padding:12px 24px; border-radius:2px;
+  text-decoration:none; font-family:'Space Grotesk',sans-serif; font-size:.75rem;
+  font-weight:600; letter-spacing:1.5px; text-transform:uppercase; transition:all .3s;
+}
+.btn-whatsapp:hover { background:#1DA851; transform:translateY(-1px); }
+.btn-whatsapp svg { width:18px; height:18px; fill:currentColor; }
 
 /* ── Animations ── */
 @keyframes fadeInUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
