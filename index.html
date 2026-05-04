@@ -140,32 +140,37 @@
     <div class="section-inner" style="text-align:center;">
       <div class="section-tag reveal">The Land</div>
       <h2 class="section-title reveal" style="margin:0 auto 32px;">See Las Lomas.</h2>
-      <div class="gallery-grid reveal">
-        <div class="gallery-item gallery-item-wide">
-          <img src="images/land-aerial-valley.jpg" alt="Aerial panorama of Las Lomas showing the valley and river" loading="lazy">
-          <div class="gallery-caption">164 hectares · the valley and river from above</div>
+    </div>
+    <div class="carousel reveal" id="land-carousel">
+      <div class="carousel-track">
+        <div class="carousel-slide active">
+          <img src="images/land-aerial-valley.jpg" alt="Aerial panorama of Las Lomas">
+          <div class="carousel-caption">164 hectares · the valley and river from above</div>
         </div>
-        <div class="gallery-item">
-          <img src="images/land-aerial-boundary.jpg" alt="Las Lomas property boundary aerial view" loading="lazy">
-          <div class="gallery-caption">Property boundary · San Isidro in the background</div>
+        <div class="carousel-slide">
+          <img src="images/land-aerial-boundary.jpg" alt="Property boundary aerial view">
+          <div class="carousel-caption">Property boundary · San Isidro in the background</div>
         </div>
-        <div class="gallery-item">
-          <img src="images/land-aerial-forest.jpg" alt="Las Lomas aerial showing forest and highland terrain" loading="lazy">
-          <div class="gallery-caption">Highland terrain at 1,000 meters</div>
+        <div class="carousel-slide">
+          <img src="images/land-aerial-forest.jpg" alt="Forest and highland terrain">
+          <div class="carousel-caption">Highland terrain at 1,000 meters</div>
         </div>
-        <div class="gallery-item">
-          <img src="images/land-highland-views.jpg" alt="Rolling highlands with panoramic valley views" loading="lazy">
-          <div class="gallery-caption">Rolling highlands · valley views to the city</div>
+        <div class="carousel-slide">
+          <img src="images/land-highland-views.jpg" alt="Rolling highlands with valley views">
+          <div class="carousel-caption">Rolling highlands · valley views to the city</div>
         </div>
-        <div class="gallery-item">
-          <img src="images/land-river-rock.jpg" alt="River with natural rock formations on the property" loading="lazy">
-          <div class="gallery-caption">River · natural rock formations</div>
+        <div class="carousel-slide">
+          <img src="images/land-river-rock.jpg" alt="River with natural rock formations">
+          <div class="carousel-caption">River · natural rock formations</div>
         </div>
-        <div class="gallery-item gallery-item-wide">
-          <img src="images/real-waterfall.jpg" alt="Natural waterfall and river on the property" loading="lazy">
-          <div class="gallery-caption">20km of river · pristine water features</div>
+        <div class="carousel-slide">
+          <img src="images/real-waterfall.jpg" alt="Natural waterfall on the property">
+          <div class="carousel-caption">20km of river · pristine water features</div>
         </div>
       </div>
+      <button class="carousel-btn carousel-prev" aria-label="Previous">‹</button>
+      <button class="carousel-btn carousel-next" aria-label="Next">›</button>
+      <div class="carousel-dots" id="carousel-dots"></div>
     </div>
   </section>
 
@@ -334,6 +339,39 @@
       });
     }, { threshold: 0.15 });
     reveals.forEach(el => observer.observe(el));
+
+    // Carousel
+    (function() {
+      const slides = document.querySelectorAll('.carousel-slide');
+      const dotsC = document.getElementById('carousel-dots');
+      let cur = 0, timer;
+      slides.forEach((_, i) => {
+        const d = document.createElement('button');
+        d.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        d.addEventListener('click', () => goTo(i));
+        dotsC.appendChild(d);
+      });
+      function goTo(n) {
+        slides[cur].classList.remove('active');
+        dotsC.children[cur].classList.remove('active');
+        cur = (n + slides.length) % slides.length;
+        slides[cur].classList.add('active');
+        dotsC.children[cur].classList.add('active');
+        resetTimer();
+      }
+      function resetTimer() { clearInterval(timer); timer = setInterval(() => goTo(cur + 1), 5000); }
+      document.querySelector('.carousel-prev').addEventListener('click', () => goTo(cur - 1));
+      document.querySelector('.carousel-next').addEventListener('click', () => goTo(cur + 1));
+      resetTimer();
+      // Touch/swipe
+      let tx = 0;
+      const el = document.getElementById('land-carousel');
+      el.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+      el.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - tx;
+        if (Math.abs(dx) > 50) goTo(cur + (dx < 0 ? 1 : -1));
+      }, {passive:true});
+    })();
 
     function handleSubmit(e) {
       e.preventDefault();
