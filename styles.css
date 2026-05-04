@@ -249,6 +249,15 @@ body {
 .eco-card-title { font-family:'Cormorant Garamond',serif; font-size:1.25rem; font-weight:600; color:var(--text-heading); margin-bottom:8px; }
 .eco-card-desc { color:var(--text-body); font-size:.88rem; line-height:1.6; font-weight:300; }
 
+/* ── Bridge ── */
+.bridge-section {
+  background:var(--warm-gray-900); color:var(--white);
+}
+.bridge-section .section-tag { color:var(--gold-light); border-color:rgba(196,163,90,.3); }
+.bridge-section .section-title { color:var(--white); }
+.bridge-section .section-subtitle { color:rgba(255,255,255,.65); }
+.bridge-section strong { color:var(--gold-light); font-weight:600; }
+
 /* ── Gallery / Carousel ── */
 .gallery-section { background:var(--cream); overflow:hidden; padding-top:var(--section-padding); padding-bottom:var(--section-padding); }
 .carousel {
