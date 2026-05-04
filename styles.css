@@ -160,19 +160,27 @@ body {
 
 /* ── Property ── */
 .property-section { background:var(--white); padding-bottom:0; }
-.features-section { background:var(--white); padding-top:24px; }
-.features-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; }
+.features-section { background:var(--warm-gray-900); padding-top:var(--section-padding); padding-bottom:var(--section-padding); }
+.features-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1px; background:rgba(255,255,255,.06); }
 .feature-card {
-  padding:28px 24px; background:var(--cream); border:1px solid var(--warm-gray-100);
-  border-radius:6px; text-align:center; transition:all .3s;
+  padding:36px 28px; background:var(--warm-gray-900);
+  text-align:center; transition:all .4s;
 }
-.feature-card:hover { border-color:var(--gold-muted); transform:translateY(-3px); box-shadow:0 8px 32px rgba(26,23,20,.06); }
-.feature-icon { font-size:1.5rem; margin-bottom:12px; }
+.feature-card:hover { background:rgba(255,255,255,.03); }
+.feature-icon {
+  width:36px; height:36px; margin:0 auto 16px;
+  color:var(--gold-muted); opacity:.7;
+}
+.feature-icon svg { width:100%; height:100%; }
+.feature-number {
+  font-family:'Cormorant Garamond',serif; font-size:clamp(1.8rem, 3vw, 2.4rem); font-weight:700;
+  color:var(--gold-light); line-height:1.1; margin-bottom:4px;
+}
 .feature-card h3 {
-  font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:600;
-  color:var(--text-heading); margin-bottom:8px;
+  font-family:'Cormorant Garamond',serif; font-size:.95rem; font-weight:600;
+  color:rgba(255,255,255,.7); margin-bottom:12px; letter-spacing:.5px;
 }
-.feature-card p { color:var(--text-body); font-size:.82rem; line-height:1.55; font-weight:300; }
+.feature-card p { color:rgba(255,255,255,.4); font-size:.78rem; line-height:1.55; font-weight:300; }
 
 /* ── Thesis ── */
 .thesis { background:var(--white); }
