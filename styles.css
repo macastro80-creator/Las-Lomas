@@ -178,7 +178,7 @@ body {
 .thesis { background:var(--white); }
 .thesis-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; margin-top:56px; }
 .thesis-visual { position:relative; border-radius:4px; overflow:hidden; aspect-ratio:16/10; }
-.thesis-visual img { width:100%; height:100%; object-fit:cover; transition:transform .8s ease; }
+.thesis-visual img { width:100%; height:100%; object-fit:cover; transition:transform .8s ease; filter:contrast(1.08) saturate(1.15) brightness(1.02); }
 .thesis-visual:hover img { transform:scale(1.03); }
 .thesis-visual-badge {
   position:absolute; top:16px; left:16px;
@@ -206,7 +206,7 @@ body {
   border-radius:4px; overflow:hidden; transition:all .4s ease;
 }
 .eco-card:hover { border-color:var(--warm-gray-200); transform:translateY(-4px); box-shadow:0 16px 48px rgba(26,23,20,.08); }
-.eco-card-img { width:100%; aspect-ratio:16/10; object-fit:cover; }
+.eco-card-img { width:100%; aspect-ratio:16/10; object-fit:cover; filter:contrast(1.08) saturate(1.15) brightness(1.02); transition:filter .3s; }
 .eco-card-body { padding:24px; }
 .eco-card-label {
   font-family:'Space Grotesk',sans-serif; font-size:.6rem; font-weight:600;
@@ -220,8 +220,12 @@ body {
 .gallery-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:32px; }
 .gallery-item { position:relative; border-radius:6px; overflow:hidden; aspect-ratio:4/3; cursor:pointer; }
 .gallery-item-wide { grid-column:1 / -1; aspect-ratio:21/9; }
-.gallery-item img { width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
-.gallery-item:hover img { transform:scale(1.04); }
+.gallery-item img {
+  width:100%; height:100%; object-fit:cover;
+  transition:transform .6s ease;
+  filter:contrast(1.08) saturate(1.15) brightness(1.02);
+}
+.gallery-item:hover img { transform:scale(1.04); filter:contrast(1.12) saturate(1.2) brightness(1.04); }
 .gallery-caption {
   position:absolute; bottom:0; left:0; right:0; padding:16px 20px;
   background:linear-gradient(to top, rgba(26,23,20,.7), transparent);
