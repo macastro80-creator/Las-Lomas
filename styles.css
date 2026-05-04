@@ -161,7 +161,7 @@ body {
 /* ── Thesis ── */
 .thesis { background:var(--white); }
 .thesis-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; margin-top:56px; }
-.thesis-visual { position:sticky; top:120px; border-radius:4px; overflow:hidden; aspect-ratio:3/4; }
+.thesis-visual { position:relative; border-radius:4px; overflow:hidden; aspect-ratio:16/10; }
 .thesis-visual img { width:100%; height:100%; object-fit:cover; transition:transform .8s ease; }
 .thesis-visual:hover img { transform:scale(1.03); }
 .thesis-visual-badge {
@@ -201,6 +201,35 @@ body {
 
 /* ── Stats Bar ── */
 .stats-bar { background:var(--warm-gray-900); padding:56px 24px; }
+
+/* ── Video Section ── */
+.video-section { background:var(--white); padding:var(--section-padding) 24px; }
+.video-placeholder {
+  position:relative; width:100%; max-width:900px; margin:0 auto;
+  aspect-ratio:16/9; background:var(--warm-gray-100);
+  border-radius:6px; border:1px solid var(--warm-gray-200);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:16px; cursor:pointer; transition:all .4s;
+  background-image:url('images/hero-aerial.png'); background-size:cover; background-position:center;
+}
+.video-placeholder::after {
+  content:''; position:absolute; inset:0; border-radius:6px;
+  background:rgba(26,23,20,.45); transition:background .3s;
+}
+.video-placeholder:hover::after { background:rgba(26,23,20,.3); }
+.video-play-btn {
+  position:relative; z-index:2;
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center;
+  transition:all .3s; box-shadow:0 4px 24px rgba(0,0,0,.15);
+}
+.video-play-btn svg { width:28px; height:28px; color:var(--warm-gray-800); margin-left:3px; }
+.video-placeholder:hover .video-play-btn { background:var(--white); transform:scale(1.08); }
+.video-placeholder p {
+  position:relative; z-index:2;
+  font-family:'Space Grotesk',sans-serif; font-size:.75rem; font-weight:600;
+  letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,.8);
+}
 .stats-grid { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:repeat(5,1fr); gap:32px; text-align:center; }
 .stat-number {
   font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,3.5vw,2.8rem);
