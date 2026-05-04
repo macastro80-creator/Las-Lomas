@@ -199,6 +199,20 @@ body {
 .eco-card-title { font-family:'Cormorant Garamond',serif; font-size:1.25rem; font-weight:600; color:var(--text-heading); margin-bottom:8px; }
 .eco-card-desc { color:var(--text-body); font-size:.88rem; line-height:1.6; font-weight:300; }
 
+/* ── Gallery ── */
+.gallery-section { background:var(--cream); }
+.gallery-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:32px; }
+.gallery-item { position:relative; border-radius:6px; overflow:hidden; aspect-ratio:4/3; cursor:pointer; }
+.gallery-item-wide { grid-column:1 / -1; aspect-ratio:21/9; }
+.gallery-item img { width:100%; height:100%; object-fit:cover; transition:transform .6s ease; }
+.gallery-item:hover img { transform:scale(1.04); }
+.gallery-caption {
+  position:absolute; bottom:0; left:0; right:0; padding:16px 20px;
+  background:linear-gradient(to top, rgba(26,23,20,.7), transparent);
+  font-family:'Space Grotesk',sans-serif; font-size:.7rem; font-weight:500;
+  letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.9); text-align:left;
+}
+
 /* ── Stats Bar ── */
 .stats-bar { background:var(--warm-gray-900); padding:56px 24px; }
 
@@ -343,6 +357,8 @@ body {
   :root { --section-padding: clamp(56px, 8vw, 100px); }
   .thesis-grid,.opp-layout,.mindset-grid { grid-template-columns:1fr; gap:36px; }
   .eco-cards { grid-template-columns:1fr; max-width:480px; margin-left:auto; margin-right:auto; }
+  .gallery-grid { grid-template-columns:1fr; }
+  .gallery-item-wide { aspect-ratio:16/9; }
   .stats-grid { grid-template-columns:repeat(3,1fr); }
   .nav-links { display:none; }
   .nav { padding:16px 24px; }
