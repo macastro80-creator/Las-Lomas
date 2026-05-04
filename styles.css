@@ -64,7 +64,7 @@ body {
   position:relative; height:100vh; min-height:700px;
   display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
-.hero-bg { position:absolute; inset:0; background:url('images/hero-aerial.png') center/cover no-repeat; }
+.hero-bg { position:absolute; inset:0; background:url('images/land-aerial-boundary.jpg') center/cover no-repeat; }
 .hero-overlay {
   position:absolute; inset:0;
   background:linear-gradient(to bottom, rgba(26,23,20,.25) 0%, rgba(26,23,20,.4) 40%, rgba(26,23,20,.7) 75%, var(--white) 100%);
@@ -240,7 +240,7 @@ body {
   border-radius:6px; border:1px solid var(--warm-gray-200);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:16px; cursor:pointer; transition:all .4s;
-  background-image:url('images/hero-aerial.png'); background-size:cover; background-position:center;
+  background-image:url('images/land-aerial-valley.jpg'); background-size:cover; background-position:center;
 }
 .video-placeholder::after {
   content:''; position:absolute; inset:0; border-radius:6px;
