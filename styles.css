@@ -158,6 +158,22 @@ body {
 .section-title em { font-style:italic; font-weight:500; }
 .section-subtitle { font-size:1rem; color:var(--text-body); line-height:1.75; max-width:560px; font-weight:300; }
 
+/* ── Property ── */
+.property-section { background:var(--white); padding-bottom:0; }
+.features-section { background:var(--white); padding-top:24px; }
+.features-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; }
+.feature-card {
+  padding:28px 24px; background:var(--cream); border:1px solid var(--warm-gray-100);
+  border-radius:6px; text-align:center; transition:all .3s;
+}
+.feature-card:hover { border-color:var(--gold-muted); transform:translateY(-3px); box-shadow:0 8px 32px rgba(26,23,20,.06); }
+.feature-icon { font-size:1.5rem; margin-bottom:12px; }
+.feature-card h3 {
+  font-family:'Cormorant Garamond',serif; font-size:1.1rem; font-weight:600;
+  color:var(--text-heading); margin-bottom:8px;
+}
+.feature-card p { color:var(--text-body); font-size:.82rem; line-height:1.55; font-weight:300; }
+
 /* ── Thesis ── */
 .thesis { background:var(--white); }
 .thesis-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; margin-top:56px; }
@@ -357,6 +373,7 @@ body {
   :root { --section-padding: clamp(56px, 8vw, 100px); }
   .thesis-grid,.opp-layout,.mindset-grid { grid-template-columns:1fr; gap:36px; }
   .eco-cards { grid-template-columns:1fr; max-width:480px; margin-left:auto; margin-right:auto; }
+  .features-grid { grid-template-columns:repeat(2, 1fr); }
   .gallery-grid { grid-template-columns:1fr; }
   .gallery-item-wide { aspect-ratio:16/9; }
   .stats-grid { grid-template-columns:repeat(3,1fr); }
@@ -371,6 +388,7 @@ body {
 @media(max-width:600px) {
   :root { --section-padding: clamp(40px, 6vw, 64px); }
   .stats-grid { grid-template-columns:1fr 1fr; gap:24px; }
+  .features-grid { grid-template-columns:1fr; }
   .hero-actions { flex-direction:column; align-items:center; }
   .hero-details { gap:16px; }
   .hero-divider { display:none; }
