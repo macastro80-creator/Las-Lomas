@@ -87,18 +87,18 @@ body {
 }
 .hero-subtitle {
   font-size:clamp(.95rem,1.6vw,1.15rem); color:rgba(255,255,255,.8);
-  line-height:1.75; max-width:580px; margin:0 auto 20px; font-weight:300;
+  line-height:1.75; max-width:580px; margin:0 auto 16px; font-weight:300;
   animation:fadeInUp 1s ease .6s both;
 }
 .hero-details {
-  display:flex; gap:32px; justify-content:center; flex-wrap:wrap;
-  margin-bottom:40px; animation:fadeInUp 1s ease .7s both;
+  display:flex; gap:24px; justify-content:center; flex-wrap:nowrap;
+  margin-bottom:24px; animation:fadeInUp 1s ease .7s both;
 }
 .hero-detail {
   text-align:center;
 }
 .hero-detail-value {
-  font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem, 4vw, 3.2rem); font-weight:700;
+  font-family:'Cormorant Garamond',serif; font-size:clamp(1.6rem, 3vw, 2.4rem); font-weight:700;
   color:var(--gold-light); line-height:1.1;
 }
 .hero-detail-label {
@@ -106,11 +106,11 @@ body {
   color:rgba(255,255,255,.6); margin-top:6px; font-weight:500;
 }
 .hero-divider {
-  width:1px; height:56px; background:rgba(255,255,255,.2); align-self:center;
+  width:1px; height:40px; background:rgba(255,255,255,.2); align-self:center;
 }
 .hero-actions {
   display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
-  animation:fadeInUp 1s ease .9s both; margin-bottom:48px;
+  animation:fadeInUp 1s ease .9s both; margin-bottom:24px;
 }
 .btn-primary {
   background:var(--gold); color:var(--white);
