@@ -110,7 +110,7 @@ body {
 }
 .hero-actions {
   display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
-  animation:fadeInUp 1s ease .9s both;
+  animation:fadeInUp 1s ease .9s both; margin-bottom:48px;
 }
 .btn-primary {
   background:var(--gold); color:var(--white);
