@@ -437,6 +437,18 @@ body {
 .btn-whatsapp:hover { background:#1DA851; transform:translateY(-1px); }
 .btn-whatsapp svg { width:18px; height:18px; fill:currentColor; }
 
+/* ── Location ── */
+.location-section { background:var(--white); }
+.location-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; margin-top:32px; }
+.location-map { aspect-ratio:4/3; border-radius:6px; overflow:hidden; background:var(--warm-gray-50); }
+.location-link {
+  display:inline-flex; align-items:center; gap:8px; margin-top:24px;
+  font-family:'Space Grotesk',sans-serif; font-size:.75rem; font-weight:600;
+  letter-spacing:1.5px; text-transform:uppercase; text-decoration:none;
+  color:var(--gold); transition:color .3s;
+}
+.location-link:hover { color:var(--gold-muted); }
+
 /* ── FAQ ── */
 .faq-section { background:var(--cream); }
 .faq-list { max-width:720px; margin:32px auto 0; }
@@ -469,7 +481,7 @@ body {
 /* ── Responsive ── */
 @media(max-width:900px) {
   :root { --section-padding: clamp(36px, 5vw, 60px); }
-  .thesis-grid,.opp-layout,.mindset-grid,.property-grid { grid-template-columns:1fr; gap:36px; }
+  .thesis-grid,.opp-layout,.mindset-grid,.property-grid,.location-grid { grid-template-columns:1fr; gap:36px; }
   .eco-cards { grid-template-columns:1fr; max-width:480px; margin-left:auto; margin-right:auto; }
   .features-grid { grid-template-columns:repeat(2, 1fr); }
   .carousel { border-radius:0; }
