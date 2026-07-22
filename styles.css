@@ -73,10 +73,12 @@ body {
 .hero-tag {
   display:inline-flex; align-items:center; gap:12px;
   font-family:'Space Grotesk',sans-serif; font-size:.7rem; font-weight:600;
-  letter-spacing:5px; text-transform:uppercase; color:var(--gold-light);
+  letter-spacing:5px; text-transform:uppercase; color:var(--white);
+  background:rgba(26,23,20,.6); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,.15);
+  padding:8px 24px; border-radius:50px;
   margin-bottom:28px; animation:fadeInUp 1s ease .2s both;
 }
-.hero-tag::before, .hero-tag::after { content:''; width:40px; height:1px; background:var(--gold-muted); }
+.hero-tag::before, .hero-tag::after { display:none; }
 .hero-title {
   font-family:'Cormorant Garamond',serif; font-size:clamp(2.8rem,6.5vw,5.5rem);
   font-weight:300; line-height:1.08; margin-bottom:24px; color:var(--white);
