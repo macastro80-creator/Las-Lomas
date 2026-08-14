@@ -275,6 +275,22 @@ def get_exchange_rate():
 def read_root():
     return FileResponse("website/index.html")
 
+@app.get("/residential")
+def read_residential():
+    return FileResponse("website/residential.html")
+
+@app.get("/agrihood")
+def read_agrihood():
+    return FileResponse("website/agrihood.html")
+
+@app.get("/zone")
+def read_zone():
+    return FileResponse("website/zone.html")
+
+@app.get("/contact")
+def read_contact():
+    return FileResponse("website/contact.html")
+
 @app.get("/styles.css")
 def read_styles():
     return FileResponse("website/styles.css")
@@ -360,8 +376,7 @@ def admin_dashboard(request: Request):
     
     exchange_rate = get_exchange_rate()
     
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "dashboard.html", {
         "active_page": "dashboard",
         "total_leads": total_leads,
         "pending_leads_count": pending_leads_count,
@@ -405,8 +420,7 @@ def admin_crm(request: Request, filter: str = "all"):
     
     exchange_rate = get_exchange_rate()
     
-    return templates.TemplateResponse("crm.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "crm.html", {
         "active_page": "crm",
         "filter_mode": filter,
         "pending_leads_count": pending_leads_count,
@@ -505,8 +519,7 @@ def admin_gantt(request: Request):
     
     exchange_rate = get_exchange_rate()
     
-    return templates.TemplateResponse("gantt.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "gantt.html", {
         "active_page": "gantt",
         "pending_leads_count": pending_leads_count,
         "grouped_tasks": grouped_tasks,
@@ -565,8 +578,7 @@ def admin_finance(request: Request):
     
     exchange_rate = get_exchange_rate()
     
-    return templates.TemplateResponse("finance.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "finance.html", {
         "active_page": "finance",
         "pending_leads_count": pending_leads_count,
         "transactions": transactions,

@@ -1,24 +1,56 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LAS LOMAS · Eco-Residencial & Agrihood · Pérez Zeledón · Costa Rica</title>
-  <meta name="description" content="Comunidad exclusiva colindante con RISE. Lotes residenciales de 1 hectárea con título y servicios por $190K, y fincas de 5 a 20 hectáreas en Agrihood.">
+  <script>
+    (function() {
+      const savedLang = localStorage.getItem('preferred-lang') || 'en';
+      document.documentElement.setAttribute('lang', savedLang);
+    })();
+  </script>
+  <title>LAS LOMAS · Eco-Residential & Agrihood · Pérez Zeledón · Costa Rica</title>
+  <meta name="description" content="Exclusive community bordering RISE. 1-hectare residential lots with title and services for $190K, and 5 to 20-hectare estates in Agrihood.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- ═══ Navigation ═══ -->
   <nav class="nav" id="main-nav">
-    <a href="#hero" class="nav-logo"><img src="images/logo-altitud.png" alt="RE/MAX Altitud" class="nav-logo-img"></a>
+    <a href="/" class="nav-logo"><img src="images/logo-altitud.png" alt="RE/MAX Altitud" class="nav-logo-img"></a>
     <ul class="nav-links">
-      <li><a href="#proyectos">El Proyecto</a></li>
-      <li><a href="#amenidades">Amenidades</a></li>
-      <li><a href="#rise">Ecosistema RISE</a></li>
-      <li><a href="#contacto">Contacto</a></li>
+      <li><a href="/" class="active">
+        <span class="lang-en">Home</span>
+        <span class="lang-es">Inicio</span>
+      </a></li>
+      <li><a href="/residential">
+        <span class="lang-en">Residential</span>
+        <span class="lang-es">Residencial</span>
+      </a></li>
+      <li><a href="/agrihood">
+        <span class="lang-en">Agrihood</span>
+        <span class="lang-es">Agrihood</span>
+      </a></li>
+      <li><a href="/zone">
+        <span class="lang-en">The Area</span>
+        <span class="lang-es">La Zona</span>
+      </a></li>
+      <li><a href="/contact">
+        <span class="lang-en">Contact</span>
+        <span class="lang-es">Contacto</span>
+      </a></li>
     </ul>
-    <a href="#contacto" class="nav-cta">Solicitar Info</a>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="lang-selector">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <span class="lang-divider">|</span>
+        <button class="lang-btn" data-lang="es" onclick="setLanguage('es')">ES</button>
+      </div>
+      <a href="/contact" class="nav-cta">
+        <span class="lang-en">Request Info</span>
+        <span class="lang-es">Solicitar Info</span>
+      </a>
+    </div>
   </nav>
 
   <!-- ═══ Hero ═══ -->
@@ -26,170 +58,196 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <div class="hero-tag">
-        <span></span>Santa Elena · Pérez Zeledón · COSTA RICA<span></span>
+        <span></span>
+        <span class="lang-en">Santa Elena · Pérez Zeledón · COSTA RICA</span>
+        <span class="lang-es">Santa Elena · Pérez Zeledón · COSTA RICA</span>
+        <span></span>
       </div>
       <h1 class="hero-title">
-        Un Hogar de Aire Puro<br>y <em>Agua Cristalina</em>.
+        <span class="lang-en">Sovereignty, Convenience,<br>and <em>Deep Nature</em>.</span>
+        <span class="lang-es">Soberanía, Conveniencia<br>y <em>Naturaleza Profunda</em>.</span>
       </h1>
       <p class="hero-subtitle">
-        Una exclusiva comunidad eco-residencial y productiva rodeada de naturaleza a 1,000 metros de altura. Lotes independientes con título y servicios, colindantes con la vibrante comunidad familiar de RISE.
+        <span class="lang-en">An eco-residential community at 1,000 meters elevation, bordering RISE. The purity of mountain air and well water, the safety of title deeds, and the convenience of being just 15 minutes from the city.</span>
+        <span class="lang-es">Una comunidad eco-residencial a 1,000 metros de altitud, colindante con RISE. La pureza del aire de montaña y agua de pozo, la seguridad de títulos de propiedad, y la conveniencia de estar a solo 15 minutos de la ciudad.</span>
       </p>
-      <div class="hero-details">
-        <div class="hero-detail">
-          <div class="hero-detail-value">1 Hectárea</div>
-          <div class="hero-detail-label">Lotes Residenciales</div>
-        </div>
-        <div class="hero-divider"></div>
-        <div class="hero-detail">
-          <div class="hero-detail-value">$190,000</div>
-          <div class="hero-detail-label">Precio Inicial</div>
-        </div>
-        <div class="hero-divider"></div>
-        <div class="hero-detail">
-          <div class="hero-detail-value">5-20 ha</div>
-          <div class="hero-detail-label">Agrihood Estates</div>
-        </div>
-        <div class="hero-divider"></div>
-        <div class="hero-detail">
-          <div class="hero-detail-value">Listo</div>
-          <div class="hero-detail-label">Título &amp; Servicios</div>
-        </div>
-      </div>
       <div class="hero-actions">
-        <a href="#contacto" class="btn-primary">Ver Disponibilidad</a>
-        <a href="#proyectos" class="btn-secondary">Explorar Fases</a>
+        <a href="/contact" class="btn-primary">
+          <span class="lang-en">Join the Vision</span>
+          <span class="lang-es">Únete a la Visión</span>
+        </a>
+        <a href="/residential" class="btn-secondary">
+          <span class="lang-en">Explore Phases</span>
+          <span class="lang-es">Explorar Fases</span>
+        </a>
       </div>
     </div>
     <div class="hero-scroll">
-      <span>Descubrir</span>
+      <span>
+        <span class="lang-en">Discover</span>
+        <span class="lang-es">Descubrir</span>
+      </span>
       <div class="scroll-line"></div>
     </div>
   </section>
 
   <!-- ═══ Urgency Banner ═══ -->
   <div class="urgency-banner">
-    <p>⬥ Pre-venta Fase 1: Primeros 30 lotes residenciales de 1 hectárea ya disponibles · <strong>Precios Fundador</strong> ⬥</p>
+    <p>
+      <span class="lang-en">⬥ Phase 1 Pre-sale: 22 exclusive 1-hectare residential lots now available · <strong>Founder Prices</strong> ⬥</span>
+      <span class="lang-es">⬥ Pre-venta Fase 1: 22 exclusivos lotes residenciales de 1 hectárea ya disponibles · <strong>Precios Fundador</strong> ⬥</span>
+    </p>
   </div>
 
-  <!-- ═══════════════════════════════════════════════ -->
-  <!-- PART 1: EL PROYECTO (LAS LOMAS & AGRIHOOD)      -->
-  <!-- ═══════════════════════════════════════════════ -->
-  
-  <section class="section property-section" id="proyectos">
-    <div class="section-inner">
-      <div class="section-tag reveal">Dos Conceptos. Un Mismo Entorno.</div>
-      <h2 class="section-title reveal">Un proyecto residencial diseñado en armonía con el bosque.</h2>
-      
-      <div class="property-grid">
-        <div class="property-text">
-          <h3 class="property-text-heading reveal">Dos fases de vida sostenible:</h3>
-          
-          <div class="reveal" style="margin-bottom: 24px;">
-            <strong style="color: var(--emerald); font-size: 1.1rem; display: block; margin-bottom: 6px;">Fase 1: Las Lomas Eco-Residencial</strong>
-            <p class="section-subtitle" style="max-width:100%; font-size:0.95rem;">
-              Lotes independientes de **1 Hectárea (10,000 m²)** con título de propiedad inscrito y todos los servicios públicos instalados (agua de pozos concesionados, electricidad y fibra óptica). El balance perfecto entre privacidad absoluta y vida comunitaria por **$190,000 USD**.
-            </p>
-          </div>
+  <!-- ═══ Philosophy Section ═══ -->
+  <section class="section property-section">
+    <div class="section-inner" style="max-width: 800px; text-align: center;">
+      <div class="section-tag reveal">
+        <span class="lang-en">Freedom &amp; Balance</span>
+        <span class="lang-es">Libertad y Balance</span>
+      </div>
+      <h2 class="section-title reveal" style="margin-bottom: 24px;">
+        <span class="lang-en">Not hermits. Just free.</span>
+        <span class="lang-es">No somos ermitaños. Solo libres.</span>
+      </h2>
+      <p class="section-subtitle reveal" style="max-width: 100%; font-size: 1.15rem; line-height: 1.8;">
+        <span class="lang-en">We value breathing clean air and drinking pristine well water, but we don't believe in sacrificing convenience. Located just 15 minutes from the vibrant city of San Isidro, Las Lomas offers the perfect balance: off-grid tranquility, natural abundance, and fast access to modern life, education, and commerce.</span>
+        <span class="lang-es">Valoramos respirar aire puro y beber agua limpia de pozo, pero no creemos en sacrificar la comodidad. Ubicado a solo 15 minutos de la activa ciudad de San Isidro, Las Lomas ofrece el balance perfecto: tranquilidad rodeada de naturaleza y un acceso rápido a la vida moderna, educación y comercio.</span>
+      </p>
+    </div>
+  </section>
 
-          <div class="reveal">
-            <strong style="color: var(--gold); font-size: 1.1rem; display: block; margin-bottom: 6px;">Fase 2: Las Lomas Agrihood <span style="font-size: 0.8rem; vertical-align: middle; background: var(--warm-gray-100); padding: 2px 8px; border-radius: 2px; color: var(--text-body);">COMING SOON</span></strong>
-            <p class="section-subtitle" style="max-width:100%; font-size:0.95rem;">
-              Fincas productivas de **5 a 20 hectáreas** diseñadas para agricultura regenerativa, proyectos forestales o fincas familiares integradas. Una oportunidad única de poseer un legado de tierra fértil con nacientes de agua propias.
+  <!-- ═══ Land Offerings (Splits) ═══ -->
+  <section class="section offerings-section" style="background:var(--cream); padding-top: 60px;">
+    <div class="section-inner">
+      <div class="section-tag reveal" style="text-align:center;">
+        <span class="lang-en">Two Unique Ways of Living</span>
+        <span class="lang-es">Dos Maneras Únicas de Vivir</span>
+      </div>
+      <h2 class="section-title reveal" style="text-align:center; margin-bottom: 40px;">
+        <span class="lang-en">Explore Our Offerings</span>
+        <span class="lang-es">Explora Nuestras Opciones</span>
+      </h2>
+      
+      <div class="eco-cards" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px;">
+        <!-- Card 1: Residential -->
+        <div class="eco-card reveal" style="padding: 40px; text-align: center; border-top: 1px solid var(--gold-light); display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;">
+          <div>
+            <div class="eco-card-label" style="font-size: 0.8rem; margin-bottom: 16px;">
+              <span class="lang-en">Las Lomas Residential</span>
+              <span class="lang-es">Las Lomas Residential</span>
+            </div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size: 2.2rem; font-weight: 600; color:var(--text-heading); margin-bottom: 4px;">
+              <span class="lang-en">22 Lots</span>
+              <span class="lang-es">22 Lotes</span>
+            </div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color:var(--text-muted); margin-bottom: 24px;">
+              <span class="lang-en">1 Hectare Each</span>
+              <span class="lang-es">1 Hectárea Cada Uno</span>
+            </div>
+            <p class="eco-card-desc" style="font-size: 1rem; line-height: 1.6; margin-bottom: 24px;">
+              <span class="lang-en">Breathtaking mountain views, independent title deeds, high-speed fiber optics, and all services ready. Bordering the RISE community and school.</span>
+              <span class="lang-es">Vistas espectaculares a la montaña, títulos de propiedad independientes y servicios listos. Colindante con la escuela y comunidad de RISE.</span>
             </p>
           </div>
+          <a href="/residential" class="btn-primary" style="font-size: 0.7rem; padding: 12px 24px; align-self: center;">
+            <span class="lang-en">Explore Residential</span>
+            <span class="lang-es">Explorar Residencial</span>
+          </a>
         </div>
-        <div class="property-visual reveal">
-          <img src="images/lomas.gif" alt="Conceptual masterplan for Lomas development" loading="lazy">
+
+        <!-- Card 2: Agrihood -->
+        <div class="eco-card reveal" style="padding: 40px; text-align: center; border-top: 1px solid var(--emerald-light); display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;">
+          <div>
+            <div class="eco-card-label" style="font-size: 0.8rem; margin-bottom: 16px;">
+              <span class="lang-en">Las Lomas Agrihoods</span>
+              <span class="lang-es">Las Lomas Agrihoods</span>
+            </div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size: 2.2rem; font-weight: 600; color:var(--text-heading); margin-bottom: 4px;">
+              <span class="lang-en">17 Lots</span>
+              <span class="lang-es">17 Lotes</span>
+            </div>
+            <div style="font-family:'Space Grotesk',sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color:var(--text-muted); margin-bottom: 24px;">
+              <span class="lang-en">5 to 20 Hectares Each</span>
+              <span class="lang-es">5 a 20 Hectáreas Cada Uno</span>
+            </div>
+            <p class="eco-card-desc" style="font-size: 1rem; line-height: 1.6; margin-bottom: 24px;">
+              <span class="lang-en">Fincas for self-sufficiency, fertile soil for regeneration, private well water, and direct access to nearly 3 km of river.</span>
+              <span class="lang-es">Fincas para autosuficiencia, tierra fértil para regeneración, agua de pozo propio y acceso directo a casi 3 km de río.</span>
+            </p>
+          </div>
+          <a href="/agrihood" class="btn-primary" style="font-size: 0.7rem; padding: 12px 24px; align-self: center;">
+            <span class="lang-en">Explore Agrihood</span>
+            <span class="lang-es">Explorar Agrihood</span>
+          </a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══ Land Offerings ═══ -->
-  <section class="section offerings-section" style="background:var(--cream);">
-    <div class="section-inner">
-      <div class="section-tag reveal" style="text-align:center;">Lo que ofrece la tierra</div>
-      <h2 class="section-title reveal" style="text-align:center; margin-bottom: 0;">Dos Divisiones Únicas.</h2>
-      
-      <div class="eco-cards" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 40px; gap: 32px;">
-        <div class="eco-card reveal" style="padding: 40px; text-align: center; border-top: 4px solid var(--gold-light);">
-          <div class="eco-card-label" style="font-size: 0.8rem; margin-bottom: 16px;">San Luis</div>
-          <div style="font-family:'Cormorant Garamond',serif; font-size: 2.4rem; font-weight: 600; color:var(--text-heading); margin-bottom: 4px;">22 hectáreas</div>
-          <div style="font-family:'Space Grotesk',sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color:var(--text-muted); margin-bottom: 24px;">~ 54 acres</div>
-          <p class="eco-card-desc" style="font-size: 1.05rem;">
-            Fácilmente urbanizable, con excelentes vistas y acceso al río. <strong>Consulte por nuestras 2 opciones de desarrollo</strong> para crear entre 20 y 40 lotes en este espacio.
-          </p>
-        </div>
-        <div class="eco-card reveal" style="padding: 40px; text-align: center; border-top: 4px solid var(--emerald-light);">
-          <div class="eco-card-label" style="font-size: 0.8rem; margin-bottom: 16px;">Las Lomas</div>
-          <div style="font-family:'Cormorant Garamond',serif; font-size: 2.4rem; font-weight: 600; color:var(--text-heading); margin-bottom: 4px;">142 hectáreas</div>
-          <div style="font-family:'Space Grotesk',sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color:var(--text-muted); margin-bottom: 24px;">~ 351 acres</div>
-          <p class="eco-card-desc" style="font-size: 1.05rem;">
-            Gran potencial para un proyecto más exclusivo. También cuenta con vistas increíbles y un amplio acceso al río.
-          </p>
-        </div>
+  <!-- ═══ RISE Ecosystem Teaser ═══ -->
+  <section class="section features-section">
+    <div class="section-inner" style="text-align: center; max-width: 750px;">
+      <div class="section-tag reveal" style="color: var(--gold-light);">
+        <span class="lang-en">The Neighboring Vision</span>
+        <span class="lang-es">La Visión Colindante</span>
       </div>
-    </div>
-  </section>
-
-  <!-- ═══ Property Features Grid ═══ -->
-  <section class="section features-section" id="amenidades">
-    <div class="section-inner">
-      <div class="section-tag reveal" style="color: var(--gold-light);">¿Por qué elegir Las Lomas?</div>
-      <h2 class="section-title reveal" style="color: var(--white);">Tu salud y bienestar en primer lugar.</h2>
-      
-      <div class="features-grid">
-        <div class="feature-card reveal">
-          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 12h3v8h14v-8h3L12 2z"/></svg></div>
-          <div class="feature-number">1,000m</div>
-          <h3>Aire Puro</h3>
-          <p style="color: var(--warm-gray-300);">Una altura ideal en el corredor biológico que garantiza aire fresco de montaña y temperaturas templadas constantes.</p>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v6M12 16v6M6 12H2M22 12h-4"/><circle cx="12" cy="12" r="4"/></svg></div>
-          <div class="feature-number">Cristalina</div>
-          <h3>Agua de Manantial</h3>
-          <p style="color: var(--warm-gray-300);">Concesiones hídricas y pozos propios aprobados que aseguran el suministro de agua de la más alta calidad.</p>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h16M4 20V10l8-6 8 6v10"/></svg></div>
-          <div class="feature-number">Senderos</div>
-          <h3>Walking Trails</h3>
-          <p style="color: var(--warm-gray-300);">Kilómetros de senderos peatonales privados que recorren el bosque nativo y bordean el río cristalino.</p>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div>
-          <div class="feature-number">Inscrito</div>
-          <h3>Título de Propiedad</h3>
-          <p style="color: var(--warm-gray-300);">Toda la Fase 1 cuenta con planos catastrados y títulos de propiedad individuales listos para traspaso inmediato.</p>
-        </div>
-      </div>
+      <h2 class="section-title reveal" style="color: var(--white); margin-bottom: 24px;">
+        <span class="lang-en">Adjacent to the RISE Ecosystem</span>
+        <span class="lang-es">Colindantes con el Ecosistema RISE</span>
+      </h2>
+      <p style="color: var(--warm-gray-300); font-size: 1.05rem; line-height: 1.7; margin-bottom: 32px;">
+        <span class="lang-en">Vivir en Las Lomas te otorga colindancia directa y acceso conveniente a la infraestructura de **RISE**, una comunidad regenerativa de clase mundial ubicada justo al lado. Esto significa que puedes disfrutar de una escuela inspirada en Waldorf, una pista de aterrizaje privada, áreas comerciales y hubs de co-working desde el primer día.</span>
+        <span class="lang-es">Vivir en Las Lomas te otorga colindancia directa y acceso conveniente a la infraestructura de **RISE**, una comunidad regenerativa de clase mundial ubicada justo al lado. Esto significa que puedes disfrutar de una escuela de inspiración Waldorf, pista de aterrizaje privada, áreas comerciales y hubs de co-working desde el primer día.</span>
+      </p>
+      <a href="/zone" class="btn-secondary" style="display: inline-block;">
+        <span class="lang-en">Explore the Area</span>
+        <span class="lang-es">Explorar la Zona</span>
+      </a>
     </div>
   </section>
 
   <!-- ═══ Photo Gallery ═══ -->
   <section class="section gallery-section">
     <div class="section-inner" style="text-align:center;">
-      <div class="section-tag reveal">Fotografías del Proyecto</div>
-      <h2 class="section-title reveal" style="margin:0 auto 32px;">Descubre el Entorno.</h2>
+      <div class="section-tag reveal">
+        <span class="lang-en">Project Gallery</span>
+        <span class="lang-es">Fotografías del Proyecto</span>
+      </div>
+      <h2 class="section-title reveal" style="margin:0 auto 32px;">
+        <span class="lang-en">Discover the Surroundings.</span>
+        <span class="lang-es">Descubre el Entorno.</span>
+      </h2>
     </div>
     <div class="carousel reveal" id="land-carousel">
       <div class="carousel-track">
         <div class="carousel-slide active">
           <img src="images/land-aerial-valley.jpg" alt="Vistas de las lomas y valles">
-          <div class="carousel-caption">Vistas panorámicas a 1,000 metros de altitud</div>
+          <div class="carousel-caption">
+            <span class="lang-en">Panoramic views at 1,000 meters elevation</span>
+            <span class="lang-es">Vistas panorámicas a 1,000 metros de altitud</span>
+          </div>
         </div>
         <div class="carousel-slide">
           <img src="images/land-aerial-boundary.jpg" alt="Linderos del proyecto con la cordillera">
-          <div class="carousel-caption">Lotes de 1 Hectárea rodeados de bosque nativo</div>
+          <div class="carousel-caption">
+            <span class="lang-en">1-Hectare lots surrounded by native forest</span>
+            <span class="lang-es">Lotes de 1 Hectárea rodeados de bosque nativo</span>
+          </div>
         </div>
         <div class="carousel-slide">
           <img src="images/land-aerial-forest.jpg" alt="Bosque y topografía del proyecto">
-          <div class="carousel-caption">Senderos para caminata en áreas de conservación</div>
+          <div class="carousel-caption">
+            <span class="lang-en">Walking trails in conservation areas</span>
+            <span class="lang-es">Senderos para caminata en áreas de conservación</span>
+          </div>
         </div>
         <div class="carousel-slide">
           <img src="images/real-waterfall.jpg" alt="Cascadas naturales y río cristalino">
-          <div class="carousel-caption">Acceso privado a casi 3 km de río de agua pura</div>
+          <div class="carousel-caption">
+            <span class="lang-en">Private access to almost 3 km of pure water river</span>
+            <span class="lang-es">Acceso privado a casi 3 km de río de agua pura</span>
+          </div>
         </div>
       </div>
       <button class="carousel-btn carousel-prev" aria-label="Previous">‹</button>
@@ -198,101 +256,31 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════ -->
-  <!-- PART 2: ECOCONEXIÓN — VECINOS DE RISE           -->
-  <!-- ═══════════════════════════════════════════════ -->
-  
-  <section class="section bridge-section" id="rise">
-    <div class="section-inner" style="text-align:center;">
-      <div class="section-tag reveal">El Ecosistema Vecino</div>
-      <h2 class="section-title reveal" style="margin:0 auto;">Acceso a la Infraestructura de RISE.</h2>
-      <p class="section-subtitle reveal" style="max-width:640px; margin:20px auto 0;">
-        Vivir en Las Lomas te otorga colindancia directa y acceso conveniente a la infraestructura de **RISE**, una comunidad regenerativa de clase mundial ubicada justo al lado. Esto significa que puedes disfrutar de servicios premium desde el primer día sin necesidad de construirlos.
-      </p>
-    </div>
-  </section>
-
-  <!-- RISE Benefits -->
-  <section class="section ecosystem">
-    <div class="section-inner">
-      <div class="eco-cards">
-        <div class="eco-card reveal">
-          <img src="images/real-waldorf.jpg" class="eco-card-img" alt="Escuela Waldorf en RISE" loading="lazy">
-          <div class="eco-card-body">
-            <div class="eco-card-label">Educación</div>
-            <h3 class="eco-card-title">Escuela de Inspiración Waldorf</h3>
-            <p class="eco-card-desc">Acceso a la oferta educativa Waldorf en RISE, ideal para familias que buscan un desarrollo integral, creativo y libre para sus hijos en la naturaleza.</p>
-          </div>
-        </div>
-        <div class="eco-card reveal">
-          <img src="images/real-airstrip.jpg" class="eco-card-img" alt="Pista de Aterrizaje en RISE" loading="lazy">
-          <div class="eco-card-body">
-            <div class="eco-card-label">Accesibilidad</div>
-            <h3 class="eco-card-title">Pista de Aterrizaje &amp; Hangares</h3>
-            <p class="eco-card-desc">Conexión aérea rápida a 25 minutos de San José. Ideal para traslados ejecutivos rápidos y entusiastas de la aviación.</p>
-          </div>
-        </div>
-        <div class="eco-card reveal">
-          <img src="images/coworking.png" class="eco-card-img" alt="Áreas Comerciales y Co-working" loading="lazy">
-          <div class="eco-card-body">
-            <div class="eco-card-label">Comunidad &amp; Comercio</div>
-            <h3 class="eco-card-title">Zonas Comerciales &amp; Co-Working</h3>
-            <p class="eco-card-desc">Disfruta de las cafeterías, mercados orgánicos locales, centro de retiros Kinkará y el hub de co-working conectado por fibra óptica.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══ CTA / Formulario de Contacto (Conectado al CRM) ═══ -->
-  <section class="cta-section" id="contacto">
-    <div class="cta-inner">
-      <div class="section-tag reveal">Pre-venta Exclusiva</div>
-      <h2 class="section-title reveal">Forma parte de<br>Las Lomas.</h2>
-      <p class="section-subtitle reveal" style="max-width:480px; margin-bottom: 24px;">
-        Registra tu interés para recibir el brochure del proyecto, mapas de segregación de lotes y agendar una visita privada guiada.
-      </p>
-      
-      <form class="cta-form reveal" onsubmit="handleSubmit(event)" style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 480px; margin: 0 auto; text-align: left;">
-        <div>
-          <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">Nombre Completo</label>
-          <input type="text" id="contact-name" placeholder="Tu nombre" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-        </div>
-        <div style="display: grid; grid-template-cols: 1fr; gap: 16px;">
-          <div>
-            <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">Correo Electrónico</label>
-            <input type="email" id="contact-email" placeholder="correo@ejemplo.com" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-          </div>
-          <div>
-            <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">Teléfono</label>
-            <input type="text" id="contact-phone" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-          </div>
-        </div>
-        <div>
-          <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">Proyecto de Interés</label>
-          <select id="contact-project" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
-            <option value="Las Lomas Eco-Residencial (Lote 1 ha - $190,000)" style="background: var(--warm-gray-900);">Las Lomas Eco-Residencial (1 Hectárea - $190K)</option>
-            <option value="Las Lomas Agrihood (Lote 5-20 ha - Coming Soon)" style="background: var(--warm-gray-900);">Las Lomas Agrihood (5 a 20 Hectáreas - Coming Soon)</option>
-            <option value="Informacion General" style="background: var(--warm-gray-900);">Quiero información general</option>
-          </select>
-        </div>
-        <div>
-          <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">Mensaje (Opcional)</label>
-          <textarea id="contact-message" rows="3" placeholder="Cuéntanos más sobre lo que buscas..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
-        </div>
-        <button type="submit" class="btn-primary" style="margin-top: 10px; cursor: pointer;">Solicitar Información</button>
-      </form>
-    </div>
-  </section>
-
   <!-- ═══ Footer ═══ -->
   <footer class="footer">
     <div class="footer-brand">LAS LOMAS</div>
     <p>Santa Elena de El General, Pérez Zeledón, Costa Rica</p>
     <ul class="footer-links">
-      <li><a href="#proyectos">El Proyecto</a></li>
-      <li><a href="#amenidades">Amenidades</a></li>
-      <li><a href="#rise">Ecosistema RISE</a></li>
+      <li><a href="/">
+        <span class="lang-en">Home</span>
+        <span class="lang-es">Inicio</span>
+      </a></li>
+      <li><a href="/residential">
+        <span class="lang-en">Residential</span>
+        <span class="lang-es">Residencial</span>
+      </a></li>
+      <li><a href="/agrihood">
+        <span class="lang-en">Agrihood</span>
+        <span class="lang-es">Agrihood</span>
+      </a></li>
+      <li><a href="/zone">
+        <span class="lang-en">The Area</span>
+        <span class="lang-es">La Zona</span>
+      </a></li>
+      <li><a href="/contact">
+        <span class="lang-en">Contact</span>
+        <span class="lang-es">Contacto</span>
+      </a></li>
     </ul>
     <div class="footer-contact">
       <a href="https://wa.me/50662170977?text=Hola,%20estoy%20interesado%20en%20los%20lotes%20de%20Las%20Lomas" target="_blank" class="btn-whatsapp">
@@ -316,6 +304,36 @@
       });
     }, { threshold: 0.15 });
     reveals.forEach(el => observer.observe(el));
+
+    // Language Selector Mechanism
+    function setLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      localStorage.setItem('preferred-lang', lang);
+      
+      // Update page metadata
+      const pageTitles = {
+        en: "LAS LOMAS · Eco-Residential & Agrihood · Pérez Zeledón · Costa Rica",
+        es: "LAS LOMAS · Eco-Residencial & Agrihood · Pérez Zeledón · Costa Rica"
+      };
+      const pageDescriptions = {
+        en: "Exclusive community bordering RISE. 1-hectare residential lots with title and services for $190K, and 5 to 20-hectare estates in Agrihood.",
+        es: "Comunidad exclusiva colindante con RISE. Lotes residenciales de 1 hectárea con título y servicios por $190K, y fincas de 5 a 20 hectáreas en Agrihood."
+      };
+      document.title = pageTitles[lang];
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', pageDescriptions[lang]);
+
+      // Toggle active classes on language buttons
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+      });
+    }
+
+    // Call once on page load to initialize button and content states
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentLang = document.documentElement.getAttribute('lang') || 'en';
+      setLanguage(currentLang);
+    });
 
     // Carousel
     (function() {
@@ -349,85 +367,6 @@
         if (Math.abs(dx) > 50) goTo(cur + (dx < 0 ? 1 : -1));
       }, {passive:true});
     })();
-
-    // Handle AJAX contact submission to local CRM API
-    function handleSubmit(e) {
-      e.preventDefault();
-      
-      const name = document.getElementById('contact-name').value;
-      const email = document.getElementById('contact-email').value;
-      const phone = document.getElementById('contact-phone').value;
-      const project = document.getElementById('contact-project').value;
-      const message = document.getElementById('contact-message').value;
-      
-      const btn = e.target.querySelector('button');
-      btn.textContent = 'ENVIANDO...';
-      btn.disabled = true;
-
-      // Construct detailed notes for the CRM
-      const details = `Proyecto Seleccionado: ${project}.\nMensaje del cliente: ${message ? message : 'Sin mensaje adicional.'}`;
-
-      // Determinar la URL del API (local o subdominio de producción)
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiEndpoint = isLocal ? '/api/leads' : 'https://admin.laslomas.cr/api/leads';
-
-      fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          phone: phone,
-          origin: 'Website Landing',
-          details: details,
-          status: 'New Lead'
-        })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('API Error');
-        return res.json();
-      })
-      .then(data => {
-        btn.textContent = '✓ ENVIADO';
-        btn.style.background = '#2D5A3F';
-        
-        // Reset form inputs
-        document.getElementById('contact-name').value = '';
-        document.getElementById('contact-email').value = '';
-        document.getElementById('contact-phone').value = '';
-        document.getElementById('contact-message').value = '';
-        
-        setTimeout(() => { 
-          btn.textContent = 'SOLICITAR INFORMACIÓN'; 
-          btn.style.background = ''; 
-          btn.disabled = false; 
-        }, 3000);
-      })
-      .catch(err => {
-        console.error('Error submitting lead:', err);
-        // Seamless fallback for user experience
-        btn.textContent = '✓ ENVIADO';
-        btn.style.background = '#2D5A3F';
-        setTimeout(() => { 
-          btn.textContent = 'SOLICITAR INFORMACIÓN'; 
-          btn.style.background = ''; 
-          btn.disabled = false; 
-        }, 3000);
-      });
-    }
-
-    // Smooth scroll for anchors
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    });
   </script>
 
 </body>

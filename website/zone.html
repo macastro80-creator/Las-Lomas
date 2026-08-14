@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      const savedLang = localStorage.getItem('preferred-lang') || 'en';
+      document.documentElement.setAttribute('lang', savedLang);
+    })();
+  </script>
+  <title>The Area · Pérez Zeledón, RISE &amp; Convenience</title>
+  <meta name="description" content="Living at 1,000 meters elevation in Santa Elena, Pérez Zeledón. Perfect climate, local community, and immediate access to RISE and the city of San Isidro.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ═══ Navigation ═══ -->
+  <nav class="nav" id="main-nav">
+    <a href="/" class="nav-logo"><img src="images/logo-altitud.png" alt="RE/MAX Altitud" class="nav-logo-img"></a>
+    <ul class="nav-links">
+      <li><a href="/">
+        <span class="lang-en">Home</span>
+        <span class="lang-es">Inicio</span>
+      </a></li>
+      <li><a href="/residential">
+        <span class="lang-en">Residential</span>
+        <span class="lang-es">Residencial</span>
+      </a></li>
+      <li><a href="/agrihood">
+        <span class="lang-en">Agrihood</span>
+        <span class="lang-es">Agrihood</span>
+      </a></li>
+      <li><a href="/zone" class="active">
+        <span class="lang-en">The Area</span>
+        <span class="lang-es">La Zona</span>
+      </a></li>
+      <li><a href="/contact">
+        <span class="lang-en">Contact</span>
+        <span class="lang-es">Contacto</span>
+      </a></li>
+    </ul>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="lang-selector">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <span class="lang-divider">|</span>
+        <button class="lang-btn" data-lang="es" onclick="setLanguage('es')">ES</button>
+      </div>
+      <a href="/contact" class="nav-cta">
+        <span class="lang-en">Request Info</span>
+        <span class="lang-es">Solicitar Info</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero" id="hero" style="background-image: linear-gradient(rgba(26,23,20,0.3), rgba(26,23,20,0.6));">
+    <div class="hero-overlay" style="background: linear-gradient(to bottom, rgba(26,23,20,0.2) 0%, rgba(26,23,20,0.4) 40%, rgba(26,23,20,0.8) 100%);"></div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span></span>
+        <span class="lang-en">Location &amp; Lifestyle</span>
+        <span class="lang-es">Ubicación y Estilo de Vida</span>
+        <span></span>
+      </div>
+      <h1 class="hero-title">
+        <span class="lang-en">Connected to Valley Life,<br><em>Rooted in the Mountains</em>.</span>
+        <span class="lang-es">Conectados al Valle,<br><em>Arraigados en la Montaña</em>.</span>
+      </h1>
+      <p class="hero-subtitle">
+        <span class="lang-en">Living at 1,000 meters elevation in Santa Elena, Pérez Zeledón. A perfect climate, a vibrant local community, and immediate access to RISE and the city of San Isidro.</span>
+        <span class="lang-es">Vivir a 1,000 metros de altitud en Santa Elena, Pérez Zeledón. Un clima ideal, una comunidad local vibrante y acceso inmediato a RISE y a la ciudad de San Isidro.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ Overview Description ═══ -->
+  <section class="section property-section">
+    <div class="section-inner" style="max-width: 850px;">
+      <div class="section-tag reveal">
+        <span class="lang-en">The Perfect Location</span>
+        <span class="lang-es">La Ubicación Perfecta</span>
+      </div>
+      <h2 class="section-title reveal">
+        <span class="lang-en">The absolute comfort of being close.</span>
+        <span class="lang-es">La absoluta comodidad de estar cerca.</span>
+      </h2>
+      <p class="section-subtitle reveal" style="max-width: 100%; font-size: 1.05rem; line-height: 1.7; margin-bottom: 32px;">
+        <span class="lang-en">Las Lomas is located in the peaceful mountain corridor of Santa Elena, Pérez Zeledón. At 1,000 meters above sea level, you enjoy a temperate climate: warm sunny days and cool mountain breezes at night. But let's be honest: we are not hippies, we love our comfort and convenience! That's why Las Lomas is positioned just **15 minutes away from the city of San Isidro de El General**, the commercial capital of the southern zone. San Isidro offers top-tier private medical services, large supermarkets, a famous organic farmers' market (Feria), schools, and restaurants. You get the off-grid peace of the mountains, with the convenience of a modern city just minutes away.</span>
+        <span class="lang-es">Las Lomas está ubicado en el pacífico corredor de montaña de Santa Elena, Pérez Zeledón. A 1,000 metros de altitud disfrutarás de un clima templado: días cálidos y soleados y brisas de montaña frescas por las noches. Pero seamos sinceros: ¡no somos hippies, nos gusta la comodidad y la conveniencia! Por eso Las Lomas se encuentra a solo **15 minutos de la ciudad de San Isidro de El General**, el centro comercial de la zona sur. San Isidro ofrece servicios de salud privados de alta calidad, supermercados, una famosa feria orgánica, colegios y excelente gastronomía. Vives en paz en la montaña, con la comodidad de la ciudad a minutos.</span>
+      </p>
+
+      <div class="section-tag reveal" style="margin-top: 48px;">
+        <span class="lang-en">RISE Infrastructure Next Door</span>
+        <span class="lang-es">Infraestructura RISE al Lado</span>
+      </div>
+      <h2 class="section-title reveal">
+        <span class="lang-en">Shared facilities from day one.</span>
+        <span class="lang-es">Servicios compartidos desde el primer día.</span>
+      </h2>
+      <p class="section-subtitle reveal" style="max-width: 100%; font-size: 1.05rem; line-height: 1.7; margin-bottom: 24px;">
+        <span class="lang-en">Living bordering the world-class community of RISE grants convenient access to its premium amenities without the need to build them. This includes a Waldorf-inspired school for progressive education, a private private airstrip with hangars (making San José just a 25-minute flight away), a commercial center with local cafes, organic markets, fiber-optic shared co-working spaces, and the renowned Kinkará wellness retreat center. You enjoy a quiet, independent land estate while being plugged into a vibrant community.</span>
+        <span class="lang-es">Vivir colindando con la comunidad de clase mundial RISE te otorga un acceso muy conveniente a sus amenidades de primer nivel desde el primer día. Esto incluye la escuela progresiva de inspiración Waldorf, la pista de aterrizaje privada y hangares (que conecta con San José en un vuelo de solo 25 minutos), un centro comercial con cafeterías locales, mercado orgánico, espacio de co-working conectado por fibra óptica y el centro de bienestar Kinkará. Disfrutas de un terreno tranquilo e independiente con la conveniencia de una comunidad conectada.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ Symmetrical Image Placeholders ═══ -->
+  <section class="section offerings-section" style="background:var(--cream); padding-top: 60px;">
+    <div class="section-inner">
+      <div class="section-tag reveal" style="text-align:center;">
+        <span class="lang-en">Visualizing the Area</span>
+        <span class="lang-es">Visualizando la Zona</span>
+      </div>
+      <h2 class="section-title reveal" style="text-align:center; margin-bottom: 40px;">
+        <span class="lang-en">Location &amp; Surrounding Hubs</span>
+        <span class="lang-es">Ubicación y Centros Aledaños</span>
+      </h2>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
+        <!-- Placeholder 1: Santa Elena Map -->
+        <div class="placeholder-img">
+          <div class="placeholder-img-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a8 8 0 00-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="placeholder-img-label">
+            <span class="lang-en">Santa Elena Location Map</span>
+            <span class="lang-es">Mapa de Ubicación de Santa Elena</span>
+          </div>
+          <p class="placeholder-img-desc">
+            <span class="lang-en">Interactive maps showing exactly where Las Lomas sits within the green corridor.</span>
+            <span class="lang-es">Mapas interactivos que muestran exactamente dónde se ubica Las Lomas dentro del corredor verde.</span>
+          </p>
+        </div>
+
+        <!-- Placeholder 2: San Isidro City -->
+        <div class="placeholder-img">
+          <div class="placeholder-img-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="placeholder-img-label">
+            <span class="lang-en">San Isidro City &amp; Markets</span>
+            <span class="lang-es">Ciudad de San Isidro y Comercios</span>
+          </div>
+          <p class="placeholder-img-desc">
+            <span class="lang-en">Photographs of San Isidro de El General city, organic farmers' market (Feria), and local shopping centers.</span>
+            <span class="lang-es">Fotografías de la ciudad de San Isidro de El General, la feria del agricultor y centros comerciales locales.</span>
+          </p>
+        </div>
+
+        <!-- Placeholder 3: RISE Facilities -->
+        <div class="placeholder-img">
+          <div class="placeholder-img-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22a10 10 0 100-20 10 10 0 000 20zM12 8l4 4-4 4M8 12h8"/></svg>
+          </div>
+          <div class="placeholder-img-label">
+            <span class="lang-en">RISE Waldorf &amp; Airstrip</span>
+            <span class="lang-es">RISE Escuela Waldorf y Pista</span>
+          </div>
+          <p class="placeholder-img-desc">
+            <span class="lang-en">Visual concepts of the Waldorf-inspired school, private landing strip, and co-working areas bordering Las Lomas.</span>
+            <span class="lang-es">Conceptos visuales de la escuela Waldorf, la pista de aterrizaje privada y áreas de co-working colindantes.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="footer-brand">LAS LOMAS</div>
+    <p>Santa Elena de El General, Pérez Zeledón, Costa Rica</p>
+    <ul class="footer-links">
+      <li><a href="/">
+        <span class="lang-en">Home</span>
+        <span class="lang-es">Inicio</span>
+      </a></li>
+      <li><a href="/residential">
+        <span class="lang-en">Residential</span>
+        <span class="lang-es">Residencial</span>
+      </a></li>
+      <li><a href="/agrihood">
+        <span class="lang-en">Agrihood</span>
+        <span class="lang-es">Agrihood</span>
+      </a></li>
+      <li><a href="/zone">
+        <span class="lang-en">The Area</span>
+        <span class="lang-es">La Zona</span>
+      </a></li>
+      <li><a href="/contact">
+        <span class="lang-en">Contact</span>
+        <span class="lang-es">Contacto</span>
+      </a></li>
+    </ul>
+    <div class="footer-contact">
+      <a href="https://wa.me/50662170977?text=Hola,%20estoy%20interesado%20en%20los%20lotes%20de%20Las%20Lomas" target="_blank" class="btn-whatsapp">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </a>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Language Selector Mechanism
+    function setLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      localStorage.setItem('preferred-lang', lang);
+      
+      // Update page metadata
+      const pageTitles = {
+        en: "The Area · Pérez Zeledón, RISE &amp; Convenience",
+        es: "La Zona · Pérez Zeledón, RISE y Conveniencia"
+      };
+      const pageDescriptions = {
+        en: "Living at 1,000 meters elevation in Santa Elena, Pérez Zeledón. Perfect climate, local community, and immediate access to RISE and the city of San Isidro.",
+        es: "Vivir a 1,000 metros de altitud en Santa Elena, Pérez Zeledón. Clima ideal, comunidad y acceso inmediato a RISE y a la ciudad de San Isidro."
+      };
+      document.title = pageTitles[lang];
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', pageDescriptions[lang]);
+
+      // Update placeholders
+      document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+        el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
+      });
+
+      // Toggle active classes on language buttons
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+      });
+    }
+
+    // Call once on page load to initialize button and content states
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentLang = document.documentElement.getAttribute('lang') || 'en';
+      setLanguage(currentLang);
+    });
+  </script>
+
+</body>
+</html>

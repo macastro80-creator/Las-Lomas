@@ -5,8 +5,11 @@ import pytest
 import time
 from fastapi.testclient import TestClient
 from main import app, get_db
+import main
 
 TEST_DB = "test_lomas.db"
+main.DATABASE_NAME = TEST_DB
+
 
 @pytest.fixture(autouse=True)
 def setup_test_db():
@@ -20,92 +23,12 @@ def setup_test_db():
     app.dependency_overrides[get_db] = get_test_db
     
     # Inicializar el esquema en la base de datos de prueba
-    conn = get_test_db()
-    cursor = conn.cursor()
-    cursor.execute("DROP TABLE IF EXISTS subtasks")
-    cursor.execute("DROP TABLE IF EXISTS payment_schedules")
-    cursor.execute("DROP TABLE IF EXISTS tasks")
-    cursor.execute("DROP TABLE IF EXISTS finances")
-    cursor.execute("DROP TABLE IF EXISTS collaborators")
-    cursor.execute("DROP TABLE IF EXISTS decisions")
-    
-    cursor.execute("""
-    CREATE TABLE tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        description TEXT,
-        status TEXT DEFAULT 'Pendiente',
-        due_date TEXT,
-        start_date TEXT,
-        progress INTEGER DEFAULT 0,
-        predecessor INTEGER,
-        phase TEXT,
-        collaborator_id INTEGER,
-        decision_path TEXT DEFAULT 'core',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-    cursor.execute("""
-    CREATE TABLE collaborators (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        role TEXT
-    )
-    """)
-    cursor.execute("""
-    CREATE TABLE subtasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        task_id INTEGER NOT NULL,
-        title TEXT NOT NULL,
-        completed INTEGER DEFAULT 0,
-        FOREIGN KEY (task_id) REFERENCES tasks (id) ON DELETE CASCADE
-    )
-    """)
-    cursor.execute("""
-    CREATE TABLE payment_schedules (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        task_id INTEGER NOT NULL,
-        concept TEXT NOT NULL,
-        amount_gross REAL NOT NULL,
-        currency TEXT NOT NULL DEFAULT 'USD',
-        due_date TEXT NOT NULL,
-        status TEXT DEFAULT 'Pendiente',
-        invoice_file TEXT,
-        paid_at TEXT,
-        FOREIGN KEY (task_id) REFERENCES tasks (id) ON DELETE CASCADE
-    )
-    """)
-    cursor.execute("""
-    CREATE TABLE finances (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        type TEXT NOT NULL,
-        category TEXT,
-        concept TEXT,
-        amount_usd REAL,
-        amount_crc REAL,
-        currency TEXT,
-        exchange_rate REAL,
-        date TEXT,
-        invoice_path TEXT,
-        category_type TEXT,
-        base_amount REAL,
-        tax_amount REAL,
-        iva_rate REAL DEFAULT 0.13,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-    cursor.execute("""
-    CREATE TABLE decisions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        key TEXT UNIQUE NOT NULL,
-        title TEXT NOT NULL,
-        selected_option TEXT NOT NULL,
-        notes TEXT,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-    conn.commit()
-    conn.close()
+    if os.path.exists(TEST_DB):
+        try:
+            os.remove(TEST_DB)
+        except OSError:
+            pass
+    main.init_db()
     
     yield
     
@@ -134,7 +57,7 @@ def test_subtask_progress_calculation():
     conn.commit()
     
     # 2. Agregar sub-tareas y verificar cálculo automático
-    response = client.post(f"/api/tasks/{task_id}/subtasks/new", data={"title": "Levantamiento topográfico"})
+    response = client.post(f"/api/tasks/{task_id}/subtasks/new", data={"title": "Levantamiento topográfico"}, follow_redirects=False)
     assert response.status_code == 303 # Redirección OK
     
     client.post(f"/api/tasks/{task_id}/subtasks/new", data={"title": "Diseño de curvas de nivel"})
@@ -202,7 +125,7 @@ def test_atomic_pay_transaction_and_iva_calculation():
     files = {"invoice_file": ("factura.pdf", mock_pdf_content, "application/pdf")}
     data = {"exchange_rate": 518.5, "payment_date": "2026-08-14"}
     
-    response = client.post(f"/api/payment-schedules/{schedule_id}/pay", files=files, data=data)
+    response = client.post(f"/api/payment-schedules/{schedule_id}/pay", files=files, data=data, follow_redirects=False)
     assert response.status_code == 303
     
     # 3. Comprobar actualización del estado del pago y su ruta de archivo
