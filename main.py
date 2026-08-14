@@ -318,7 +318,27 @@ def admin_dashboard(request: Request):
     # 4. Recent Leads
     cursor.execute("SELECT * FROM leads ORDER BY id DESC LIMIT 5")
     recent_leads = [dict(row) for row in cursor.fetchall()]
+
+    # 5. Fetch Decisions
+    cursor.execute("SELECT * FROM decisions")
+    decisions_rows = cursor.fetchall()
+    decisions = {row["key"]: row["selected_option"] for row in decisions_rows}
     
+    # 6. Calculate Net Balance, 15% Capital Gains Tax, and Net Utility
+    net_balance_usd = total_income_usd - total_expense_usd
+    net_balance_crc = total_income_crc - total_expense_crc
+
+    if net_balance_usd > 0:
+        capital_gains_tax_usd = net_balance_usd * 0.15
+        capital_gains_tax_crc = net_balance_crc * 0.15
+        net_utility_usd = net_balance_usd - capital_gains_tax_usd
+        net_utility_crc = net_balance_crc - capital_gains_tax_crc
+    else:
+        capital_gains_tax_usd = 0.0
+        capital_gains_tax_crc = 0.0
+        net_utility_usd = net_balance_usd
+        net_utility_crc = net_balance_crc
+        
     conn.close()
     
     exchange_rate = get_exchange_rate()
@@ -334,8 +354,15 @@ def admin_dashboard(request: Request):
         "total_income_crc": total_income_crc,
         "total_expense_usd": total_expense_usd,
         "total_expense_crc": total_expense_crc,
+        "net_balance_usd": net_balance_usd,
+        "net_balance_crc": net_balance_crc,
+        "capital_gains_tax_usd": capital_gains_tax_usd,
+        "capital_gains_tax_crc": capital_gains_tax_crc,
+        "net_utility_usd": net_utility_usd,
+        "net_utility_crc": net_utility_crc,
         "recent_leads": recent_leads,
-        "exchange_rate": exchange_rate
+        "exchange_rate": exchange_rate,
+        "decisions": decisions
     })
 
 @app.get("/admin/crm")

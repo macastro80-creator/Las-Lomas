@@ -7,7 +7,7 @@
 <div class="space-y-6">
   
   <!-- KPI Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     
     <!-- Leads Card -->
     <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
@@ -41,30 +41,60 @@
       </div>
     </div>
 
-    <!-- Finances - Incomes Card -->
+    <!-- Net Balance Card -->
     <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Total Ingresos</p>
-        <h3 class="text-xl font-bold text-green-700 mt-2">${{ "{:,.2f}".format(total_income_usd) }}</h3>
-        <p class="text-xs text-[#948A7C] mt-1">₡{{ "{:,.0f}".format(total_income_crc) }}</p>
+        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Balance Neto Inmobiliario</p>
+        <h3 class="text-2xl font-bold mt-2 {% if net_balance_usd >= 0 %}text-green-700{% else %}text-red-700{% endif %}">
+          ${{ "{:,.2f}".format(net_balance_usd) }}
+        </h3>
+        <p class="text-xs text-[#574F45] mt-1">Equivalente a: <strong>₡{{ "{:,.0f}".format(net_balance_crc) }}</strong></p>
       </div>
-      <div class="bg-green-50 p-3 rounded-full text-green-600">
-        <i data-lucide="trending-up" class="w-6 h-6"></i>
+      <div class="p-3 rounded-full {% if net_balance_usd >= 0 %}bg-green-50 text-green-600{% else %}bg-red-50 text-red-600{% endif %}">
+        <i data-lucide="piggy-bank" class="w-6 h-6"></i>
       </div>
     </div>
 
-    <!-- Finances - Expenses Card -->
-    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+  </div>
+
+  <!-- Detailed Financial Bar Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- Incomes -->
+    <div class="bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Total Egresos</p>
-        <h3 class="text-xl font-bold text-red-700 mt-2">${{ "{:,.2f}".format(total_expense_usd) }}</h3>
-        <p class="text-xs text-[#948A7C] mt-1">₡{{ "{:,.0f}".format(total_expense_crc) }}</p>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Total Ingresos</p>
+        <h3 class="text-lg font-bold text-green-700 mt-1">${{ "{:,.2f}".format(total_income_usd) }}</h3>
       </div>
-      <div class="bg-red-50 p-3 rounded-full text-red-600">
-        <i data-lucide="trending-down" class="w-6 h-6"></i>
-      </div>
+      <div class="text-green-600"><i data-lucide="trending-up" class="w-5 h-5"></i></div>
     </div>
 
+    <!-- Expenses -->
+    <div class="bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Total Egresos</p>
+        <h3 class="text-lg font-bold text-red-700 mt-1">${{ "{:,.2f}".format(total_expense_usd) }}</h3>
+      </div>
+      <div class="text-red-600"><i data-lucide="trending-down" class="w-5 h-5"></i></div>
+    </div>
+
+    <!-- 15% Gains Tax -->
+    <div class="bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between bg-gradient-to-br from-white to-[#FAF8F5]">
+      <div>
+        <p class="text-[10px] font-semibold text-[#9E7A38] uppercase tracking-wider">Impuesto Ganancias (15%)</p>
+        <h3 class="text-lg font-bold text-amber-700 mt-1">${{ "{:,.2f}".format(capital_gains_tax_usd) }}</h3>
+        <p class="text-[9px] text-[#948A7C]">Utilidad Neta: <strong>${{ "{:,.2f}".format(net_utility_usd) }}</strong></p>
+      </div>
+      <div class="text-amber-600"><i data-lucide="percent" class="w-5 h-5"></i></div>
+    </div>
+
+    <!-- Official Exchange Rate -->
+    <div class="bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Tipo de Cambio Oficial</p>
+        <h3 class="text-lg font-bold text-gray-700 mt-1">₡{{ "%.1f"|format(exchange_rate) }}</h3>
+      </div>
+      <div class="text-gray-600"><i data-lucide="coins" class="w-5 h-5"></i></div>
+    </div>
   </div>
 
   <!-- Quick Action Buttons -->
@@ -79,6 +109,72 @@
     <a href="/admin/gantt?show_modal=true" class="border border-[#EDE9E3] hover:bg-gray-50 text-[#574F45] px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
       <i data-lucide="plus" class="w-4 h-4"></i> Agregar Tarea al Gantt
     </a>
+  </div>
+
+  <!-- Decisions Center Widget -->
+  <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm space-y-4">
+    <div>
+      <h3 class="font-bold text-gray-800 text-lg">Centro de Decisiones Críticas</h3>
+      <p class="text-xs text-[#948A7C]">Modificar una opción reconfigura automáticamente las tareas del Gantt y cronograma.</p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Water Decision Card -->
+      <div class="border border-[#EDE9E3] p-5 rounded-lg flex flex-col justify-between space-y-4 bg-[#FAF8F5]">
+        <div>
+          <div class="flex justify-between items-start">
+            <span class="text-xs uppercase tracking-wider font-bold text-[#948A7C]">Infraestructura Hídrica</span>
+            <span class="text-xs px-2.5 py-1 rounded font-bold bg-blue-100 text-blue-800">
+              {{ decisions.get('water_option', 'ASADA') }}
+            </span>
+          </div>
+          <h4 class="font-bold text-gray-800 mt-2 text-sm">Abastecimiento de Agua</h4>
+          <p class="text-xs text-[#574F45] mt-1">
+            {% if decisions.get('water_option', 'ASADA') == 'ASADA' %}
+            Red comunal: Menor inversión inicial, sujeta a trámites de disponibilidad con la junta local.
+            {% else %}
+            Pozo Propio: Mayor inversión (perforación/caudal), valor de activo directo y control del recurso.
+            {% endif %}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="toggleDecision('water_option', 'ASADA')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('water_option', 'ASADA') == 'ASADA' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
+            ASADA
+          </button>
+          <button onclick="toggleDecision('water_option', 'Pozo')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('water_option', 'ASADA') == 'Pozo' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
+            Pozo Propio
+          </button>
+        </div>
+      </div>
+
+      <!-- Internet Decision Card -->
+      <div class="border border-[#EDE9E3] p-5 rounded-lg flex flex-col justify-between space-y-4 bg-[#FAF8F5]">
+        <div>
+          <div class="flex justify-between items-start">
+            <span class="text-xs uppercase tracking-wider font-bold text-[#948A7C]">Conectividad Digital</span>
+            <span class="text-xs px-2.5 py-1 rounded font-bold bg-purple-100 text-purple-800">
+              {{ decisions.get('internet_option', 'Fibra') }}
+            </span>
+          </div>
+          <h4 class="font-bold text-gray-800 mt-2 text-sm">Fibra Óptica vs Starlink</h4>
+          <p class="text-xs text-[#574F45] mt-1">
+            {% if decisions.get('internet_option', 'Fibra') == 'Fibra' %}
+            Fibra Óptica: Conexión terrestre de alta estabilidad, requiere cotización de tendido por postes.
+            {% else %}
+            Starlink (Elon Musk): Conexión satelital inmediata, sin tendidos, pero con costos de antena fijos.
+            {% endif %}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="toggleDecision('internet_option', 'Fibra')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('internet_option', 'Fibra') == 'Fibra' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
+            Fibra Óptica
+          </button>
+          <button onclick="toggleDecision('internet_option', 'Starlink')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('internet_option', 'Fibra') == 'Starlink' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
+            Starlink (Sat)
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Split Panel -->
@@ -207,4 +303,29 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function toggleDecision(key, selectedOption) {
+    const formData = new FormData();
+    formData.append("selected_option", selectedOption);
+    formData.append("notes", `Modificación de decisión a ${selectedOption}`);
+
+    try {
+      const response = await fetch(`/api/decisions/${key}`, {
+        method: "PATCH",
+        body: formData
+      });
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        alert("Error al actualizar la decisión.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error de conexión al cambiar decisión.");
+    }
+  }
+</script>
 {% endblock %}
