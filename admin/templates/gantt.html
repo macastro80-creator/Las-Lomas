@@ -1,0 +1,783 @@
+{% extends "base.html" %}
+
+{% block title %}Gantt & Cronograma - Las Lomas{% endblock %}
+{% block header_title %}Gantt & Cronograma del Proyecto{% endblock %}
+
+{% block head %}
+<!-- Mermaid JS for Gantt Chart -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#FAF8F5',
+      primaryTextColor: '#3D372F',
+      primaryBorderColor: '#EDE9E3',
+      lineColor: '#2D5A3F',
+      secondaryColor: '#E6EFEA',
+      tertiaryColor: '#FAF8F5'
+    }
+  });
+</script>
+<style>
+  .mermaid svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Collaborators Filter Bar -->
+  <div class="bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-wrap items-center gap-3">
+    <span class="text-xs font-bold text-natural uppercase tracking-wider">Filtrar por Responsable:</span>
+    <div class="flex flex-wrap gap-2">
+      {% for c in collaborators %}
+      <button onclick="filterByCollaborator({{ c.id }})" data-id="{{ c.id }}" class="collab-avatar px-3 py-1.5 bg-[#FAF8F5] border border-[#EDE9E3] rounded-full text-xs font-semibold text-gray-700 hover:bg-[#EDE9E3] transition flex items-center gap-1.5 opacity-70">
+        <span class="w-5.5 h-5.5 rounded-full bg-natural text-white font-bold flex items-center justify-center text-[10px]">
+          {{ c.name[0] | upper }}{{ c.name.split(' ')[1][0] | upper if c.name.split(' ') | length > 1 else '' }}
+        </span>
+        <span>{{ c.name }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Gantt Chart Card -->
+  <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg">Visualización del Cronograma</h3>
+        <p class="text-xs text-[#948A7C]">Actualizado en tiempo real basado en el estado y fechas de cada tarea.</p>
+      </div>
+      <button onclick="openNewTaskModal()" class="bg-natural hover:bg-opacity-90 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
+        <i data-lucide="plus" class="w-4.5 h-4.5"></i> Agregar Tarea
+      </button>
+    </div>
+    
+    <!-- Mermaid Render -->
+    <div class="overflow-x-auto border border-[#EDE9E3] rounded-lg p-4 bg-[#FAF8F5]">
+      <div class="mermaid min-w-[700px] flex justify-center">
+{{ mermaid_code }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Tasks Table grouped by Phase -->
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-[#EDE9E3]">
+      <h3 class="font-bold text-gray-800">Desglose de Fases y Tareas</h3>
+    </div>
+    
+    <div class="p-6 space-y-8">
+      {% for phase, phase_tasks in grouped_tasks.items() %}
+      <div class="space-y-3">
+        <!-- Phase Title Banner -->
+        <h4 class="text-sm font-bold text-natural uppercase tracking-wider bg-[#E6EFEA] px-4 py-2 rounded flex items-center justify-between">
+          <span>{{ phase }}</span>
+          <span class="text-xs text-[#574F45] font-semibold font-mono">
+            {{ phase_tasks | length }} Tareas
+          </span>
+        </h4>
+        
+        <!-- Phase Tasks Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm whitespace-nowrap">
+            <thead>
+              <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3]">
+                <th class="py-2 pb-3">Tarea</th>
+                <th class="py-2 pb-3">Fechas (Inicio / Fin)</th>
+                <th class="py-2 pb-3">Progreso</th>
+                <th class="py-2 pb-3">Dep.</th>
+                <th class="py-2 pb-3">Estado</th>
+                <th class="py-2 pb-3 text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#FAF8F5]">
+              {% for task in phase_tasks %}
+              <tr class="task-row hover:bg-gray-50 transition" data-collaborator-id="{{ task.collaborator_id or 0 }}">
+                <td class="py-3 pr-4">
+                  <div class="font-medium text-gray-800">{{ task.title }}</div>
+                  <div class="text-xs text-[#948A7C] truncate max-w-xs">{{ task.description if task.description else 'Sin descripción' }}</div>
+                </td>
+                <td class="py-3 text-xs text-[#574F45]">
+                  <span>{{ task.start_date }}</span>
+                  <span class="text-[#948A7C]">al</span>
+                  <span class="font-medium text-gray-800">{{ task.due_date }}</span>
+                </td>
+                <td class="py-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                      <div class="bg-[#9E7A38] h-1.5 rounded-full" style="width: {{ task.progress }}%"></div>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-600">{{ task.progress }}%</span>
+                  </div>
+                </td>
+                <td class="py-3 text-xs text-[#948A7C] font-mono">
+                  {{ 't' ~ task.predecessor if task.predecessor else '-' }}
+                </td>
+                <td class="py-3">
+                  <span class="text-xs px-2 py-0.5 rounded-full font-semibold 
+                    {% if task.status == 'Completado' %}bg-green-100 text-green-800
+                    {% elif task.status == 'En Proceso' %}bg-yellow-100 text-yellow-800
+                    {% else %}bg-gray-100 text-gray-700{% endif %}">
+                    {{ task.status }}
+                  </span>
+                </td>
+                <td class="py-3 text-center">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <button onclick="openTaskDrawer({{ task.id }}, '{{ task.title | escape }}', '{{ task.phase | escape }}', {{ task.progress }})" class="p-1 text-[#9E7A38] hover:bg-gray-100 rounded transition" title="Ver Detalles y Finanzas">
+                      <i data-lucide="list-todo" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="editTask({{ task.id }})" class="p-1 text-natural hover:bg-gray-100 rounded transition" title="Editar Tarea">
+                      <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    </button>
+                    <form action="/api/tasks/{{ task.id }}/delete" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar esta tarea? Se eliminarán dependencias asociadas.');" class="inline">
+                      <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded transition" title="Eliminar Tarea">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Task Form Modal -->
+<div id="taskModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 id="taskModalTitle" class="font-bold text-gray-800 text-lg">Agregar Tarea</h3>
+      <button onclick="closeTaskModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <form id="taskForm" method="POST" action="/api/tasks/new" class="p-6 space-y-4 overflow-y-auto flex-1 text-sm">
+      <input type="hidden" id="taskId" name="task_id">
+      
+      <!-- Phase & Title -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Fase del Desarrollo</label>
+          <select id="taskPhase" name="phase" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="Regulación y Permisos">Regulación y Permisos</option>
+            <option value="Planificación y Diseño">Planificación y Diseño</option>
+            <option value="Mercadeo y Ventas">Mercadeo y Ventas</option>
+            <option value="Construcción e Infraestructura">Construcción e Infraestructura</option>
+            <option value="Entrega y Cierre">Entrega y Cierre</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Título de la Tarea</label>
+          <input type="text" id="taskTitle" name="title" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Descripción</label>
+        <textarea id="taskDescription" name="description" rows="2" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural" placeholder="Breve explicación de la tarea..."></textarea>
+      </div>
+
+      <!-- Start Date & Due Date -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Fecha de Inicio</label>
+          <input type="date" id="taskStartDate" name="start_date" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Fecha de Vencimiento</label>
+          <input type="date" id="taskDueDate" name="due_date" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+      </div>
+
+      <!-- Progress & Status -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Progreso (%)</label>
+          <input type="number" id="taskProgress" name="progress" min="0" max="100" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Estado</label>
+          <select id="taskStatus" name="status" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="Pendiente">Pendiente</option>
+            <option value="En Proceso">En Proceso</option>
+            <option value="Completado">Completado</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Predecessor (Dependency) -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Dependencia (Predecesora)</label>
+        <select id="taskPredecessor" name="predecessor" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+          <option value="">Ninguna</option>
+          {% for t in all_tasks_list %}
+          <option value="{{ t.id }}">t{{ t.id }} - {{ t.title }}</option>
+          {% endfor %}
+        </select>
+        <p class="text-[10px] text-[#948A7C] mt-1">La tarea actual comenzará después de la finalización de la predecesora seleccionada.</p>
+      </div>
+
+      <!-- Collaborator & Decision Path (Las Lomas extensions) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Colaborador Asignado</label>
+          <select id="taskCollaborator" name="collaborator_id" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="">Sin Asignar</option>
+            {% for c in collaborators %}
+            <option value="{{ c.id }}">{{ c.name }} ({{ c.role }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Ruta de Decisión</label>
+          <select id="taskDecisionPath" name="decision_path" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="core">General (Core)</option>
+            <option value="asada">Opción ASADA (Agua)</option>
+            <option value="pozo">Opción Pozo (Agua)</option>
+            <option value="fibra">Opción Fibra (Internet)</option>
+            <option value="starlink">Opción Starlink (Internet)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeTaskModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Guardar Tarea
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- SIDEBAR DRAWER: DETALLES DE TAREA -->
+<div id="drawerOverlay" class="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm hidden z-45" onclick="closeTaskDrawer()"></div>
+
+<div id="taskDrawer" class="fixed inset-y-0 right-0 w-full sm:w-[460px] bg-white border-l border-[#EDE9E3] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
+  
+  <!-- Header -->
+  <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+    <div>
+      <h3 id="drawerTitle" class="font-bold text-gray-800 text-lg">Detalles de Tarea</h3>
+      <p id="drawerPhase" class="text-xs text-natural uppercase tracking-wider font-semibold"></p>
+    </div>
+    <button onclick="closeTaskDrawer()" class="text-gray-400 hover:text-gray-600 transition">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="flex border-b border-[#EDE9E3] bg-[#FAF8F5] text-sm font-semibold">
+    <button onclick="switchTab('checklist')" id="tabBtn-checklist" class="flex-1 py-3 text-center border-b-2 border-natural text-natural transition">
+      Checklist
+    </button>
+    <button onclick="switchTab('payments')" id="tabBtn-payments" class="flex-1 py-3 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition">
+      Plan de Pagos
+    </button>
+  </div>
+
+  <!-- Panels Container -->
+  <div class="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
+    
+    <!-- Tab Panel: Checklist -->
+    <div id="panel-checklist" class="space-y-4">
+      <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider">Sub-tareas (Progreso Automático)</h4>
+      <ul id="drawerSubtasksList" class="space-y-2.5">
+        <!-- Generado dinámicamente por JS -->
+      </ul>
+      
+      <!-- Agregar Sub-tarea Form -->
+      <form id="addSubtaskForm" method="POST" action="" class="pt-4 border-t border-[#EDE9E3] space-y-2">
+        <label class="block text-xs font-semibold text-[#948A7C]">AGREGAR ÍTEM AL CHECKLIST</label>
+        <div class="flex gap-2">
+          <input type="text" name="title" required placeholder="Ej: Redactar planos definitivos..." class="flex-1 px-3 py-1.5 border border-[#EDE9E3] rounded text-sm focus:outline-none focus:border-natural">
+          <button type="submit" class="bg-natural text-white px-4 py-1.5 rounded font-semibold text-xs hover:bg-opacity-90 transition">
+            Añadir
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tab Panel: Plan de Pagos -->
+    <div id="panel-payments" class="space-y-4 hidden">
+      <div class="flex justify-between items-center">
+        <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider">Cronograma de Hitos de Pago</h4>
+        <span class="text-[10px] text-[#948A7C] font-semibold bg-gray-100 px-2 py-0.5 rounded">Monto Bruto</span>
+      </div>
+      
+      <div id="drawerPaymentsList" class="space-y-3">
+        <!-- Generado dinámicamente por JS -->
+      </div>
+
+      <!-- Programar Pago Form -->
+      <form id="addPaymentForm" method="POST" action="" class="pt-4 border-t border-[#EDE9E3] space-y-3">
+        <h5 class="text-xs font-bold text-gray-700 uppercase tracking-wider">PROGRAMAR HITO DE PAGO</h5>
+        
+        <div>
+          <label class="block text-[10px] font-semibold text-[#948A7C] mb-1">CONCEPTO</label>
+          <input type="text" name="concept" required placeholder="Ej: Anticipo firma de contrato" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded text-sm focus:outline-none focus:border-natural">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-[#948A7C] mb-1">MONTO BRUTO (CON IVA)</label>
+            <input type="number" step="0.01" name="amount_gross" required placeholder="0.00" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded text-sm focus:outline-none focus:border-natural">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-[#948A7C] mb-1">MONEDA</label>
+            <select name="currency" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded text-sm focus:outline-none focus:border-natural bg-white">
+              <option value="USD">USD ($)</option>
+              <option value="CRC">CRC (₡)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-semibold text-[#948A7C] mb-1">FECHA LÍMITE</label>
+          <input type="date" name="due_date" required class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded text-sm focus:outline-none focus:border-natural">
+        </div>
+
+        <button type="submit" class="w-full bg-[#9E7A38] text-white py-2 rounded text-xs font-bold hover:bg-opacity-90 transition">
+          PROGRAMAR PAGO
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- SLIDE-UP MODAL: CARGAR FACTURA Y LIQUIDAR -->
+<div id="paySlideUpOverlay" class="fixed inset-0 bg-black bg-opacity-20 hidden z-55" onclick="closePaySlideUp()"></div>
+<div id="paySlideUp" class="fixed inset-x-0 bottom-0 max-w-lg mx-auto bg-white border-t border-[#EDE9E3] shadow-2xl rounded-t-2xl transform translate-y-full transition-transform duration-300 ease-in-out z-50 p-6 hidden">
+  <div class="flex justify-between items-center mb-4 pb-2 border-b border-[#EDE9E3]">
+    <div>
+      <h4 class="font-bold text-gray-800 text-sm uppercase">Liquidar Hito de Pago</h4>
+      <p id="payLabelConcept" class="text-xs text-[#948A7C] font-semibold"></p>
+    </div>
+    <button onclick="closePaySlideUp()" class="text-gray-400 hover:text-gray-600 transition">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+  </div>
+
+  <form id="payForm" method="POST" enctype="multipart/form-data" action="" class="space-y-4 text-xs">
+    <!-- Tipo de Cambio Cache -->
+    <input type="hidden" name="exchange_rate" value="{{ exchange_rate }}">
+
+    <!-- Contenedor del Desglose de IVA -->
+    <div class="bg-[#FAF8F5] p-3 rounded-lg border border-[#EDE9E3] space-y-2">
+      <div class="flex justify-between font-semibold text-gray-700">
+        <span>Monto Total Bruto (Facturado):</span>
+        <span id="payValGross" class="text-gray-800 text-sm font-bold"></span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="ivaToggle" onchange="toggleIvaBreakdown()" class="rounded border-gray-300 text-natural focus:ring-natural">
+        <label for="ivaToggle" class="font-semibold text-natural cursor-pointer select-none">Ver desglose del 13% de IVA</label>
+      </div>
+
+      <div id="ivaBreakdown" class="hidden pl-4 border-l-2 border-gray-300 space-y-1 text-[#948A7C]">
+        <div class="flex justify-between">
+          <span>Subtotal (Neto sin IVA):</span>
+          <span id="payValNet"></span>
+        </div>
+        <div class="flex justify-between">
+          <span>Impuesto IVA (13%):</span>
+          <span id="payValIva"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cargar archivo -->
+    <div>
+      <label class="block font-semibold text-[#948A7C] mb-1">CARGAR COMPROBANTE/FACTURA (PDF o Imagen)</label>
+      <input type="file" name="invoice_file" required accept=".pdf,image/*" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-[#FAF8F5] file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-natural file:text-white hover:file:bg-opacity-90">
+    </div>
+
+    <!-- Fecha de pago -->
+    <div>
+      <label class="block font-semibold text-[#948A7C] mb-1">FECHA DE PAGO EFECTIVO</label>
+      <input type="date" name="payment_date" id="payInputDate" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+    </div>
+
+    <div class="flex gap-2 justify-end pt-2">
+      <button type="button" onclick="closePaySlideUp()" class="px-4 py-2 border border-[#EDE9E3] rounded font-semibold text-[#574F45] hover:bg-gray-50 transition">
+        Cancelar
+      </button>
+      <button type="submit" class="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded font-bold transition flex items-center gap-1.5">
+        <i data-lucide="check-circle" class="w-4 h-4"></i> Liquidar Pago
+      </button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const tasks = {{ tasks_json | safe }};
+
+  function openNewTaskModal() {
+    document.getElementById('taskModalTitle').textContent = 'Agregar Nueva Tarea';
+    document.getElementById('taskForm').action = '/api/tasks/new';
+    document.getElementById('taskId').value = '';
+    document.getElementById('taskPhase').value = 'Regulación y Permisos';
+    document.getElementById('taskTitle').value = '';
+    document.getElementById('taskDescription').value = '';
+    // Set default dates around current local time
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('taskStartDate').value = today;
+    document.getElementById('taskDueDate').value = today;
+    document.getElementById('taskProgress').value = '0';
+    document.getElementById('taskStatus').value = 'Pendiente';
+    document.getElementById('taskPredecessor').value = '';
+    document.getElementById('taskCollaborator').value = '';
+    document.getElementById('taskDecisionPath').value = 'core';
+
+    document.getElementById('taskModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function editTask(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    document.getElementById('taskModalTitle').textContent = 'Editar Tarea: ' + task.title;
+    document.getElementById('taskForm').action = '/api/tasks/' + task.id + '/edit';
+    document.getElementById('taskId').value = task.id;
+    document.getElementById('taskPhase').value = task.phase || 'Regulación y Permisos';
+    document.getElementById('taskTitle').value = task.title || '';
+    document.getElementById('taskDescription').value = task.description || '';
+    document.getElementById('taskStartDate').value = task.start_date || '';
+    document.getElementById('taskDueDate').value = task.due_date || '';
+    document.getElementById('taskProgress').value = task.progress || '0';
+    document.getElementById('taskStatus').value = task.status || 'Pendiente';
+    document.getElementById('taskPredecessor').value = task.predecessor || '';
+    document.getElementById('taskCollaborator').value = task.collaborator_id || '';
+    document.getElementById('taskDecisionPath').value = task.decision_path || 'core';
+
+    document.getElementById('taskModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function closeTaskModal() {
+    document.getElementById('taskModal').classList.add('hidden');
+  }
+
+  // --- Side Drawer Controllers ---
+  let activeTaskId = null;
+  let activeGross = 0;
+  let activeCurrency = "USD";
+
+  async function openTaskDrawer(taskId, title, phase, progress) {
+    activeTaskId = taskId;
+    
+    // Configurar metadatos del Drawer
+    document.getElementById("drawerTitle").textContent = title;
+    document.getElementById("drawerPhase").textContent = phase;
+    
+    // Configurar las URLs de acción de los formularios
+    document.getElementById("addSubtaskForm").action = "/api/tasks/" + taskId + "/subtasks/new";
+    document.getElementById("addPaymentForm").action = "/api/tasks/" + taskId + "/payment-schedules/new";
+    
+    // Reiniciar pestañas
+    switchTab("checklist");
+    
+    // Cargar contenido dinámico
+    await loadSubtasks();
+    await loadPaymentSchedules();
+    
+    // Mostrar Drawer
+    const drawer = document.getElementById("taskDrawer");
+    const overlay = document.getElementById("drawerOverlay");
+    drawer.classList.remove("hidden");
+    overlay.classList.remove("hidden");
+    
+    setTimeout(() => {
+      drawer.classList.remove("translate-x-full");
+      drawer.classList.add("translate-x-0");
+    }, 10);
+
+    lucide.createIcons();
+  }
+
+  function closeTaskDrawer() {
+    const drawer = document.getElementById("taskDrawer");
+    const overlay = document.getElementById("drawerOverlay");
+    
+    drawer.classList.remove("translate-x-0");
+    drawer.classList.add("translate-x-full");
+    
+    setTimeout(() => {
+      drawer.classList.add("hidden");
+      overlay.classList.add("hidden");
+    }, 300);
+  }
+
+  function switchTab(tab) {
+    const btnChecklist = document.getElementById("tabBtn-checklist");
+    const btnPayments = document.getElementById("tabBtn-payments");
+    const panelChecklist = document.getElementById("panel-checklist");
+    const panelPayments = document.getElementById("panel-payments");
+
+    if (tab === "checklist") {
+      btnChecklist.className = "flex-1 py-3 text-center border-b-2 border-natural text-natural transition";
+      btnPayments.className = "flex-1 py-3 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+      panelChecklist.classList.remove("hidden");
+      panelPayments.classList.add("hidden");
+    } else {
+      btnPayments.className = "flex-1 py-3 text-center border-b-2 border-natural text-natural transition";
+      btnChecklist.className = "flex-1 py-3 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition";
+      panelPayments.classList.remove("hidden");
+      panelChecklist.classList.add("hidden");
+    }
+  }
+
+  async function loadSubtasks() {
+    const res = await fetch("/api/tasks/" + activeTaskId + "/subtasks");
+    const subtasks = await res.json();
+    const listContainer = document.getElementById("drawerSubtasksList");
+    listContainer.innerHTML = "";
+
+    if (subtasks.length === 0) {
+      listContainer.innerHTML = `<li class="text-xs text-[#948A7C] italic">No hay sub-tareas agregadas a esta tarea.</li>`;
+      return;
+    }
+
+    subtasks.forEach(s => {
+      const isChecked = s.completed === 1;
+      const li = document.createElement("li");
+      li.className = "flex items-center justify-between bg-[#FAF8F5] p-2.5 rounded border border-[#EDE9E3]";
+      li.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleSubtask(${s.id})" class="rounded border-gray-300 text-natural focus:ring-natural cursor-pointer">
+          <span class="${isChecked ? "line-through text-gray-400" : "text-gray-700"} font-medium">${s.title}</span>
+        </div>
+        <form action="/api/subtasks/${s.id}/delete" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar esta sub-tarea?');" class="inline">
+          <button type="submit" class="text-red-500 hover:text-red-700 transition">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </form>
+      `;
+      listContainer.appendChild(li);
+    });
+    lucide.createIcons();
+  }
+
+  async function toggleSubtask(subtaskId) {
+    const res = await fetch("/api/subtasks/" + subtaskId + "/toggle", { method: "POST" });
+    window.location.reload();
+  }
+
+  async function loadPaymentSchedules() {
+    const res = await fetch("/api/tasks/" + activeTaskId + "/payment-schedules");
+    const payments = await res.json();
+    const container = document.getElementById("drawerPaymentsList");
+    container.innerHTML = "";
+
+    if (payments.length === 0) {
+      container.innerHTML = `<div class="text-xs text-[#948A7C] italic">No hay hitos de pago programados.</div>`;
+      return;
+    }
+
+    payments.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "p-3 rounded-lg border flex flex-col gap-2 " + (p.status === "Pagado" ? "bg-green-50 border-green-200" : "bg-[#FAF8F5] border-[#EDE9E3]");
+      
+      const symbol = p.currency === "USD" ? "$" : "₡";
+      const formattedAmount = symbol + p.amount_gross.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      let actionHtml = "";
+      if (p.status === "Pendiente") {
+        actionHtml = `
+          <button type="button" onclick="openPaySlideUp(${p.id}, '${p.concept.replace(/'/g, "\\'")}', ${p.amount_gross}, '${p.currency}')" class="w-full mt-1 bg-green-700 hover:bg-green-800 text-white py-1.5 rounded text-xs font-bold transition flex items-center justify-center gap-1.5">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i> Registrar Factura & Pagar
+          </button>
+        `;
+      } else {
+        actionHtml = `
+          <div class="flex justify-between items-center text-[10px] text-gray-500 pt-1 border-t border-green-200">
+            <span>Pagado el: <strong>${p.paid_at || '-'}</strong></span>
+            <a href="/${p.invoice_file}" target="_blank" class="text-[#9E7A38] font-bold hover:underline flex items-center gap-0.5">
+              Ver Factura <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+        `;
+      }
+
+      div.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <div class="font-bold text-gray-800 text-xs">${p.concept}</div>
+            <div class="text-[10px] text-gray-500">Vence: ${p.due_date}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-extrabold text-xs ${p.status === 'Pagado' ? 'text-green-700' : 'text-[#9E7A38]'}">${formattedAmount}</div>
+            <span class="text-[9px] uppercase px-1.5 py-0.5 rounded-full font-bold ${p.status === 'Pagado' ? 'bg-green-200 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${p.status}</span>
+          </div>
+        </div>
+        ${actionHtml}
+      `;
+      container.appendChild(div);
+    });
+    lucide.createIcons();
+  }
+
+  function openPaySlideUp(scheduleId, concept, amountGross, currency) {
+    activeGross = amountGross;
+    activeCurrency = currency;
+    
+    document.getElementById("payForm").action = "/api/payment-schedules/" + scheduleId + "/pay";
+    document.getElementById("payLabelConcept").textContent = concept;
+    
+    const symbol = currency === "USD" ? "$" : "₡";
+    document.getElementById("payValGross").textContent = symbol + amountGross.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+    // Reset inputs
+    document.getElementById("ivaToggle").checked = false;
+    document.getElementById("ivaBreakdown").classList.add("hidden");
+    document.getElementById("payInputDate").value = new Date().toISOString().split("T")[0];
+
+    // Show slide-up modal
+    document.getElementById("paySlideUp").classList.remove("hidden");
+    document.getElementById("paySlideUpOverlay").classList.remove("hidden");
+    
+    setTimeout(() => {
+      document.getElementById("paySlideUp").classList.remove("translate-y-full");
+      document.getElementById("paySlideUp").classList.add("translate-y-0");
+    }, 10);
+    lucide.createIcons();
+  }
+
+  function closePaySlideUp() {
+    const slideUp = document.getElementById("paySlideUp");
+    const overlay = document.getElementById("paySlideUpOverlay");
+    
+    slideUp.classList.remove("translate-y-0");
+    slideUp.classList.add("translate-y-full");
+    
+    setTimeout(() => {
+      slideUp.classList.add("hidden");
+      overlay.classList.add("hidden");
+    }, 300);
+  }
+
+  function toggleIvaBreakdown() {
+    const isChecked = document.getElementById("ivaToggle").checked;
+    const breakdown = document.getElementById("ivaBreakdown");
+    
+    if (isChecked) {
+      const net = activeGross / 1.13;
+      const iva = activeGross - net;
+      const symbol = activeCurrency === "USD" ? "$" : "₡";
+      
+      document.getElementById("payValNet").textContent = symbol + net.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById("payValIva").textContent = symbol + iva.toLocaleString("es-CR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      breakdown.classList.remove("hidden");
+    } else {
+      breakdown.classList.add("hidden");
+    }
+  }
+
+  let selectedCollaboratorId = null;
+
+  function filterByCollaborator(collabId) {
+    if (selectedCollaboratorId === collabId) {
+      selectedCollaboratorId = null;
+      // Reset buttons
+      document.querySelectorAll('.collab-avatar').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-natural', 'opacity-100');
+        btn.classList.add('opacity-70');
+      });
+      // Reset Mermaid tasks opacity
+      document.querySelectorAll('.mermaid g.task').forEach(node => {
+        node.style.opacity = '1.0';
+      });
+      // Reset table rows opacity
+      document.querySelectorAll('.task-row').forEach(row => {
+        row.classList.remove('opacity-30');
+      });
+    } else {
+      selectedCollaboratorId = collabId;
+      // Update buttons
+      document.querySelectorAll('.collab-avatar').forEach(btn => {
+        const id = parseInt(btn.dataset.id);
+        if (id === collabId) {
+          btn.classList.add('ring-2', 'ring-natural', 'opacity-100');
+          btn.classList.remove('opacity-70');
+        } else {
+          btn.classList.remove('ring-2', 'ring-natural', 'opacity-100');
+          btn.classList.add('opacity-70');
+        }
+      });
+      
+      // Filter SVG task bars
+      tasks.forEach(task => {
+        const svgNode = document.querySelector(`.mermaid g.task.t${task.id}`);
+        if (svgNode) {
+          if (task.collaborator_id === collabId) {
+            svgNode.style.opacity = '1.0';
+          } else {
+            svgNode.style.opacity = '0.15';
+          }
+        }
+      });
+
+      // Filter table rows
+      document.querySelectorAll('.task-row').forEach(row => {
+        const rowCollabId = parseInt(row.dataset.collaboratorId);
+        if (rowCollabId === collabId) {
+          row.classList.remove('opacity-30');
+        } else {
+          row.classList.add('opacity-30');
+        }
+      });
+    }
+  }
+
+  window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('show_modal') === 'true') {
+      openNewTaskModal();
+    }
+    
+    // Add event listener to delegate clicks on the Mermaid SVG nodes to open the drawer
+    setTimeout(() => {
+      const mermaidContainer = document.querySelector('.mermaid');
+      if (mermaidContainer) {
+        mermaidContainer.addEventListener('click', function(e) {
+          const taskNode = e.target.closest('g.task');
+          if (taskNode) {
+            const classes = Array.from(taskNode.classList);
+            const taskClass = classes.find(c => c.startsWith('t') && !c.includes('-'));
+            if (taskClass) {
+              const taskId = parseInt(taskClass.substring(1));
+              const taskObj = tasks.find(t => t.id === taskId);
+              if (taskObj) {
+                openTaskDrawer(taskObj.id, taskObj.title, taskObj.phase, taskObj.progress);
+              }
+            }
+          }
+        });
+      }
+    }, 1000);
+  }
+</script>
+{% endblock %}

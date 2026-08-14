@@ -1,0 +1,9 @@
+.vercel
+.agent/
+.agents/
+.claude/
+__pycache__/
+_bmad/
+_bmad-output/
+*.pyc
+.DS_Store

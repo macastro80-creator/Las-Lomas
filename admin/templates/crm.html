@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}CRM Prospectos - Las Lomas{% endblock %}
+{% block header_title %}CRM Prospectos (Leads){% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header Actions -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm">
+    <!-- Filters -->
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider mr-2">Filtrar por:</span>
+      <a href="/admin/crm?filter=all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition {% if filter_mode == 'all' %}bg-natural text-white{% else %}bg-gray-100 text-[#574F45] hover:bg-gray-200{% endif %}">
+        Todos
+      </a>
+      <a href="/admin/crm?filter=pending" class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 {% if filter_mode == 'pending' %}bg-red-500 text-white{% else %}bg-red-50 text-red-700 hover:bg-red-100{% endif %}">
+        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+        Sin Responder
+      </a>
+    </div>
+
+    <!-- Create Lead Trigger -->
+    <button onclick="openNewLeadModal()" class="bg-natural hover:bg-opacity-90 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2 self-stretch sm:self-auto justify-center">
+      <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Nuevo Prospecto
+    </button>
+  </div>
+
+  <!-- Leads List / Table -->
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-[#EDE9E3]">
+      <h3 class="font-bold text-gray-800">Listado de Prospectos</h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+      {% if leads %}
+      <table class="w-full text-left text-sm whitespace-nowrap">
+        <thead>
+          <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3] bg-[#FAF8F5]">
+            <th class="py-3 px-6">Nombre</th>
+            <th class="py-3 px-6">Email / Teléfono</th>
+            <th class="py-3 px-6">Origen</th>
+            <th class="py-3 px-6">Fecha Registro</th>
+            <th class="py-3 px-6">Estado</th>
+            <th class="py-3 px-6">Respuesta</th>
+            <th class="py-3 px-6 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#EDE9E3]">
+          {% for lead in leads %}
+          <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="viewLeadDetail({{ lead.id }})">
+            <!-- Name -->
+            <td class="py-4 px-6 font-medium text-gray-800">
+              {{ lead.name }}
+            </td>
+            <!-- Contact info -->
+            <td class="py-4 px-6" onclick="event.stopPropagation();">
+              <div class="text-[#3D372F]">{{ lead.email }}</div>
+              <div class="text-xs text-[#948A7C]">{{ lead.phone if lead.phone else 'Sin teléfono' }}</div>
+            </td>
+            <!-- Origin -->
+            <td class="py-4 px-6 text-xs text-[#574F45]">
+              {{ lead.origin }}
+            </td>
+            <!-- Created date -->
+            <td class="py-4 px-6 text-xs text-[#948A7C]">
+              {{ lead.created_at }}
+            </td>
+            <!-- Status -->
+            <td class="py-4 px-6">
+              <span class="text-xs px-2.5 py-1 rounded font-semibold 
+                {% if lead.status == 'New Lead' %}bg-blue-50 text-blue-700
+                {% elif lead.status == 'Contacted' %}bg-yellow-50 text-yellow-700
+                {% elif lead.status == 'Hot lead' %}bg-orange-50 text-orange-700
+                {% elif lead.status == 'SOLD' %}bg-green-50 text-green-700
+                {% elif lead.status == 'LOST' %}bg-gray-100 text-gray-700
+                {% else %}bg-gray-50 text-gray-700{% endif %}">
+                {{ lead.status }}
+              </span>
+            </td>
+            <!-- Replied Toggle (Stops propagation to prevent opening details modal) -->
+            <td class="py-4 px-6" onclick="event.stopPropagation();">
+              <form action="/api/leads/{{ lead.id }}/toggle-replied?redirect_to=crm&filter={{ filter_mode }}" method="POST">
+                {% if lead.replied == 1 %}
+                <button type="submit" class="bg-green-100 hover:bg-green-200 text-green-800 text-xs px-2.5 py-1 rounded font-semibold transition flex items-center gap-1">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i> Contestado
+                </button>
+                {% else %}
+                <button type="submit" class="bg-red-100 hover:bg-red-200 text-red-800 text-xs px-2.5 py-1 rounded font-semibold transition flex items-center gap-1 animate-pulse">
+                  <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Pendiente
+                </button>
+                {% endif %}
+              </form>
+            </td>
+            <!-- Actions -->
+            <td class="py-4 px-6 text-center" onclick="event.stopPropagation();">
+              <div class="flex items-center justify-center gap-2">
+                <button onclick="viewLeadDetail({{ lead.id }})" class="p-1 text-natural hover:bg-gray-100 rounded transition" title="Ver Detalle">
+                  <i data-lucide="eye" class="w-4.5 h-4.5"></i>
+                </button>
+                <form action="/api/leads/{{ lead.id }}/delete" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este prospecto?');" class="inline">
+                  <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded transition" title="Eliminar">
+                    <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="text-center py-16 text-[#948A7C]">
+        <i data-lucide="users-2" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+        <p class="text-sm font-semibold">No se encontraron prospectos.</p>
+        <p class="text-xs text-gray-400 mt-1">Registra un lead manualmente o envía un formulario desde la página web.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- New/Edit Lead Modal -->
+<div id="leadModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 id="modalTitle" class="font-bold text-gray-800 text-lg">Detalles del Prospecto</h3>
+      <button onclick="closeLeadModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <form id="leadForm" method="POST" action="/api/leads/new" class="p-6 space-y-4 overflow-y-auto flex-1 text-sm">
+      <input type="hidden" id="leadId" name="lead_id">
+      
+      <!-- Name -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Nombre Completo</label>
+        <input type="text" id="leadName" name="name" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+      </div>
+
+      <!-- Email & Phone -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Correo Electrónico</label>
+          <input type="email" id="leadEmail" name="email" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Teléfono</label>
+          <input type="text" id="leadPhone" name="phone" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+      </div>
+
+      <!-- Origin & Status -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Canal de Origen</label>
+          <select id="leadOrigin" name="origin" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="Website Landing">Sitio Web</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Instagram">Instagram</option>
+            <option value="Llamada Telefónica">Llamada</option>
+            <option value="Recomendación">Recomendación</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Estado del Embudo</label>
+          <select id="leadStatus" name="status" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="New Lead">Nuevo Prospecto</option>
+            <option value="Contacted">Contactado</option>
+            <option value="Hot lead">Caliente / Muy Interesado</option>
+            <option value="SOLD">VENDIDO</option>
+            <option value="LOST">Perdido</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Replied Checkbox -->
+      <div class="flex items-center gap-2 py-1">
+        <input type="checkbox" id="leadReplied" name="replied" value="1" class="w-4 h-4 rounded text-natural border-[#EDE9E3] focus:ring-natural">
+        <label for="leadReplied" class="text-xs font-semibold text-[#574F45] uppercase tracking-wider">Marcar como Contestado (Respuesta enviada)</label>
+      </div>
+
+      <!-- Details / Notes -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Detalles / Notas de Seguimiento</label>
+        <textarea id="leadDetails" name="details" rows="4" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural" placeholder="Notas sobre el cliente, qué lote busca, presupuesto, etc."></textarea>
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeLeadModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Guardar Cambios
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Parse leads database items safely to a JSON array for client side indexing
+  const leads = {{ leads_json | safe }};
+
+  function openNewLeadModal() {
+    document.getElementById('modalTitle').textContent = 'Registrar Nuevo Prospecto';
+    document.getElementById('leadForm').action = '/api/leads/new';
+    document.getElementById('leadId').value = '';
+    document.getElementById('leadName').value = '';
+    document.getElementById('leadEmail').value = '';
+    document.getElementById('leadPhone').value = '';
+    document.getElementById('leadOrigin').value = 'Website Landing';
+    document.getElementById('leadStatus').value = 'New Lead';
+    document.getElementById('leadReplied').checked = false;
+    document.getElementById('leadDetails').value = '';
+    
+    document.getElementById('leadModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function viewLeadDetail(id) {
+    const lead = leads.find(l => l.id === id);
+    if (!lead) return;
+
+    document.getElementById('modalTitle').textContent = 'Editar Prospecto: ' + lead.name;
+    document.getElementById('leadForm').action = '/api/leads/' + lead.id + '/edit';
+    document.getElementById('leadId').value = lead.id;
+    document.getElementById('leadName').value = lead.name || '';
+    document.getElementById('leadEmail').value = lead.email || '';
+    document.getElementById('leadPhone').value = lead.phone || '';
+    document.getElementById('leadOrigin').value = lead.origin || 'Website Landing';
+    document.getElementById('leadStatus').value = lead.status || 'New Lead';
+    document.getElementById('leadReplied').checked = (lead.replied === 1);
+    document.getElementById('leadDetails').value = lead.details || '';
+
+    document.getElementById('leadModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function closeLeadModal() {
+    document.getElementById('leadModal').classList.add('hidden');
+  }
+
+  // Handle opening modal if URL query specifies it
+  window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('show_modal') === 'true') {
+      openNewLeadModal();
+    }
+  }
+</script>
+{% endblock %}

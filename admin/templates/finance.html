@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Finanzas - Las Lomas{% endblock %}
+{% block header_title %}Control de Ingresos y Egresos{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Financial KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Net Balance Card -->
+    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Balance Neto Inmobiliario</p>
+        <h3 class="text-2xl font-bold mt-2 {% if net_balance_usd >= 0 %}text-green-700{% else %}text-red-700{% endif %}">
+          ${{ "{:,.2f}".format(net_balance_usd) }}
+        </h3>
+        <p class="text-xs text-[#574F45] mt-1">Equivalente a: <strong>₡{{ "{:,.0f}".format(net_balance_crc) }}</strong></p>
+      </div>
+      <div class="p-3 rounded-full {% if net_balance_usd >= 0 %}bg-green-50 text-green-600{% else %}bg-red-50 text-red-600{% endif %}">
+        <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+      </div>
+    </div>
+
+    <!-- Income Card -->
+    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Total Ingresos</p>
+        <h3 class="text-2xl font-bold text-green-700 mt-2">${{ "{:,.2f}".format(total_income_usd) }}</h3>
+        <p class="text-xs text-[#948A7C] mt-1">₡{{ "{:,.0f}".format(total_income_crc) }}</p>
+      </div>
+      <div class="bg-green-50 p-3 rounded-full text-green-600">
+        <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+      </div>
+    </div>
+
+    <!-- Expense Card -->
+    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Total Egresos</p>
+        <h3 class="text-2xl font-bold text-red-700 mt-2">${{ "{:,.2f}".format(total_expense_usd) }}</h3>
+        <p class="text-xs text-[#948A7C] mt-1">₡{{ "{:,.0f}".format(total_expense_crc) }}</p>
+      </div>
+      <div class="bg-red-50 p-3 rounded-full text-red-600">
+        <i data-lucide="arrow-down-left" class="w-6 h-6"></i>
+      </div>
+    </div>
+
+    <!-- Capital Gains Card -->
+    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between bg-gradient-to-br from-white to-[#FAF8F5]">
+      <div>
+        <p class="text-xs font-semibold text-[#9E7A38] uppercase tracking-wider">Impuesto Ganancias (15%)</p>
+        <h3 class="text-2xl font-bold text-amber-700 mt-2">${{ "{:,.2f}".format(capital_gains_tax_usd) }}</h3>
+        <p class="text-xs text-[#948A7C] mt-1">Utilidad Neta: <strong>${{ "{:,.2f}".format(net_utility_usd) }}</strong></p>
+      </div>
+      <div class="bg-amber-50 p-3 rounded-full text-amber-600">
+        <i data-lucide="percent" class="w-6 h-6"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Action & Trigger -->
+  <div class="flex justify-between items-center bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm">
+    <div class="text-xs text-[#574F45]">
+      Tipo de cambio oficial utilizado hoy: <strong>1 USD = ₡{{ "%.1f"|format(exchange_rate) }}</strong>
+    </div>
+    <button onclick="openNewTransactionModal()" class="bg-[#9E7A38] hover:bg-opacity-90 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
+      <i data-lucide="plus-circle" class="w-4.5 h-4.5"></i> Registrar Movimiento
+    </button>
+  </div>
+
+  <!-- Transaction History Ledger -->
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-[#EDE9E3]">
+      <h3 class="font-bold text-gray-800">Libro de Contabilidad (Ledger)</h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+      {% if transactions %}
+      <table class="w-full text-left text-sm whitespace-nowrap">
+        <thead>
+          <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3] bg-[#FAF8F5]">
+            <th class="py-3 px-6">Fecha</th>
+            <th class="py-3 px-6">Tipo / Categoría</th>
+            <th class="py-3 px-6">Concepto</th>
+            <th class="py-3 px-6 text-right">Monto USD</th>
+            <th class="py-3 px-6 text-right">Monto CRC</th>
+            <th class="py-3 px-6 text-center">Tipo Cambio</th>
+            <th class="py-3 px-6 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#EDE9E3]">
+          {% for tx in transactions %}
+          <tr class="hover:bg-gray-50 transition">
+            <!-- Date -->
+            <td class="py-3.5 px-6 font-medium text-[#574F45]">
+              {{ tx.date }}
+            </td>
+            <!-- Type / Category -->
+            <td class="py-3.5 px-6">
+              <div class="flex items-center gap-2">
+                <span class="p-1 rounded-full text-xs font-semibold
+                  {% if tx.type == 'Ingreso' %}bg-green-50 text-green-700{% else %}bg-red-50 text-red-700{% endif %}">
+                  <i data-lucide="{% if tx.type == 'Ingreso' %}arrow-up-right{% else %}arrow-down-left{% endif %}" class="w-3.5 h-3.5"></i>
+                </span>
+                <div>
+                  <div class="font-semibold text-xs text-gray-800">{{ tx.type }}</div>
+                  <div class="text-[10px] uppercase font-bold text-[#948A7C] tracking-wider">{{ tx.category }}</div>
+                </div>
+              </div>
+            </td>
+            <!-- Concept -->
+            <td class="py-3.5 px-6 text-gray-700 max-w-xs truncate" title="{{ tx.concept }}">
+              {{ tx.concept }}
+            </td>
+            <!-- USD Amount -->
+            <td class="py-3.5 px-6 text-right font-semibold {% if tx.type == 'Ingreso' %}text-green-700{% else %}text-red-700{% endif %}">
+              {% if tx.type == 'Egreso' %}-{% endif %}${{ "{:,.2f}".format(tx.amount_usd) }}
+              {% if tx.currency == 'USD' %}
+              <span class="text-[9px] text-[#948A7C] font-normal uppercase">Orig</span>
+              {% endif %}
+            </td>
+            <!-- CRC Amount -->
+            <td class="py-3.5 px-6 text-right font-semibold {% if tx.type == 'Ingreso' %}text-green-700{% else %}text-red-700{% endif %}">
+              {% if tx.type == 'Egreso' %}-{% endif %}₡{{ "{:,.0f}".format(tx.amount_crc) }}
+              {% if tx.currency == 'CRC' %}
+              <span class="text-[9px] text-[#948A7C] font-normal uppercase">Orig</span>
+              {% endif %}
+            </td>
+            <!-- Exchange Rate -->
+            <td class="py-3.5 px-6 text-center text-xs text-[#574F45] font-mono">
+              ₡{{ "%.1f"|format(tx.exchange_rate) }}
+            </td>
+            <!-- Actions -->
+            <td class="py-3.5 px-6 text-center flex items-center justify-center gap-2">
+              {% if tx.invoice_path %}
+              <a href="/{{ tx.invoice_path }}" target="_blank" class="p-1 text-natural hover:bg-gray-100 rounded transition" title="Ver Factura">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+              </a>
+              {% endif %}
+              <form action="/api/finances/{{ tx.id }}/delete" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este registro contable?');" class="inline">
+                <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded transition" title="Eliminar">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="text-center py-16 text-[#948A7C]">
+        <i data-lucide="receipt" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+        <p class="text-sm font-semibold">No hay movimientos registrados.</p>
+        <p class="text-xs text-gray-400 mt-1">Registra tu primer ingreso o egreso de dinero haciendo clic en Registrar Movimiento.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- New Transaction Modal -->
+<div id="financeModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-md w-full overflow-hidden flex flex-col max-h-[95vh]">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 class="font-bold text-gray-800 text-lg">Registrar Movimiento Financiero</h3>
+      <button onclick="closeTransactionModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <form method="POST" action="/api/finances/new" enctype="multipart/form-data" class="p-6 space-y-4 overflow-y-auto flex-1 text-sm">
+      
+      <!-- Date -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Fecha</label>
+        <input type="date" id="txDate" name="date" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+      </div>
+
+      <!-- Type, Classification & Category -->
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label class="block text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Tipo</label>
+          <select id="txType" name="type" required class="w-full px-2 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-xs">
+            <option value="Egreso">Egreso (Gasto)</option>
+            <option value="Ingreso">Ingreso (Ventas/Aportes)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Clasificación</label>
+          <select id="txCategoryType" name="category_type" class="w-full px-2 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-xs">
+            <option value="CAPEX">CAPEX (Inversión)</option>
+            <option value="OPEX">OPEX (Operativo)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Categoría</label>
+          <select id="txCategory" name="category" required class="w-full px-2 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-xs">
+            <option value="Construcción">Construcción</option>
+            <option value="Permisos e Impuestos">Permisos e Impuestos</option>
+            <option value="Topografía y Catastro">Topografía y Catastro</option>
+            <option value="Pozos e Infraestructura Hídrica">Pozos y Agua</option>
+            <option value="Mercadeo y Ventas">Mercadeo y Ventas</option>
+            <option value="Honorarios Legales">Honorarios Legales</option>
+            <option value="Administración">Administración</option>
+            <option value="Venta de Lotes">Venta de Lotes (Ingreso)</option>
+            <option value="Aporte de Capital">Aporte de Capital (Ingreso)</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Concept -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Concepto / Descripción</label>
+        <input type="text" name="concept" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural" placeholder="Ej. Pago de planos de curvas de nivel, compra de tubos...">
+      </div>
+
+      <!-- Currency, Amount & Exchange Rate -->
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Moneda</label>
+          <select id="txCurrency" name="currency" required onchange="handleCurrencyChange()" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="USD">Dólares ($)</option>
+            <option value="CRC">Colones (₡)</option>
+          </select>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Monto</label>
+          <input type="number" step="0.01" name="amount" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural" placeholder="0.00">
+        </div>
+      </div>
+
+      <!-- Exchange Rate (Manual Override but Auto Filled) -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Tipo de Cambio Utilizado</label>
+        <input type="number" step="0.1" name="exchange_rate" id="txExchangeRate" value="{{ exchange_rate }}" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-gray-50">
+        <p class="text-[10px] text-[#948A7C] mt-1">Llenado automáticamente con el tipo de cambio oficial de hoy, pero puedes ajustarlo si tu banco aplicó otro.</p>
+      </div>
+
+      <!-- Tax desegregation (13% IVA Costa Rica) -->
+      <div class="flex items-center gap-2 py-1">
+        <input type="checkbox" id="txApplyTax" name="apply_tax" value="true" class="rounded border-gray-300 text-natural focus:ring-natural cursor-pointer">
+        <label for="txApplyTax" class="text-xs font-semibold text-natural cursor-pointer select-none">Sumar y Desglosar el 13% de IVA Costarricense</label>
+      </div>
+
+      <!-- Upload invoice PDF/image -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Adjuntar Comprobante/Factura</label>
+        <input type="file" name="invoice_file" accept=".pdf,image/*" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-[#FAF8F5] file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-natural file:text-white hover:file:bg-opacity-90">
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeTransactionModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-[#9E7A38] hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Registrar Movimiento
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openNewTransactionModal() {
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('txDate').value = today;
+    
+    document.getElementById('financeModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function closeTransactionModal() {
+    document.getElementById('financeModal').classList.add('hidden');
+  }
+
+  function handleCurrencyChange() {
+    const cur = document.getElementById('txCurrency').value;
+    const cat = document.getElementById('txCategory');
+    const type = document.getElementById('txType').value;
+    
+    // Auto shift category defaults based on Income/Expense type
+    if (type === 'Ingreso') {
+      document.getElementById('txType').value = 'Ingreso';
+    }
+  }
+
+  // Pre-adjust categories when Type changes
+  document.getElementById('txType').addEventListener('change', function() {
+    const type = this.value;
+    const cat = document.getElementById('txCategory');
+    if (type === 'Ingreso') {
+      cat.value = 'Venta de Lotes';
+    } else {
+      cat.value = 'Construcción';
+    }
+  });
+
+  window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('show_modal') === 'true') {
+      openNewTransactionModal();
+    }
+  }
+</script>
+{% endblock %}
