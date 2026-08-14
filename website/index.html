@@ -367,7 +367,11 @@
       // Construct detailed notes for the CRM
       const details = `Proyecto Seleccionado: ${project}.\nMensaje del cliente: ${message ? message : 'Sin mensaje adicional.'}`;
 
-      fetch('/api/leads', {
+      // Determinar la URL del API (local o subdominio de producción)
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const apiEndpoint = isLocal ? '/api/leads' : 'https://admin.laslomas.cr/api/leads';
+
+      fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

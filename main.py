@@ -13,7 +13,24 @@ from pydantic import BaseModel
 
 DATABASE_NAME = "lomas.db"
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="Las Lomas Local Management App")
+
+# Configure CORS for subdomains and local development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://las-lomas.vercel.app",
+        "https://laslomas.cr",
+        "https://www.laslomas.cr",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Templates Setup
 templates = Jinja2Templates(directory="admin/templates")
