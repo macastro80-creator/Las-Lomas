@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /
+
+# Invite and prioritize AI search crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CohereBot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: OMgilibot
+Allow: /
+
+User-agent: diffbot
+Allow: /
+
+Sitemap: https://laslomas.cr/sitemap.xml

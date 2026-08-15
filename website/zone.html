@@ -12,6 +12,48 @@
   <title>The Area · Pérez Zeledón, RISE &amp; Convenience</title>
   <meta name="description" content="Living at 1,000 meters elevation in Santa Elena, Pérez Zeledón. Perfect climate, local community, and immediate access to RISE and the city of San Isidro.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="canonical" href="https://laslomas.cr/zone">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://laslomas.cr/zone">
+  <meta property="og:title" content="The Area · Pérez Zeledón, RISE &amp; Convenience">
+  <meta property="og:description" content="Living at 1,000 meters elevation in Santa Elena, Pérez Zeledón. Perfect climate, local community, and immediate access to RISE and the city of San Isidro.">
+  <meta property="og:image" content="https://laslomas.cr/images/land-aerial-valley.jpg">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="es_CR">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://laslomas.cr/zone">
+  <meta name="twitter:title" content="The Area · Pérez Zeledón, RISE &amp; Convenience">
+  <meta name="twitter:description" content="Living at 1,000 meters elevation in Santa Elena, Pérez Zeledón. Perfect climate, local community, and immediate access to RISE and the city of San Isidro.">
+  <meta name="twitter:image" content="https://laslomas.cr/images/land-aerial-valley.jpg">
+  
+  <!-- AI / Search Engine JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": "https://laslomas.cr/zone/#about",
+    "mainEntity": {
+      "@type": "Place",
+      "name": "Santa Elena, Pérez Zeledón",
+      "description": "A temperate mountain corridor at 1,000 meters above sea level in Pérez Zeledón, Costa Rica. Home to Las Lomas community and bordering the RISE regenerative ecosystem.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Santa Elena de El General",
+        "addressRegion": "Pérez Zeledón",
+        "addressCountry": "CR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 9.38,
+        "longitude": -83.65
+      }
+    }
+  }
+  </script>
 </head>
 <body>
 
@@ -50,6 +92,13 @@
         <span class="lang-en">Request Info</span>
         <span class="lang-es">Solicitar Info</span>
       </a>
+      
+      <!-- Hamburger Menu Toggle Button -->
+      <button class="nav-menu-toggle" id="menu-toggle" aria-label="Toggle Menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
     </div>
   </nav>
 
@@ -204,6 +253,25 @@
     const nav = document.getElementById('main-nav');
     window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
 
+    // Responsive Mobile Menu mechanism
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener('click', () => {
+        const isOpen = menuToggle.classList.toggle('open');
+        navLinks.classList.toggle('active');
+        document.body.classList.toggle('no-scroll', isOpen);
+      });
+      // Close menu when clicking a link
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          menuToggle.classList.remove('open');
+          navLinks.classList.remove('active');
+          document.body.classList.remove('no-scroll');
+        });
+      });
+    }
+
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((e, i) => {
@@ -232,6 +300,16 @@
       document.title = pageTitles[lang];
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', pageDescriptions[lang]);
+
+      // Update OpenGraph & Twitter tags dynamically
+      const metaOgTitle = document.querySelector('meta[property="og:title"]');
+      const metaOgDesc = document.querySelector('meta[property="og:description"]');
+      const metaTwTitle = document.querySelector('meta[name="twitter:title"]');
+      const metaTwDesc = document.querySelector('meta[name="twitter:description"]');
+      if (metaOgTitle) metaOgTitle.setAttribute('content', pageTitles[lang]);
+      if (metaOgDesc) metaOgDesc.setAttribute('content', pageDescriptions[lang]);
+      if (metaTwTitle) metaTwTitle.setAttribute('content', pageTitles[lang]);
+      if (metaTwDesc) metaTwDesc.setAttribute('content', pageDescriptions[lang]);
 
       // Update placeholders
       document.querySelectorAll('[data-placeholder-en]').forEach(el => {
