@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     (function() {
-      const savedLang = localStorage.getItem('preferred-lang') || 'en';
+      let savedLang = localStorage.getItem('preferred-lang');
+      if (!savedLang) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        savedLang = (browserLang && browserLang.startsWith('es')) ? 'es' : 'en';
+      }
       document.documentElement.setAttribute('lang', savedLang);
     })();
   </script>
@@ -157,50 +161,62 @@
         <span class="lang-es">Distribución de Agrihood y Accesos Naturales</span>
       </h2>
       
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
-        <!-- Placeholder 1: Master Plan Map -->
-        <div class="placeholder-img">
-          <div class="placeholder-img-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2l6 3 6-3v12l-6 3-6-3z"/><path d="M9 2v16M15 5v12"/></svg>
+      <div class="eco-cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
+        <!-- Card 1: Masterplan -->
+        <div class="eco-card reveal">
+          <img src="images/Las Lomas.png" class="eco-card-img" alt="Agrihood Master Plan Map" style="aspect-ratio: 4/3; object-fit: cover;">
+          <div class="eco-card-body">
+            <div class="eco-card-label">
+              <span class="lang-en">Phase 2 · Fincas</span>
+              <span class="lang-es">Fase 2 · Fincas</span>
+            </div>
+            <h3 class="eco-card-title">
+              <span class="lang-en">Agrihood Master Plan</span>
+              <span class="lang-es">Plan Maestro de Agrihood</span>
+            </h3>
+            <p class="eco-card-desc">
+              <span class="lang-en">Topographical boundaries and farm segregations for the 5-20 hectare self-sufficient estates.</span>
+              <span class="lang-es">Límites topográficos y segregaciones de fincas para los lotes de 5-20 hectáreas de autosuficiencia.</span>
+            </p>
           </div>
-          <div class="placeholder-img-label">
-            <span class="lang-en">Agrihood Master Plan</span>
-            <span class="lang-es">Plan Maestro de Agrihood</span>
-          </div>
-          <p class="placeholder-img-desc">
-            <span class="lang-en">Topographical boundaries and farm segregations for the 5-20 hectare estates.</span>
-            <span class="lang-es">Límites topográficos y segregaciones de fincas para los lotes de 5-20 hectáreas.</span>
-          </p>
         </div>
 
-        <!-- Placeholder 2: River & Waterfall -->
-        <div class="placeholder-img">
-          <div class="placeholder-img-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v12M6 12h12"/></svg>
+        <!-- Card 2: River & Waterfall -->
+        <div class="eco-card reveal">
+          <img src="images/real-waterfall.jpg" class="eco-card-img" alt="River Access & Waterfalls" style="aspect-ratio: 4/3; object-fit: cover;">
+          <div class="eco-card-body">
+            <div class="eco-card-label">
+              <span class="lang-en">Water · Pristine</span>
+              <span class="lang-es">Agua · Virgen</span>
+            </div>
+            <h3 class="eco-card-title">
+              <span class="lang-en">River Access &amp; Waterfalls</span>
+              <span class="lang-es">Acceso al Río y Cascadas</span>
+            </h3>
+            <p class="eco-card-desc">
+              <span class="lang-en">Private, direct access to nearly 3 kilometers of crystal-clear river, pristine pools and natural waterfalls.</span>
+              <span class="lang-es">Acceso directo y privado a casi 3 kilómetros de río cristalino, pozas naturales y cascadas vírgenes.</span>
+            </p>
           </div>
-          <div class="placeholder-img-label">
-            <span class="lang-en">River Access &amp; Waterfalls</span>
-            <span class="lang-es">Acceso al Río y Cascadas</span>
-          </div>
-          <p class="placeholder-img-desc">
-            <span class="lang-en">Photographic proof of the pristine river access points, waterfalls, and natural pools bordering the estates.</span>
-            <span class="lang-es">Evidencia fotográfica de los accesos al río cristalino, cascadas y pozas naturales colindantes.</span>
-          </p>
         </div>
 
-        <!-- Placeholder 3: Off-Grid Homestead -->
-        <div class="placeholder-img">
-          <div class="placeholder-img-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5"/></svg>
+        <!-- Card 3: Off-Grid Homestead -->
+        <div class="eco-card reveal">
+          <img src="images/land-aerial-forest.jpg" class="eco-card-img" alt="Off-Grid Homestead Concept" style="aspect-ratio: 4/3; object-fit: cover;">
+          <div class="eco-card-body">
+            <div class="eco-card-label">
+              <span class="lang-en">Regeneration · Off-grid</span>
+              <span class="lang-es">Regeneración · Off-grid</span>
+            </div>
+            <h3 class="eco-card-title">
+              <span class="lang-en">Homestead &amp; Cabin Concepts</span>
+              <span class="lang-es">Conceptos de Granja y Cabañas</span>
+            </h3>
+            <p class="eco-card-desc">
+              <span class="lang-en">Architectural blueprints and ideas for self-sufficient solar homesteads, greenhouses and organic farms.</span>
+              <span class="lang-es">Planos e ideas arquitectónicas para granjas solares autosuficientes, invernaderos y agricultura orgánica.</span>
+            </p>
           </div>
-          <div class="placeholder-img-label">
-            <span class="lang-en">Homestead &amp; Cabin Concepts</span>
-            <span class="lang-es">Conceptos de Granja y Cabaña</span>
-          </div>
-          <p class="placeholder-img-desc">
-            <span class="lang-en">Conceptual design ideas for off-grid cabins, greenhouses, and organic solar-powered homesteads.</span>
-            <span class="lang-es">Ideas de diseño conceptual para cabañas off-grid, invernaderos y granjas solares orgánicas.</span>
-          </p>
         </div>
       </div>
     </div>
