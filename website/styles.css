@@ -517,6 +517,16 @@ body {
 .location-section { background:var(--white); }
 .location-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; margin-top:32px; }
 .location-map { aspect-ratio:4/3; border-radius:6px; overflow:hidden; background:var(--warm-gray-50); }
+.location-map iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: grayscale(100%) invert(5%) sepia(20%) saturate(120%) hue-rotate(15deg) brightness(95%) contrast(105%);
+  transition: filter 0.5s ease;
+}
+.location-map iframe:hover {
+  filter: grayscale(0%) sepia(0%) saturate(100%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
 .location-link {
   display:inline-flex; align-items:center; gap:8px; margin-top:24px;
   font-family:'Space Grotesk',sans-serif; font-size:.75rem; font-weight:600;

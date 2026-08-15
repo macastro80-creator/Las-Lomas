@@ -119,18 +119,22 @@
       
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
         <!-- Placeholder 1: Santa Elena Map -->
-        <div class="placeholder-img">
-          <div class="placeholder-img-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a8 8 0 00-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+        <!-- Santa Elena Location Map Card -->
+        <div class="location-card" style="border: 1px solid var(--gold-light); border-radius: 4px; overflow: hidden; background: var(--white); display: flex; flex-direction: column; min-height: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); transition: all 0.3s ease;">
+          <div class="location-map" style="flex: 1; min-height: 200px; aspect-ratio: auto; border-radius: 0;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62872.5!2d-83.65!3d9.32!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa16818929aaaab%3A0x5a1c45e7a2e0bfb9!2sP%C3%A9rez%20Zeled%C3%B3n!5e0!3m2!1sen!2scr!4v1714847600000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           </div>
-          <div class="placeholder-img-label">
-            <span class="lang-en">Santa Elena Location Map</span>
-            <span class="lang-es">Mapa de Ubicación de Santa Elena</span>
+          <div style="padding: 16px; text-align: center; border-top: 1px solid var(--warm-gray-100); background: var(--cream);">
+            <div class="placeholder-img-label" style="margin-bottom: 4px;">
+              <span class="lang-en">Santa Elena Location Map</span>
+              <span class="lang-es">Mapa de Ubicación de Santa Elena</span>
+            </div>
+            <a href="https://maps.app.goo.gl/KUyhS65oAebzz6Un9" target="_blank" class="location-link" style="margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--gold); text-decoration: none; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+              <span class="lang-en">Open in Google Maps</span>
+              <span class="lang-es">Abrir en Google Maps</span>
+            </a>
           </div>
-          <p class="placeholder-img-desc">
-            <span class="lang-en">Interactive maps showing exactly where Las Lomas sits within the green corridor.</span>
-            <span class="lang-es">Mapas interactivos que muestran exactamente dónde se ubica Las Lomas dentro del corredor verde.</span>
-          </p>
         </div>
 
         <!-- Placeholder 2: San Isidro City -->
