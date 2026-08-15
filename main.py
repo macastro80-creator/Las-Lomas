@@ -295,6 +295,15 @@ def read_contact():
 def read_styles():
     return FileResponse("website/styles.css")
 
+@app.get("/robots.txt")
+def read_robots():
+    return FileResponse("website/robots.txt")
+
+@app.get("/sitemap.xml")
+def read_sitemap():
+    return FileResponse("website/sitemap.xml", media_type="application/xml")
+
+
 # ----------------- BACK-OFFICE RENDER ROUTES -----------------
 
 @app.get("/admin")

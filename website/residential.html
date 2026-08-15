@@ -16,7 +16,91 @@
   <title>Las Lomas Residential · Nature &amp; Community</title>
   <meta name="description" content="22 exclusive 1-hectare residential lots with independent registered titles, mountain views, and services. Bordering the RISE community and school.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="canonical" href="https://laslomas.cr/residential">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://laslomas.cr/residential">
+  <meta property="og:title" content="Las Lomas Residential · Sanctuary &amp; Community">
+  <meta property="og:description" content="22 exclusive 1-hectare residential lots with independent registered titles, mountain views, and services. Bordering the RISE community and school.">
+  <meta property="og:image" content="https://laslomas.cr/images/land-highland-views.jpg">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="es_CR">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://laslomas.cr/residential">
+  <meta name="twitter:title" content="Las Lomas Residential · Sanctuary &amp; Community">
+  <meta name="twitter:description" content="22 exclusive 1-hectare residential lots with independent registered titles, mountain views, and services. Bordering the RISE community and school.">
+  <meta name="twitter:image" content="https://laslomas.cr/images/land-highland-views.jpg">
+  
+  <!-- AI / Search Engine JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "RealEstateProject",
+        "@id": "https://laslomas.cr/residential/#project",
+        "name": "Las Lomas Residential",
+        "description": "Phase 1 of Las Lomas featuring 22 exclusive 1-hectare residential lots with registered titles and services. Bordering the RISE community and school.",
+        "url": "https://laslomas.cr/residential",
+        "image": "https://laslomas.cr/images/land-highland-views.jpg",
+        "location": {
+          "@type": "Place",
+          "name": "Santa Elena, Pérez Zeledón, Costa Rica",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Santa Elena de El General",
+            "addressRegion": "Pérez Zeledón",
+            "addressCountry": "CR"
+          }
+        },
+        "priceRange": "$190,000 - $250,000"
+      },
+      {
+        "@type": "ItemList",
+        "name": "Las Lomas Residential Lots Listing",
+        "description": "Available 1-hectare land lots for sale in Phase 1 of Las Lomas",
+        "numberOfItems": 22,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@type": "Product",
+              "name": "Residential Lot 1",
+              "description": "1.7 hectares lot with mountain views at Las Lomas Residential",
+              "offers": {
+                "@type": "Offer",
+                "price": "235000",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock"
+              }
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "item": {
+              "@type": "Product",
+              "name": "Residential Lot 4",
+              "description": "2.0 hectares lot with direct river access at Las Lomas Residential",
+              "offers": {
+                "@type": "Offer",
+                "price": "250000",
+                "priceCurrency": "USD",
+                "availability": "https://schema.org/InStock"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
+
 <body>
 
   <!-- ═══ Navigation ═══ -->
@@ -54,6 +138,13 @@
         <span class="lang-en">Request Info</span>
         <span class="lang-es">Solicitar Info</span>
       </a>
+      
+      <!-- Hamburger Menu Toggle Button -->
+      <button class="nav-menu-toggle" id="menu-toggle" aria-label="Toggle Menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
     </div>
   </nav>
 
@@ -388,6 +479,25 @@
     const nav = document.getElementById('main-nav');
     window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
 
+    // Responsive Mobile Menu mechanism
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    if (menuToggle && navLinks) {
+      menuToggle.addEventListener('click', () => {
+        const isOpen = menuToggle.classList.toggle('open');
+        navLinks.classList.toggle('active');
+        document.body.classList.toggle('no-scroll', isOpen);
+      });
+      // Close menu when clicking a link
+      navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          menuToggle.classList.remove('open');
+          navLinks.classList.remove('active');
+          document.body.classList.remove('no-scroll');
+        });
+      });
+    }
+
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((e, i) => {
@@ -416,6 +526,16 @@
       document.title = pageTitles[lang];
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', pageDescriptions[lang]);
+
+      // Update OpenGraph & Twitter tags dynamically
+      const metaOgTitle = document.querySelector('meta[property="og:title"]');
+      const metaOgDesc = document.querySelector('meta[property="og:description"]');
+      const metaTwTitle = document.querySelector('meta[name="twitter:title"]');
+      const metaTwDesc = document.querySelector('meta[name="twitter:description"]');
+      if (metaOgTitle) metaOgTitle.setAttribute('content', pageTitles[lang]);
+      if (metaOgDesc) metaOgDesc.setAttribute('content', pageDescriptions[lang]);
+      if (metaTwTitle) metaTwTitle.setAttribute('content', pageTitles[lang]);
+      if (metaTwDesc) metaTwDesc.setAttribute('content', pageDescriptions[lang]);
 
       // Update placeholders
       document.querySelectorAll('[data-placeholder-en]').forEach(el => {
