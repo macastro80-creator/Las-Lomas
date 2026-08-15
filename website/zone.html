@@ -123,8 +123,10 @@
       
       <div class="eco-cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
         <!-- Card 1: Santa Elena Map -->
-        <div class="eco-card reveal">
-          <img src="images/land-aerial-valley.jpg" class="eco-card-img" alt="Santa Elena Location Map" style="aspect-ratio: 4/3; object-fit: cover;">
+        <div class="eco-card reveal" style="display: flex; flex-direction: column;">
+          <div class="location-map" style="flex: 1; min-height: 200px; aspect-ratio: 4/3; border-radius: 0; overflow: hidden; position: relative;">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62872.5!2d-83.65!3d9.32!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa16818929aaaab%3A0x5a1c45e7a2e0bfb9!2sP%C3%A9rez%20Zeled%C3%B3n!5e0!3m2!1sen!2scr!4v1714847600000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
           <div class="eco-card-body">
             <div class="eco-card-label">
               <span class="lang-en">Chirripó · Geography</span>
@@ -138,6 +140,11 @@
               <span class="lang-en">Nestled in the green biological corridor of Pérez Zeledón at 1,000m above sea level.</span>
               <span class="lang-es">Ubicado en el corredor biológico verde de Pérez Zeledón a 1,000m sobre el nivel del mar.</span>
             </p>
+            <a href="https://maps.app.goo.gl/KUyhS65oAebzz6Un9" target="_blank" class="location-link" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--gold); text-decoration: none; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+              <span class="lang-en">Open in Google Maps</span>
+              <span class="lang-es">Abrir en Google Maps</span>
+            </a>
           </div>
         </div>
 
