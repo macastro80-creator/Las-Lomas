@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     (function() {
-      const savedLang = localStorage.getItem('preferred-lang') || 'en';
+      let savedLang = localStorage.getItem('preferred-lang');
+      if (!savedLang) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        savedLang = (browserLang && browserLang.startsWith('es')) ? 'es' : 'en';
+      }
       document.documentElement.setAttribute('lang', savedLang);
     })();
   </script>
@@ -110,52 +114,62 @@
         <span class="lang-es">Conceptos de Diseño y Distribución</span>
       </h2>
       
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
-        <!-- Placeholder 1: Masterplan -->
-        <a href="images/Las%20Lomas%20Residential%20-Masterplan.png" target="_blank" class="reveal" style="text-decoration: none; border-radius: 4px; overflow: hidden; border: 1px solid var(--gold-light); background: var(--white); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; min-height: 280px; transition: transform 0.3s ease, border-color 0.3s ease;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--gold-light)';">
-          <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 12px; background: #fff;">
-            <img src="images/Las%20Lomas%20Residential%20-Masterplan.png" alt="Las Lomas Residential Masterplan" style="max-width: 100%; max-height: 180px; object-fit: contain;">
-          </div>
-          <div style="padding: 16px; background: var(--cream); border-top: 1px solid var(--warm-gray-100); text-align: center;">
-            <div class="placeholder-img-label" style="margin-bottom: 4px;">
+      <div class="eco-cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
+        <!-- Card 1: Masterplan -->
+        <a href="images/Las%20Lomas%20Residential%20-Masterplan.png" target="_blank" class="eco-card reveal" style="text-decoration: none; display: block;">
+          <img src="images/masterplan.png" class="eco-card-img" alt="Phase 1 Lot Layout Map" style="aspect-ratio: 4/3; object-fit: cover;">
+          <div class="eco-card-body">
+            <div class="eco-card-label">
+              <span class="lang-en">Phase 1 · Segregations (Click to enlarge)</span>
+              <span class="lang-es">Fase 1 · Segregaciones (Clic para ampliar)</span>
+            </div>
+            <h3 class="eco-card-title">
               <span class="lang-en">Lot Layout Map</span>
               <span class="lang-es">Mapa de Distribución de Lotes</span>
-            </div>
-            <p class="placeholder-img-desc" style="max-width: 100%; font-size: 0.75rem; margin: 0;">
-              <span class="lang-en">Segregation plans and boundaries for the 1-hectare residential lots (Click to enlarge).</span>
-              <span class="lang-es">Planos de segregación y límites para los lotes residenciales de 1 hectárea (Clic para ampliar).</span>
+            </h3>
+            <p class="eco-card-desc">
+              <span class="lang-en">Approved segregation plans and official boundaries for the 22 residential lots of 1 hectare each.</span>
+              <span class="lang-es">Planos de segregación aprobados y linderos oficiales para los 22 lotes residenciales de 1 hectárea cada uno.</span>
             </p>
           </div>
         </a>
 
-        <!-- Placeholder 2: Ridges View -->
-        <div class="placeholder-img">
-          <div class="placeholder-img-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 21h20M2 17l5-5 4 4 6-6 5 5"/></svg>
+        <!-- Card 2: Ridges View -->
+        <div class="eco-card reveal">
+          <img src="images/land-highland-views.jpg" class="eco-card-img" alt="Sanctuary Ridges View" style="aspect-ratio: 4/3; object-fit: cover;">
+          <div class="eco-card-body">
+            <div class="eco-card-label">
+              <span class="lang-en">Scenic · Ridges</span>
+              <span class="lang-es">Escénico · Crestas</span>
+            </div>
+            <h3 class="eco-card-title">
+              <span class="lang-en">Sanctuary Ridges View</span>
+              <span class="lang-es">Vistas de las Crestas Residenciales</span>
+            </h3>
+            <p class="eco-card-desc">
+              <span class="lang-en">Panoramic views of the green valley and surrounding mountains at 1,000 meters elevation.</span>
+              <span class="lang-es">Vistas panorámicas del valle verde y las montañas circundantes a 1,000 metros de altitud.</span>
+            </p>
           </div>
-          <div class="placeholder-img-label">
-            <span class="lang-en">Sanctuary Ridges View</span>
-            <span class="lang-es">Vistas de las Crestas Residenciales</span>
-          </div>
-          <p class="placeholder-img-desc">
-            <span class="lang-en">Panoramic photographs showcasing the green valley views from the residential ridge.</span>
-            <span class="lang-es">Fotografías panorámicas mostrando las vistas del valle verde desde la cresta residencial.</span>
-          </p>
         </div>
 
-        <!-- Placeholder 3: Eco-Home Concept -->
-        <div class="placeholder-img">
-          <div class="placeholder-img-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <!-- Card 3: Eco-Home Concept -->
+        <div class="eco-card reveal">
+          <img src="images/rise-lifestyle.png" class="eco-card-img" alt="Eco-Home Concept" style="aspect-ratio: 4/3; object-fit: cover;">
+          <div class="eco-card-body">
+            <div class="eco-card-label">
+              <span class="lang-en">Architecture · Integration</span>
+              <span class="lang-es">Arquitectura · Integración</span>
+            </div>
+            <h3 class="eco-card-title">
+              <span class="lang-en">Eco-Home Concept</span>
+              <span class="lang-es">Concepto de Hogar Ecológico</span>
+            </h3>
+            <p class="eco-card-desc">
+              <span class="lang-en">Architectural conceptual designs showing low-impact eco-luxury homes integrated into the native forest.</span>
+              <span class="lang-es">Diseños conceptuales de arquitectura para casas de eco-lujo de bajo impacto integradas al bosque nativo.</span>
+            </p>
           </div>
-          <div class="placeholder-img-label">
-            <span class="lang-en">Eco-Home Concept</span>
-            <span class="lang-es">Concepto de Hogar Ecológico</span>
-          </div>
-          <p class="placeholder-img-desc">
-            <span class="lang-en">Architectural conceptual designs showing low-impact eco-luxury homes integrated into the forest.</span>
-            <span class="lang-es">Diseños conceptuales de arquitectura para casas de eco-lujo de bajo impacto integradas al bosque.</span>
-          </p>
         </div>
       </div>
     </div>
