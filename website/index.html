@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     (function() {
-      const savedLang = localStorage.getItem('preferred-lang') || 'en';
+      let savedLang = localStorage.getItem('preferred-lang');
+      if (!savedLang) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        savedLang = (browserLang && browserLang.startsWith('es')) ? 'es' : 'en';
+      }
       document.documentElement.setAttribute('lang', savedLang);
     })();
   </script>
@@ -253,6 +257,123 @@
       <button class="carousel-btn carousel-prev" aria-label="Previous">‹</button>
       <button class="carousel-btn carousel-next" aria-label="Next">›</button>
       <div class="carousel-dots" id="carousel-dots"></div>
+    </div>
+  </section>
+
+  <!-- ═══ Location ═══ -->
+  <section class="section location-section" id="location">
+    <div class="section-inner">
+      <div class="section-tag reveal">
+        <span class="lang-en">Location</span>
+        <span class="lang-es">Ubicación</span>
+      </div>
+      <h2 class="section-title reveal" style="text-align:center;">
+        <span class="lang-en">Immersed in nature. Connected to everything.</span>
+        <span class="lang-es">Inmerso en la naturaleza. Conectado con todo.</span>
+      </h2>
+
+      <div class="location-grid">
+        <div class="location-text">
+          <p class="section-subtitle reveal" style="max-width:100%;">
+            <span class="lang-en">Las Lomas sits in the Chirripó area of Pérez Zeledón, one of Costa Rica's most biodiverse regions. The property lies within the <strong>COBAS</strong> (Corredor Biológico Alexander Skutch), a protected bird corridor of international significance, and directly adjacent to <strong>Parque Nacional La Amistad</strong>, a UNESCO World Heritage Site.</span>
+            <span class="lang-es">Las Lomas se encuentra en la zona de Chirripó en Pérez Zeledón, una de las regiones más biodiversas de Costa Rica. La propiedad está dentro del <strong>COBAS</strong> (Corredor Biológico Alexander Skutch), un corredor de aves protegido de importancia internacional, y colinda directamente con el <strong>Parque Nacional La Amistad</strong>, un Sitio del Patrimonio Mundial de la UNESCO.</span>
+          </p>
+          <p class="section-subtitle reveal" style="max-width:100%; margin-top:16px;">
+            <span class="lang-en">Despite this pristine natural setting, the city of <strong>San Isidro de El General</strong> is just 15 minutes away; full-service hospitals, international schools, supermarkets, banks, and commercial centers. The best of both worlds.</span>
+            <span class="lang-es">A pesar de este entorno natural virgen, la ciudad de <strong>San Isidro de El General</strong> está a solo 15 minutos; con hospitales completos, escuelas internacionales, supermercados, bancos y centros comerciales. Lo mejor de ambos mundos.</span>
+          </p>
+          <a href="https://maps.app.goo.gl/KUyhS65oAebzz6Un9" target="_blank" class="location-link reveal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span class="lang-en">Open in Google Maps</span>
+            <span class="lang-es">Abrir en Google Maps</span>
+          </a>
+        </div>
+        <div class="location-map reveal">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62872.5!2d-83.65!3d9.32!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8fa16818929aaaab%3A0x5a1c45e7a2e0bfb9!2sP%C3%A9rez%20Zeled%C3%B3n!5e0!3m2!1sen!2scr!4v1714847600000" width="100%" height="100%" style="border:0; border-radius:6px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FAQs ═══ -->
+  <section class="section faq-section" id="faq">
+    <div class="section-inner">
+      <div class="section-tag reveal">
+        <span class="lang-en">Frequently Asked Questions</span>
+        <span class="lang-es">Preguntas Frecuentes</span>
+      </div>
+      <h2 class="section-title reveal" style="text-align:center;">
+        <span class="lang-en">Questions about Las Lomas</span>
+        <span class="lang-es">Dudas sobre Las Lomas</span>
+      </h2>
+
+      <div class="faq-list">
+        <details class="faq-item reveal">
+          <summary class="faq-question">
+            <span class="lang-en">What is Las Lomas and where is it located?</span>
+            <span class="lang-es">¿Qué es Las Lomas y dónde está ubicado?</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">Las Lomas is an exclusive eco-residential and agricultural community located in Santa Elena, Pérez Zeledón, Costa Rica. Sitting at 1,000 meters above sea level in the southern highlands, it offers a perfect temperate climate and is located just 15 minutes from the city of San Isidro de El General.</span>
+            <span class="lang-es">Las Lomas es una comunidad eco-residencial y agrícola exclusiva ubicada en Santa Elena, Pérez Zeledón, Costa Rica. Situada a 1,000 metros sobre el nivel del mar en las tierras altas del sur, ofrece un clima templado ideal y se encuentra a solo 15 minutos de la ciudad de San Isidro de El General.</span>
+          </div>
+        </details>
+        
+        <details class="faq-item reveal">
+          <summary class="faq-question">
+            <span class="lang-en">What type of lots are available?</span>
+            <span class="lang-es">¿Qué tipo de lotes están disponibles?</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">We offer two unique ways of living: Phase 1 features 22 residential lots of 1 hectare (2.5 acres) each, bordering the RISE community. Phase 2 features 17 Agrihood fincas of 5 to 20 hectares (12 to 50 acres) designed for self-sufficiency, with fertile soil and direct river access.</span>
+            <span class="lang-es">Ofrecemos dos maneras únicas de vivir: la Fase 1 cuenta con 22 lotes residenciales de 1 hectárea (2.5 acres) cada uno, colindantes con la comunidad RISE. La Fase 2 cuenta con 17 fincas Agrihood de 5 a 20 hectáreas (12 a 50 acres) diseñadas para la autosuficiencia, con suelo fértil y acceso directo al río.</span>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary class="faq-question">
+            <span class="lang-en">What is the connection with RISE Costa Rica?</span>
+            <span class="lang-es">¿Cuál es la relación con RISE Costa Rica?</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">Las Lomas borders the world-class RISE community. This proximity gives our residents convenient access to RISE's established infrastructure, including a Waldorf-inspired school, private landing strip, Town Square commercial area, and Kinkára wellness retreat.</span>
+            <span class="lang-es">Las Lomas colinda con la comunidad de clase mundial RISE. Esta proximidad otorga a nuestros residentes un acceso muy conveniente a la infraestructura establecida de RISE, incluyendo la escuela de inspiración Waldorf, la pista de aterrizaje privada, el centro comercial Town Square y el centro de bienestar Kinkára.</span>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary class="faq-question">
+            <span class="lang-en">Do the lots have access to utilities and water?</span>
+            <span class="lang-es">¿Tienen los lotes acceso a servicios públicos y agua?</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">Yes. All lots have access to high-speed fiber-optic internet, electricity, and pristine water from approved concessions/wells. The property also features extensive public road frontage, ensuring easy and cost-effective access.</span>
+            <span class="lang-es">Sí. Todos los lotes cuentan con acceso a internet de fibra óptica de alta velocidad, electricidad y agua de pozos/concesiones aprobadas. La propiedad también cuenta con un amplio frente a calle pública, garantizando un acceso sencillo y de bajo costo.</span>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary class="faq-question">
+            <span class="lang-en">What does the environmental viability (SETENA D1) mean for me?</span>
+            <span class="lang-es">¿Qué significa la viabilidad ambiental (SETENA D1) para mí?</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">SETENA D1 is Costa Rica's highest and most rigorous environmental viability classification, which has already been approved for the entire Las Lomas property. This means the major environmental hurdles are solved, drastically simplifying and accelerating the process of obtaining municipal permits to build your custom home.</span>
+            <span class="lang-es">SETENA D1 es la clasificación de viabilidad ambiental más alta y rigurosa de Costa Rica, la cual ya está aprobada para toda la propiedad de Las Lomas. Esto significa que los principales trámites ambientales están resueltos, simplificando y acelerando drásticamente el proceso de obtención de permisos municipales para construir su casa personalizada.</span>
+          </div>
+        </details>
+
+        <details class="faq-item reveal">
+          <summary class="faq-question">
+            <span class="lang-en">Who is representing the project and how can I request information?</span>
+            <span class="lang-es">¿Quién representa el proyecto y cómo puedo solicitar información?</span>
+          </summary>
+          <div class="faq-answer">
+            <span class="lang-en">The project is represented by RE/MAX Altitud. You can contact Alejandra Castro at acastro@remax-altitud.cr or via WhatsApp at +506 6217 0977, or use our contact form to request availability and pricing.</span>
+            <span class="lang-es">El proyecto es representado por RE/MAX Altitud. Puede ponerse en contacto con Alejandra Castro al correo acastro@remax-altitud.cr, por WhatsApp al +506 6217 0977, o utilizar nuestro formulario de contacto para solicitar disponibilidad y precios.</span>
+          </div>
+        </details>
+      </div>
     </div>
   </section>
 

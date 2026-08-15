@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
     (function() {
-      const savedLang = localStorage.getItem('preferred-lang') || 'en';
+      let savedLang = localStorage.getItem('preferred-lang');
+      if (!savedLang) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        savedLang = (browserLang && browserLang.startsWith('es')) ? 'es' : 'en';
+      }
       document.documentElement.setAttribute('lang', savedLang);
     })();
   </script>
