@@ -471,10 +471,19 @@
       const leftPct = pin.style.left;
       tooltipCard.style.top = topPct;
       tooltipCard.style.left = leftPct;
+
+      // Check if pin is in the upper part of the map to prevent overflow
+      const topVal = parseInt(topPct, 10) || 0;
+      if (topVal < 35) {
+        tooltipCard.classList.add('below');
+      } else {
+        tooltipCard.classList.remove('below');
+      }
     }
 
     function hideTooltip() {
       tooltipCard.classList.remove('active');
+      tooltipCard.classList.remove('below');
       pins.forEach(p => p.classList.remove('active'));
       activeLot = null;
     }
