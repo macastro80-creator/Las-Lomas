@@ -731,6 +731,25 @@ body {
   transform: translate(-50%, 20px) scale(1);
 }
 
+.lot-card-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--warm-gray-400);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.3s ease;
+  z-index: 21;
+}
+
+.lot-card-close:hover {
+  color: var(--gold-light);
+}
+
 .lot-card-header {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.4rem;
