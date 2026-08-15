@@ -159,6 +159,13 @@
               </span>
               <span class="info-value" id="lot-price-val">$235,000 USD</span>
             </div>
+            <div class="lot-info-item" id="lot-river-access-item" style="display: none; align-items: center; gap: 8px;">
+              <span class="info-label" style="color: var(--emerald-light); font-size: 1.1rem; display: inline-flex; align-items: center;">🌊</span>
+              <span class="info-value" style="color: var(--emerald-light); font-weight: 600;">
+                <span class="lang-en">River Access</span>
+                <span class="lang-es">Acceso al Río</span>
+              </span>
+            </div>
             <!-- Quick Media Simulator Links -->
             <div class="lot-media-links">
               <button onclick="openMediaSimulator('photo')" title="Photos" class="media-btn">📷</button>
@@ -427,30 +434,31 @@
       1: { sizeEs: "1.7 Hectáreas (17,000 m²)", sizeEn: "1.7 Hectares (17,000 m²)", price: "$235,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
       2: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
       3: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
-      4: { sizeEs: "2.0 Hectáreas (20,000 m²)", sizeEn: "2.0 Hectares (20,000 m²)", price: "$250,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg" },
+      4: { sizeEs: "2.0 Hectáreas (20,000 m²)", sizeEn: "2.0 Hectares (20,000 m²)", price: "$250,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg", riverAccess: true },
       5: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
       6: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
       7: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
-      8: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg" },
-      9: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      8: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg", riverAccess: true },
+      9: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg", riverAccess: true },
       10: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
       11: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
       12: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
-      13: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      13: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg", riverAccess: true },
       14: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
       15: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
       16: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
-      17: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      17: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg", riverAccess: true },
       18: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
       19: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
       20: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
-      21: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" }
+      21: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg", riverAccess: true }
     };
 
     let activeLot = null;
     const tooltipCard = document.getElementById('lot-tooltip-card');
     const sizeVal = document.getElementById('lot-size-val');
     const priceVal = document.getElementById('lot-price-val');
+    const riverAccessItem = document.getElementById('lot-river-access-item');
     const pins = document.querySelectorAll('.map-pin');
 
     function updateTooltip(lotNum) {
@@ -463,6 +471,13 @@
       document.querySelector('.lot-card-header').textContent = lang === 'es' ? `LOTE ${String(lotNum).padStart(2, '0')}` : `LOT ${String(lotNum).padStart(2, '0')}`;
       sizeVal.textContent = sizeText;
       priceVal.textContent = `${data.price} USD`;
+
+      if (data.riverAccess) {
+        riverAccessItem.style.display = 'flex';
+      } else {
+        riverAccessItem.style.display = 'none';
+      }
+
       activeLot = lotNum;
     }
 
