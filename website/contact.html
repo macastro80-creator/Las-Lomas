@@ -231,6 +231,31 @@
     document.addEventListener('DOMContentLoaded', () => {
       const currentLang = document.documentElement.getAttribute('lang') || 'en';
       setLanguage(currentLang);
+
+      // Parse URL parameters for pre-filling specific lot inquiry
+      const params = new URLSearchParams(window.location.search);
+      const lot = params.get('lot');
+      if (lot) {
+        const select = document.getElementById('contact-project');
+        if (select) {
+          // Set to the first option: Eco-Residencial
+          select.value = "Las Lomas Eco-Residencial (Lote 1 ha - $190,000)";
+        }
+        const messageArea = document.getElementById('contact-message');
+        if (messageArea) {
+          // Determine size and price based on lot
+          const sizes = { 1: "1.7", 4: "2.0" };
+          const size = sizes[lot] || "1.0";
+          const prices = { 1: "$235,000", 4: "$250,000", 8: "$210,000", 9: "$210,000", 11: "$210,000", 12: "$210,000", 13: "$210,000" };
+          const price = prices[lot] || "$190,000";
+          
+          if (currentLang === 'es') {
+            messageArea.value = `Hola, estoy interesado en el Lote ${lot} de Las Lomas Eco-Residencial (${size} Hectárea(s) - ${price} USD). Por favor envíenme más información y planos de segregación.`;
+          } else {
+            messageArea.value = `Hello, I am interested in Lot ${lot} of Las Lomas Eco-Residential (${size} Hectare(s) - ${price} USD). Please send me more details and segregation plans.`;
+          }
+        }
+      }
     });
 
     // Handle AJAX contact submission to local CRM API

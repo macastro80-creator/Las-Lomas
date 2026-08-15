@@ -102,8 +102,106 @@
     </div>
   </section>
 
+  <!-- ═══ Interactive Masterplan Section ═══ -->
+  <section class="section masterplan-section" style="background:var(--cream); padding-top: 60px; padding-bottom: 20px;">
+    <div class="section-inner" style="max-width: 1000px; text-align: center;">
+      <div class="section-tag reveal">
+        <span class="lang-en">Explore the Sanctuary</span>
+        <span class="lang-es">Explora el Santuario</span>
+      </div>
+      <h2 class="section-title reveal" style="margin-bottom: 12px;">
+        <span class="lang-en">Interactive Lot Map</span>
+        <span class="lang-es">Mapa de Lotes Interactivo</span>
+      </h2>
+      <p class="section-subtitle reveal" style="margin-bottom: 40px; font-size: 0.95rem; color: var(--text-muted); max-width: 100%;">
+        <span class="lang-en">Hover over the hotspots to view dimensions, prices, and media. Tap on mobile.</span>
+        <span class="lang-es">Pasa el cursor sobre los puntos para ver dimensiones, precios y multimedia. Toca en móviles.</span>
+      </p>
+
+      <!-- The Interactive Map Container -->
+      <div class="interactive-map-container reveal" id="interactive-map">
+        <img src="images/Las%20Lomas%20Residential%20-Masterplan.png" alt="Las Lomas Residential Masterplan" style="width: 100%; height: auto; display: block;">
+        
+        <!-- Hotspots for Lot 1 to 21 -->
+        <div class="map-pin" data-lot="1" style="top: 18.3%; left: 60.7%;"></div>
+        <div class="map-pin" data-lot="2" style="top: 25.5%; left: 69.7%;"></div>
+        <div class="map-pin" data-lot="3" style="top: 23.8%; left: 78.3%;"></div>
+        <div class="map-pin" data-lot="4" style="top: 24%; left: 86.8%;"></div>
+        <div class="map-pin" data-lot="5" style="top: 24.8%; left: 43.4%;"></div>
+        <div class="map-pin" data-lot="6" style="top: 28.9%; left: 53.5%;"></div>
+        <div class="map-pin" data-lot="7" style="top: 35.9%; left: 62.1%;"></div>
+        <div class="map-pin" data-lot="8" style="top: 42.9%; left: 64.8%;"></div>
+        <div class="map-pin" data-lot="9" style="top: 50.4%; left: 66.4%;"></div>
+        <div class="map-pin" data-lot="10" style="top: 30%; left: 41.4%;"></div>
+        <div class="map-pin" data-lot="11" style="top: 42.9%; left: 51.8%;"></div>
+        <div class="map-pin" data-lot="12" style="top: 54.2%; left: 55.3%;"></div>
+        <div class="map-pin" data-lot="13" style="top: 55.8%; left: 61.2%;"></div>
+        <div class="map-pin" data-lot="14" style="top: 45.1%; left: 43%;"></div>
+        <div class="map-pin" data-lot="15" style="top: 48.8%; left: 32.7%;"></div>
+        <div class="map-pin" data-lot="16" style="top: 60.5%; left: 36%;"></div>
+        <div class="map-pin" data-lot="17" style="top: 68.7%; left: 41.7%;"></div>
+        <div class="map-pin" data-lot="18" style="top: 46.1%; left: 24.1%;"></div>
+        <div class="map-pin" data-lot="19" style="top: 51.6%; left: 26.4%;"></div>
+        <div class="map-pin" data-lot="20" style="top: 65.6%; left: 31.7%;"></div>
+        <div class="map-pin" data-lot="21" style="top: 77.9%; left: 41.2%;"></div>
+
+        <!-- Tooltip Card (Starts Hidden) -->
+        <div class="lot-tooltip-card" id="lot-tooltip-card">
+          <button class="lot-card-close" onclick="hideTooltip(); event.stopPropagation();" aria-label="Close">&times;</button>
+          <div class="lot-card-header">Lote 01</div>
+          <div class="lot-card-body">
+            <div class="lot-info-item">
+              <span class="info-label">
+                <span class="lang-en">Size:</span>
+                <span class="lang-es">Tamaño:</span>
+              </span>
+              <span class="info-value" id="lot-size-val">1.7 Hectáreas</span>
+            </div>
+            <div class="lot-info-item">
+              <span class="info-label">
+                <span class="lang-en">Price:</span>
+                <span class="lang-es">Precio:</span>
+              </span>
+              <span class="info-value" id="lot-price-val">$235,000 USD</span>
+            </div>
+            <div class="lot-info-item" id="lot-river-access-item" style="display: none; align-items: center; gap: 8px;">
+              <span class="info-label" style="color: var(--emerald-light); font-size: 1.1rem; display: inline-flex; align-items: center;">🌊</span>
+              <span class="info-value" style="color: var(--emerald-light); font-weight: 600;">
+                <span class="lang-en">River Access</span>
+                <span class="lang-es">Acceso al Río</span>
+              </span>
+            </div>
+            <!-- Quick Media Simulator Links -->
+            <div class="lot-media-links">
+              <button onclick="openMediaSimulator('photo')" title="Photos" class="media-btn">📷</button>
+              <button onclick="openMediaSimulator('video')" title="Video" class="media-btn">🎥</button>
+              <button onclick="openMediaSimulator('360')" title="360 View" class="media-btn">🔄</button>
+            </div>
+          </div>
+          <div class="lot-card-footer">
+            <button onclick="enquireLot()" class="lot-enquire-btn">
+              <span class="lang-en">Enquire Lot</span>
+              <span class="lang-es">Consultar Lote</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Media Simulation Modal (Starts Hidden) -->
+  <div class="media-modal-overlay" id="media-modal" onclick="closeMediaSimulator(event)">
+    <div class="media-modal-content" onclick="event.stopPropagation()">
+      <button class="media-modal-close" onclick="closeMediaSimulator(event)">×</button>
+      <h3 class="media-modal-title" id="media-modal-title">Tour Lote</h3>
+      <div class="media-modal-body" id="media-modal-body">
+        <!-- Dynamic Content (Img or Video) goes here -->
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Symmetrical Image Placeholders ═══ -->
-  <section class="section offerings-section" style="background:var(--cream); padding-top: 60px;">
+  <section class="section offerings-section" style="background:var(--cream); padding-top: 20px;">
     <div class="section-inner">
       <div class="section-tag reveal" style="text-align:center;">
         <span class="lang-en">Visualizing the Sanctuary</span>
@@ -114,62 +212,35 @@
         <span class="lang-es">Conceptos de Diseño y Distribución</span>
       </h2>
       
-      <div class="eco-cards" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
-        <!-- Card 1: Masterplan -->
-        <a href="images/Las%20Lomas%20Residential%20-Masterplan.png" target="_blank" class="eco-card reveal" style="text-decoration: none; display: block;">
-          <img src="images/masterplan.png" class="eco-card-img" alt="Phase 1 Lot Layout Map" style="aspect-ratio: 4/3; object-fit: cover;">
-          <div class="eco-card-body">
-            <div class="eco-card-label">
-              <span class="lang-en">Phase 1 · Segregations (Click to enlarge)</span>
-              <span class="lang-es">Fase 1 · Segregaciones (Clic para ampliar)</span>
-            </div>
-            <h3 class="eco-card-title">
-              <span class="lang-en">Lot Layout Map</span>
-              <span class="lang-es">Mapa de Distribución de Lotes</span>
-            </h3>
-            <p class="eco-card-desc">
-              <span class="lang-en">Approved segregation plans and official boundaries for the 22 residential lots of 1 hectare each.</span>
-              <span class="lang-es">Planos de segregación aprobados y linderos oficiales para los 22 lotes residenciales de 1 hectárea cada uno.</span>
-            </p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; margin-top: 20px;">
+        <!-- Placeholder 1: Ridges View -->
+        <div class="placeholder-img">
+          <div class="placeholder-img-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 21h20M2 17l5-5 4 4 6-6 5 5"/></svg>
           </div>
-        </a>
-
-        <!-- Card 2: Ridges View -->
-        <div class="eco-card reveal">
-          <img src="images/land-highland-views.jpg" class="eco-card-img" alt="Sanctuary Ridges View" style="aspect-ratio: 4/3; object-fit: cover;">
-          <div class="eco-card-body">
-            <div class="eco-card-label">
-              <span class="lang-en">Scenic · Ridges</span>
-              <span class="lang-es">Escénico · Crestas</span>
-            </div>
-            <h3 class="eco-card-title">
-              <span class="lang-en">Sanctuary Ridges View</span>
-              <span class="lang-es">Vistas de las Crestas Residenciales</span>
-            </h3>
-            <p class="eco-card-desc">
-              <span class="lang-en">Panoramic views of the green valley and surrounding mountains at 1,000 meters elevation.</span>
-              <span class="lang-es">Vistas panorámicas del valle verde y las montañas circundantes a 1,000 metros de altitud.</span>
-            </p>
+          <div class="placeholder-img-label">
+            <span class="lang-en">Sanctuary Ridges View</span>
+            <span class="lang-es">Vistas de las Crestas Residenciales</span>
           </div>
+          <p class="placeholder-img-desc">
+            <span class="lang-en">Panoramic photographs showcasing the green valley views from the residential ridge.</span>
+            <span class="lang-es">Fotografías panorámicas mostrando las vistas del valle verde desde la cresta residencial.</span>
+          </p>
         </div>
 
-        <!-- Card 3: Eco-Home Concept -->
-        <div class="eco-card reveal">
-          <img src="images/rise-lifestyle.png" class="eco-card-img" alt="Eco-Home Concept" style="aspect-ratio: 4/3; object-fit: cover;">
-          <div class="eco-card-body">
-            <div class="eco-card-label">
-              <span class="lang-en">Architecture · Integration</span>
-              <span class="lang-es">Arquitectura · Integración</span>
-            </div>
-            <h3 class="eco-card-title">
-              <span class="lang-en">Eco-Home Concept</span>
-              <span class="lang-es">Concepto de Hogar Ecológico</span>
-            </h3>
-            <p class="eco-card-desc">
-              <span class="lang-en">Architectural conceptual designs showing low-impact eco-luxury homes integrated into the native forest.</span>
-              <span class="lang-es">Diseños conceptuales de arquitectura para casas de eco-lujo de bajo impacto integradas al bosque nativo.</span>
-            </p>
+        <!-- Placeholder 2: Eco-Home Concept -->
+        <div class="placeholder-img">
+          <div class="placeholder-img-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
           </div>
+          <div class="placeholder-img-label">
+            <span class="lang-en">Eco-Home Concept</span>
+            <span class="lang-es">Concepto de Hogar Ecológico</span>
+          </div>
+          <p class="placeholder-img-desc">
+            <span class="lang-en">Architectural conceptual designs showing low-impact eco-luxury homes integrated into the forest.</span>
+            <span class="lang-es">Diseños conceptuales de arquitectura para casas de eco-lujo de bajo impacto integradas al bosque.</span>
+          </p>
         </div>
       </div>
     </div>
@@ -362,6 +433,288 @@
       const currentLang = document.documentElement.getAttribute('lang') || 'en';
       setLanguage(currentLang);
     });
+
+    // Interactive Map Logic
+    const lotMetadata = {
+      1: { sizeEs: "1.7 Hectáreas (17,000 m²)", sizeEn: "1.7 Hectares (17,000 m²)", price: "$235,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      2: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      3: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      4: { sizeEs: "2.0 Hectáreas (20,000 m²)", sizeEn: "2.0 Hectares (20,000 m²)", price: "$250,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg", riverAccess: true },
+      5: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      6: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      7: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      8: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg", riverAccess: true },
+      9: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg", riverAccess: true },
+      10: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      11: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      12: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      13: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg", riverAccess: true },
+      14: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      15: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      16: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      17: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg", riverAccess: true },
+      18: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      19: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      20: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      21: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg", riverAccess: true }
+    };
+
+    let activeLot = null;
+    const tooltipCard = document.getElementById('lot-tooltip-card');
+    const sizeVal = document.getElementById('lot-size-val');
+    const priceVal = document.getElementById('lot-price-val');
+    const riverAccessItem = document.getElementById('lot-river-access-item');
+    const pins = document.querySelectorAll('.map-pin');
+
+    function updateTooltip(lotNum) {
+      const data = lotMetadata[lotNum];
+      if (!data) return;
+
+      const lang = document.documentElement.getAttribute('lang') || 'en';
+      const sizeText = lang === 'es' ? data.sizeEs : data.sizeEn;
+
+      document.querySelector('.lot-card-header').textContent = lang === 'es' ? `LOTE ${String(lotNum).padStart(2, '0')}` : `LOT ${String(lotNum).padStart(2, '0')}`;
+      sizeVal.textContent = sizeText;
+      priceVal.textContent = `${data.price} USD`;
+
+      if (data.riverAccess) {
+        riverAccessItem.style.display = 'flex';
+      } else {
+        riverAccessItem.style.display = 'none';
+      }
+
+      activeLot = lotNum;
+    }
+
+    function positionTooltip(pin) {
+      const topPct = pin.style.top;
+      const leftPct = pin.style.left;
+      tooltipCard.style.top = topPct;
+      tooltipCard.style.left = leftPct;
+
+      // Check if pin is in the upper part of the map to prevent overflow
+      const topVal = parseInt(topPct, 10) || 0;
+      if (topVal < 35) {
+        tooltipCard.classList.add('below');
+      } else {
+        tooltipCard.classList.remove('below');
+      }
+    }
+
+    function hideTooltip() {
+      tooltipCard.classList.remove('active');
+      tooltipCard.classList.remove('below');
+      pins.forEach(p => p.classList.remove('active'));
+      activeLot = null;
+    }
+
+    // Interaction on pins
+    pins.forEach(pin => {
+      // Desktop: hover / roll over
+      pin.addEventListener('mouseenter', () => {
+        const lotNum = pin.getAttribute('data-lot');
+        pins.forEach(p => p.classList.remove('active'));
+        pin.classList.add('active');
+        updateTooltip(lotNum);
+        positionTooltip(pin);
+        tooltipCard.classList.add('active');
+      });
+
+      // Mobile/Taps: toggle tooltip
+      pin.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lotNum = pin.getAttribute('data-lot');
+        
+        if (activeLot === lotNum && tooltipCard.classList.contains('active')) {
+          hideTooltip();
+        } else {
+          pins.forEach(p => p.classList.remove('active'));
+          pin.classList.add('active');
+          updateTooltip(lotNum);
+          positionTooltip(pin);
+          tooltipCard.classList.add('active');
+        }
+      });
+    });
+
+    // Close tooltip if click outside map container
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#interactive-map') && !e.target.closest('#media-modal')) {
+        hideTooltip();
+      }
+    });
+
+    // Media simulator functions
+    const mediaModal = document.getElementById('media-modal');
+    const mediaModalTitle = document.getElementById('media-modal-title');
+    const mediaModalBody = document.getElementById('media-modal-body');
+
+    window.openMediaSimulator = function(type) {
+      if (!activeLot) return;
+      const data = lotMetadata[activeLot];
+      const lang = document.documentElement.getAttribute('lang') || 'en';
+      
+      let title = "";
+      let contentHtml = "";
+
+      if (type === 'photo') {
+        title = lang === 'es' ? `Galería de Fotos - Lote ${activeLot}` : `Photo Gallery - Lot ${activeLot}`;
+        contentHtml = `<img src="${data.img}" alt="Lot Photo Preview">`;
+      } else if (type === 'video') {
+        title = lang === 'es' ? `Vista Aérea de Dron - Lote ${activeLot}` : `Drone Aerial Tour - Lot ${activeLot}`;
+        contentHtml = `
+          <video autoplay loop muted playsinline controls style="width: 100%; height: 100%;">
+            <source src="${data.video}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        `;
+      } else if (type === '360') {
+        title = lang === 'es' ? `Simulador de Vista 360° - Lote ${activeLot}` : `360° Panorama View - Lot ${activeLot}`;
+        contentHtml = `<img src="${data.view360}" class="pan-360" alt="360 View Simulation">`;
+      }
+
+      mediaModalTitle.textContent = title;
+      mediaModalBody.innerHTML = contentHtml;
+      mediaModal.classList.add('active');
+    };
+
+    window.closeMediaSimulator = function(e) {
+      mediaModal.classList.remove('active');
+      // Stop video play if any
+      mediaModalBody.innerHTML = "";
+    };
+
+    // Direct enquiry function
+    window.enquireLot = function() {
+      if (!activeLot) return;
+      window.location.href = `/contact?lot=${activeLot}`;
+    };
+
+    // Editor Mode: Draggable Pins
+    if (window.location.search.includes('edit=true')) {
+      // 1. Create coordinates console
+      const consoleDiv = document.createElement('div');
+      consoleDiv.id = 'editor-console';
+      consoleDiv.style.position = 'fixed';
+      consoleDiv.style.bottom = '20px';
+      consoleDiv.style.right = '20px';
+      consoleDiv.style.width = '350px';
+      consoleDiv.style.background = '#1A1714';
+      consoleDiv.style.border = '2px solid #C2A15D';
+      consoleDiv.style.borderRadius = '8px';
+      consoleDiv.style.padding = '16px';
+      consoleDiv.style.zIndex = '10000';
+      consoleDiv.style.color = '#fff';
+      consoleDiv.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+      consoleDiv.style.fontFamily = 'Space Grotesk, sans-serif';
+
+      consoleDiv.innerHTML = `
+        <h3 style="margin-top:0; color:#C2A15D; font-size:1.1rem; border-bottom:1px solid #333; padding-bottom:8px; font-weight:600;">Modo Editor de Lotes</h3>
+        <p style="font-size:0.8rem; color:#ccc; margin-bottom:12px; line-height:1.4;">Arrastra los puntos del mapa a su posición correcta. Copia el código generado abajo y reemplázalo en tu archivo HTML.</p>
+        <textarea id="coords-output-area" readonly style="width:100%; height:200px; background:#000; color:#0f0; border:1px solid #333; border-radius:4px; font-family:monospace; font-size:0.7rem; padding:8px; box-sizing:border-box; margin-bottom:12px; resize:none; outline:none;"></textarea>
+        <button onclick="copyEditorCoords()" style="width:100%; background:#2D5A3F; color:#fff; border:none; padding:10px; border-radius:4px; font-weight:600; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:1px;">Copiar Coordenadas</button>
+      `;
+      document.body.appendChild(consoleDiv);
+
+      window.copyEditorCoords = function() {
+        const area = document.getElementById('coords-output-area');
+        area.select();
+        document.execCommand('copy');
+        alert('Coordenadas copiadas al portapapeles!');
+      };
+
+      // 2. Generate initial output code
+      const mapContainer = document.getElementById('interactive-map');
+      
+      function updateGeneratedCode() {
+        const pinElements = Array.from(pins).sort((a, b) => {
+          return parseInt(a.getAttribute('data-lot')) - parseInt(b.getAttribute('data-lot'));
+        });
+        
+        let htmlCode = "";
+        pinElements.forEach(pin => {
+          const lot = pin.getAttribute('data-lot');
+          const top = pin.style.top;
+          const left = pin.style.left;
+          htmlCode += `        <div class="map-pin" data-lot="${lot}" style="top: ${top}; left: ${left};"></div>\n`;
+        });
+        
+        document.getElementById('coords-output-area').value = htmlCode;
+      }
+      
+      updateGeneratedCode();
+
+      // 3. Make pins draggable
+      pins.forEach(pin => {
+        pin.style.cursor = 'move';
+        
+        pin.addEventListener('mousedown', dragStart);
+        pin.addEventListener('touchstart', dragStart, { passive: false });
+
+        let startX, startY;
+        let pinStartTop, pinStartLeft;
+        
+        function dragStart(e) {
+          e.preventDefault();
+          
+          // Get mouse/touch starting coordinates
+          startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+          startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+          
+          // Get starting offset percentages
+          const rect = pin.getBoundingClientRect();
+          const containerRect = mapContainer.getBoundingClientRect();
+          
+          pinStartLeft = rect.left + rect.width/2 - containerRect.left;
+          pinStartTop = rect.top + rect.height/2 - containerRect.top;
+          
+          document.addEventListener('mousemove', dragMove);
+          document.addEventListener('mouseup', dragEnd);
+          document.addEventListener('touchmove', dragMove, { passive: false });
+          document.addEventListener('touchend', dragEnd);
+        }
+        
+        function dragMove(e) {
+          e.preventDefault();
+          
+          const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+          const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+          
+          const dx = currentX - startX;
+          const dy = currentY - startY;
+          
+          const containerRect = mapContainer.getBoundingClientRect();
+          
+          let newLeft = pinStartLeft + dx;
+          let newTop = pinStartTop + dy;
+          
+          // Clamp within container boundaries
+          newLeft = Math.max(0, Math.min(containerRect.width, newLeft));
+          newTop = Math.max(0, Math.min(containerRect.height, newTop));
+          
+          // Convert to percentage
+          const leftPct = ((newLeft / containerRect.width) * 100).toFixed(1) + '%';
+          const topPct = ((newTop / containerRect.height) * 100).toFixed(1) + '%';
+          
+          pin.style.left = leftPct;
+          pin.style.top = topPct;
+          
+          // Keep tooltip aligned if active
+          if (activeLot === pin.getAttribute('data-lot')) {
+            positionTooltip(pin);
+          }
+        }
+        
+        function dragEnd() {
+          document.removeEventListener('mousemove', dragMove);
+          document.removeEventListener('mouseup', dragEnd);
+          document.removeEventListener('touchmove', dragMove);
+          document.removeEventListener('touchend', dragEnd);
+          
+          updateGeneratedCode();
+        }
+      });
+    }
   </script>
 
 </body>
