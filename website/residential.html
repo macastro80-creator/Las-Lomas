@@ -584,6 +584,132 @@
       if (!activeLot) return;
       window.location.href = `/contact?lot=${activeLot}`;
     };
+
+    // Editor Mode: Draggable Pins
+    if (window.location.search.includes('edit=true')) {
+      // 1. Create coordinates console
+      const consoleDiv = document.createElement('div');
+      consoleDiv.id = 'editor-console';
+      consoleDiv.style.position = 'fixed';
+      consoleDiv.style.bottom = '20px';
+      consoleDiv.style.right = '20px';
+      consoleDiv.style.width = '350px';
+      consoleDiv.style.background = '#1A1714';
+      consoleDiv.style.border = '2px solid #C2A15D';
+      consoleDiv.style.borderRadius = '8px';
+      consoleDiv.style.padding = '16px';
+      consoleDiv.style.zIndex = '10000';
+      consoleDiv.style.color = '#fff';
+      consoleDiv.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+      consoleDiv.style.fontFamily = 'Space Grotesk, sans-serif';
+
+      consoleDiv.innerHTML = `
+        <h3 style="margin-top:0; color:#C2A15D; font-size:1.1rem; border-bottom:1px solid #333; padding-bottom:8px; font-weight:600;">Modo Editor de Lotes</h3>
+        <p style="font-size:0.8rem; color:#ccc; margin-bottom:12px; line-height:1.4;">Arrastra los puntos del mapa a su posición correcta. Copia el código generado abajo y reemplázalo en tu archivo HTML.</p>
+        <textarea id="coords-output-area" readonly style="width:100%; height:200px; background:#000; color:#0f0; border:1px solid #333; border-radius:4px; font-family:monospace; font-size:0.7rem; padding:8px; box-sizing:border-box; margin-bottom:12px; resize:none; outline:none;"></textarea>
+        <button onclick="copyEditorCoords()" style="width:100%; background:#2D5A3F; color:#fff; border:none; padding:10px; border-radius:4px; font-weight:600; cursor:pointer; text-transform:uppercase; font-size:0.75rem; letter-spacing:1px;">Copiar Coordenadas</button>
+      `;
+      document.body.appendChild(consoleDiv);
+
+      window.copyEditorCoords = function() {
+        const area = document.getElementById('coords-output-area');
+        area.select();
+        document.execCommand('copy');
+        alert('Coordenadas copiadas al portapapeles!');
+      };
+
+      // 2. Generate initial output code
+      const mapContainer = document.getElementById('interactive-map');
+      
+      function updateGeneratedCode() {
+        const pinElements = Array.from(pins).sort((a, b) => {
+          return parseInt(a.getAttribute('data-lot')) - parseInt(b.getAttribute('data-lot'));
+        });
+        
+        let htmlCode = "";
+        pinElements.forEach(pin => {
+          const lot = pin.getAttribute('data-lot');
+          const top = pin.style.top;
+          const left = pin.style.left;
+          htmlCode += `        <div class="map-pin" data-lot="${lot}" style="top: ${top}; left: ${left};"></div>\n`;
+        });
+        
+        document.getElementById('coords-output-area').value = htmlCode;
+      }
+      
+      updateGeneratedCode();
+
+      // 3. Make pins draggable
+      pins.forEach(pin => {
+        pin.style.cursor = 'move';
+        
+        pin.addEventListener('mousedown', dragStart);
+        pin.addEventListener('touchstart', dragStart, { passive: false });
+
+        let startX, startY;
+        let pinStartTop, pinStartLeft;
+        
+        function dragStart(e) {
+          e.preventDefault();
+          
+          // Get mouse/touch starting coordinates
+          startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+          startY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+          
+          // Get starting offset percentages
+          const rect = pin.getBoundingClientRect();
+          const containerRect = mapContainer.getBoundingClientRect();
+          
+          pinStartLeft = rect.left + rect.width/2 - containerRect.left;
+          pinStartTop = rect.top + rect.height/2 - containerRect.top;
+          
+          document.addEventListener('mousemove', dragMove);
+          document.addEventListener('mouseup', dragEnd);
+          document.addEventListener('touchmove', dragMove, { passive: false });
+          document.addEventListener('touchend', dragEnd);
+        }
+        
+        function dragMove(e) {
+          e.preventDefault();
+          
+          const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+          const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+          
+          const dx = currentX - startX;
+          const dy = currentY - startY;
+          
+          const containerRect = mapContainer.getBoundingClientRect();
+          
+          let newLeft = pinStartLeft + dx;
+          let newTop = pinStartTop + dy;
+          
+          // Clamp within container boundaries
+          newLeft = Math.max(0, Math.min(containerRect.width, newLeft));
+          newTop = Math.max(0, Math.min(containerRect.height, newTop));
+          
+          // Convert to percentage
+          const leftPct = ((newLeft / containerRect.width) * 100).toFixed(1) + '%';
+          const topPct = ((newTop / containerRect.height) * 100).toFixed(1) + '%';
+          
+          pin.style.left = leftPct;
+          pin.style.top = topPct;
+          
+          // Keep tooltip aligned if active
+          if (activeLot === pin.getAttribute('data-lot')) {
+            positionTooltip(pin);
+          }
+        }
+        
+        function dragEnd() {
+          document.removeEventListener('mousemove', dragMove);
+          document.removeEventListener('mouseup', dragEnd);
+          document.removeEventListener('touchmove', dragMove);
+          document.removeEventListener('touchend', dragEnd);
+          
+          updateGeneratedCode();
+        }
+      });
+    }
   </script>
 
 </body>
