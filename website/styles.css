@@ -655,3 +655,294 @@ body {
 }
 
 
+/* ── Interactive Masterplan Map ── */
+.interactive-map-container {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(26, 23, 20, 0.1);
+  background: var(--cream);
+  border: 1px solid var(--gold-light);
+}
+
+.interactive-map-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+
+/* Map Pins / Hotspots */
+.map-pin {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: var(--emerald);
+  border: 2px solid var(--white);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.map-pin::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--emerald);
+  opacity: 0;
+  animation: pinPulse 2s infinite;
+}
+
+@keyframes pinPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.map-pin:hover, .map-pin.active {
+  background: var(--gold);
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+.map-pin:hover::after, .map-pin.active::after {
+  border-color: var(--gold);
+}
+
+/* Tooltip / Details Card */
+.lot-tooltip-card {
+  position: absolute;
+  width: 250px;
+  background: var(--warm-gray-900);
+  border: 1px solid var(--gold-light);
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -100%) scale(0.9);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  color: var(--white);
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: left;
+}
+
+.lot-tooltip-card.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -120%) scale(1);
+}
+
+.lot-card-header {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--gold-light);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.lot-info-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.info-label {
+  color: var(--warm-gray-400);
+}
+
+.info-value {
+  font-weight: 500;
+  color: var(--white);
+}
+
+.lot-media-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 12px;
+  justify-content: center;
+}
+
+.media-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--white);
+  border-radius: 4px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.media-btn:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--warm-gray-900);
+  transform: translateY(-2px);
+}
+
+.lot-card-footer {
+  margin-top: 14px;
+}
+
+.lot-enquire-btn {
+  width: 100%;
+  background: var(--emerald);
+  border: none;
+  color: var(--white);
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+
+.lot-enquire-btn:hover {
+  background: #254a33;
+}
+
+/* Multimedia Simulator Modal */
+.media-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(18, 16, 14, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.media-modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.media-modal-content {
+  background: var(--warm-gray-900);
+  border: 1px solid var(--gold-light);
+  border-radius: 6px;
+  width: 90%;
+  max-width: 700px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.media-modal-overlay.active .media-modal-content {
+  transform: scale(1);
+}
+
+.media-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--warm-gray-400);
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.media-modal-close:hover {
+  color: var(--white);
+}
+
+.media-modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  color: var(--gold-light);
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.media-modal-body {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.media-modal-body img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.media-modal-body video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Rotating effect for 360° Simulation */
+.pan-360 {
+  animation: slowPan 40s linear infinite;
+  width: 250% !important; /* expand to allow panning */
+  max-width: none !important;
+}
+
+@keyframes slowPan {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-40%); }
+  100% { transform: translateX(0); }
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 600px) {
+  .lot-tooltip-card.active {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) scale(1);
+    width: 90%;
+    z-index: 100;
+  }
+}

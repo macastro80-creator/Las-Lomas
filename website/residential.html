@@ -98,8 +98,98 @@
     </div>
   </section>
 
+  <!-- ═══ Interactive Masterplan Section ═══ -->
+  <section class="section masterplan-section" style="background:var(--cream); padding-top: 60px; padding-bottom: 20px;">
+    <div class="section-inner" style="max-width: 1000px; text-align: center;">
+      <div class="section-tag reveal">
+        <span class="lang-en">Explore the Sanctuary</span>
+        <span class="lang-es">Explora el Santuario</span>
+      </div>
+      <h2 class="section-title reveal" style="margin-bottom: 12px;">
+        <span class="lang-en">Interactive Lot Map</span>
+        <span class="lang-es">Mapa de Lotes Interactivo</span>
+      </h2>
+      <p class="section-subtitle reveal" style="margin-bottom: 40px; font-size: 0.95rem; color: var(--text-muted); max-width: 100%;">
+        <span class="lang-en">Hover over the hotspots to view dimensions, prices, and media. Tap on mobile.</span>
+        <span class="lang-es">Pasa el cursor sobre los puntos para ver dimensiones, precios y multimedia. Toca en móviles.</span>
+      </p>
+
+      <!-- The Interactive Map Container -->
+      <div class="interactive-map-container reveal" id="interactive-map">
+        <img src="images/Las%20Lomas%20Residential%20-Masterplan.png" alt="Las Lomas Residential Masterplan" style="width: 100%; height: auto; display: block;">
+        
+        <!-- Hotspots for Lot 1 to 21 -->
+        <div class="map-pin" data-lot="1" style="top: 24%; left: 47.5%;"></div>
+        <div class="map-pin" data-lot="2" style="top: 34%; left: 64.5%;"></div>
+        <div class="map-pin" data-lot="3" style="top: 37%; left: 72.5%;"></div>
+        <div class="map-pin" data-lot="4" style="top: 43%; left: 81.5%;"></div>
+        <div class="map-pin" data-lot="5" style="top: 31%; left: 32%;"></div>
+        <div class="map-pin" data-lot="6" style="top: 34%; left: 43.5%;"></div>
+        <div class="map-pin" data-lot="7" style="top: 39%; left: 51%;"></div>
+        <div class="map-pin" data-lot="8" style="top: 47%; left: 68%;"></div>
+        <div class="map-pin" data-lot="9" style="top: 56%; left: 67.5%;"></div>
+        <div class="map-pin" data-lot="10" style="top: 37.5%; left: 25.5%;"></div>
+        <div class="map-pin" data-lot="11" style="top: 45%; left: 46%;"></div>
+        <div class="map-pin" data-lot="12" style="top: 52%; left: 49.5%;"></div>
+        <div class="map-pin" data-lot="13" style="top: 60%; left: 57.5%;"></div>
+        <div class="map-pin" data-lot="14" style="top: 45.5%; left: 33%;"></div>
+        <div class="map-pin" data-lot="15" style="top: 43.5%; left: 22%;"></div>
+        <div class="map-pin" data-lot="16" style="top: 54%; left: 34.5%;"></div>
+        <div class="map-pin" data-lot="17" style="top: 64%; left: 40.5%;"></div>
+        <div class="map-pin" data-lot="18" style="top: 47.5%; left: 13.5%;"></div>
+        <div class="map-pin" data-lot="19" style="top: 57.5%; left: 18.5%;"></div>
+        <div class="map-pin" data-lot="20" style="top: 66.5%; left: 23.5%;"></div>
+        <div class="map-pin" data-lot="21" style="top: 73.5%; left: 32.5%;"></div>
+
+        <!-- Tooltip Card (Starts Hidden) -->
+        <div class="lot-tooltip-card" id="lot-tooltip-card">
+          <div class="lot-card-header">Lote 01</div>
+          <div class="lot-card-body">
+            <div class="lot-info-item">
+              <span class="info-label">
+                <span class="lang-en">Size:</span>
+                <span class="lang-es">Tamaño:</span>
+              </span>
+              <span class="info-value" id="lot-size-val">1.7 Hectáreas</span>
+            </div>
+            <div class="lot-info-item">
+              <span class="info-label">
+                <span class="lang-en">Price:</span>
+                <span class="lang-es">Precio:</span>
+              </span>
+              <span class="info-value" id="lot-price-val">$235,000 USD</span>
+            </div>
+            <!-- Quick Media Simulator Links -->
+            <div class="lot-media-links">
+              <button onclick="openMediaSimulator('photo')" title="Photos" class="media-btn">📷</button>
+              <button onclick="openMediaSimulator('video')" title="Video" class="media-btn">🎥</button>
+              <button onclick="openMediaSimulator('360')" title="360 View" class="media-btn">🔄</button>
+            </div>
+          </div>
+          <div class="lot-card-footer">
+            <button onclick="enquireLot()" class="lot-enquire-btn">
+              <span class="lang-en">Enquire Lot</span>
+              <span class="lang-es">Consultar Lote</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Media Simulation Modal (Starts Hidden) -->
+  <div class="media-modal-overlay" id="media-modal" onclick="closeMediaSimulator(event)">
+    <div class="media-modal-content" onclick="event.stopPropagation()">
+      <button class="media-modal-close" onclick="closeMediaSimulator(event)">×</button>
+      <h3 class="media-modal-title" id="media-modal-title">Tour Lote</h3>
+      <div class="media-modal-body" id="media-modal-body">
+        <!-- Dynamic Content (Img or Video) goes here -->
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Symmetrical Image Placeholders ═══ -->
-  <section class="section offerings-section" style="background:var(--cream); padding-top: 60px;">
+  <section class="section offerings-section" style="background:var(--cream); padding-top: 20px;">
     <div class="section-inner">
       <div class="section-tag reveal" style="text-align:center;">
         <span class="lang-en">Visualizing the Sanctuary</span>
@@ -110,13 +200,8 @@
         <span class="lang-es">Conceptos de Diseño y Distribución</span>
       </h2>
       
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 20px;">
-        <!-- Placeholder 1: Masterplan -->
-        <a href="images/Las%20Lomas%20Residential%20-Masterplan.png" target="_blank" class="placeholder-img" style="border-style: solid; padding: 0; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Click to view full map">
-          <img src="images/Las%20Lomas%20Residential%20-Masterplan.png" alt="Las Lomas Residential Masterplan" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-        </a>
-
-        <!-- Placeholder 2: Ridges View -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; margin-top: 20px;">
+        <!-- Placeholder 1: Ridges View -->
         <div class="placeholder-img">
           <div class="placeholder-img-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 21h20M2 17l5-5 4 4 6-6 5 5"/></svg>
@@ -131,7 +216,7 @@
           </p>
         </div>
 
-        <!-- Placeholder 3: Eco-Home Concept -->
+        <!-- Placeholder 2: Eco-Home Concept -->
         <div class="placeholder-img">
           <div class="placeholder-img-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -336,6 +421,145 @@
       const currentLang = document.documentElement.getAttribute('lang') || 'en';
       setLanguage(currentLang);
     });
+
+    // Interactive Map Logic
+    const lotMetadata = {
+      1: { sizeEs: "1.7 Hectáreas (17,000 m²)", sizeEn: "1.7 Hectares (17,000 m²)", price: "$235,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      2: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      3: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      4: { sizeEs: "2.0 Hectáreas (20,000 m²)", sizeEn: "2.0 Hectares (20,000 m²)", price: "$250,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg" },
+      5: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      6: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      7: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-highland-views.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      8: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-forest.jpg" },
+      9: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      10: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      11: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$195,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      12: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      13: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$210,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      14: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      15: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      16: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      17: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" },
+      18: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-boundary.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-river-rock.jpg" },
+      19: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-forest.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-valley.jpg" },
+      20: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-river-rock.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-highland-views.jpg" },
+      21: { sizeEs: "1.0 Hectárea (10,000 m²)", sizeEn: "1.0 Hectare (10,000 m²)", price: "$190,000", img: "images/land-aerial-valley.jpg", video: "https://www.w3schools.com/html/mov_bbb.mp4", view360: "images/land-aerial-boundary.jpg" }
+    };
+
+    let activeLot = null;
+    const tooltipCard = document.getElementById('lot-tooltip-card');
+    const sizeVal = document.getElementById('lot-size-val');
+    const priceVal = document.getElementById('lot-price-val');
+    const pins = document.querySelectorAll('.map-pin');
+
+    function updateTooltip(lotNum) {
+      const data = lotMetadata[lotNum];
+      if (!data) return;
+
+      const lang = document.documentElement.getAttribute('lang') || 'en';
+      const sizeText = lang === 'es' ? data.sizeEs : data.sizeEn;
+
+      document.querySelector('.lot-card-header').textContent = lang === 'es' ? `LOTE ${String(lotNum).padStart(2, '0')}` : `LOT ${String(lotNum).padStart(2, '0')}`;
+      sizeVal.textContent = sizeText;
+      priceVal.textContent = `${data.price} USD`;
+      activeLot = lotNum;
+    }
+
+    function positionTooltip(pin) {
+      const topPct = pin.style.top;
+      const leftPct = pin.style.left;
+      tooltipCard.style.top = topPct;
+      tooltipCard.style.left = leftPct;
+    }
+
+    function hideTooltip() {
+      tooltipCard.classList.remove('active');
+      pins.forEach(p => p.classList.remove('active'));
+      activeLot = null;
+    }
+
+    // Interaction on pins
+    pins.forEach(pin => {
+      // Desktop: hover / roll over
+      pin.addEventListener('mouseenter', () => {
+        const lotNum = pin.getAttribute('data-lot');
+        pins.forEach(p => p.classList.remove('active'));
+        pin.classList.add('active');
+        updateTooltip(lotNum);
+        positionTooltip(pin);
+        tooltipCard.classList.add('active');
+      });
+
+      // Mobile/Taps: toggle tooltip
+      pin.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lotNum = pin.getAttribute('data-lot');
+        
+        if (activeLot === lotNum && tooltipCard.classList.contains('active')) {
+          hideTooltip();
+        } else {
+          pins.forEach(p => p.classList.remove('active'));
+          pin.classList.add('active');
+          updateTooltip(lotNum);
+          positionTooltip(pin);
+          tooltipCard.classList.add('active');
+        }
+      });
+    });
+
+    // Close tooltip if click outside map container
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#interactive-map') && !e.target.closest('#media-modal')) {
+        hideTooltip();
+      }
+    });
+
+    // Media simulator functions
+    const mediaModal = document.getElementById('media-modal');
+    const mediaModalTitle = document.getElementById('media-modal-title');
+    const mediaModalBody = document.getElementById('media-modal-body');
+
+    window.openMediaSimulator = function(type) {
+      if (!activeLot) return;
+      const data = lotMetadata[activeLot];
+      const lang = document.documentElement.getAttribute('lang') || 'en';
+      
+      let title = "";
+      let contentHtml = "";
+
+      if (type === 'photo') {
+        title = lang === 'es' ? `Galería de Fotos - Lote ${activeLot}` : `Photo Gallery - Lot ${activeLot}`;
+        contentHtml = `<img src="${data.img}" alt="Lot Photo Preview">`;
+      } else if (type === 'video') {
+        title = lang === 'es' ? `Vista Aérea de Dron - Lote ${activeLot}` : `Drone Aerial Tour - Lot ${activeLot}`;
+        contentHtml = `
+          <video autoplay loop muted playsinline controls style="width: 100%; height: 100%;">
+            <source src="${data.video}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        `;
+      } else if (type === '360') {
+        title = lang === 'es' ? `Simulador de Vista 360° - Lote ${activeLot}` : `360° Panorama View - Lot ${activeLot}`;
+        contentHtml = `<img src="${data.view360}" class="pan-360" alt="360 View Simulation">`;
+      }
+
+      mediaModalTitle.textContent = title;
+      mediaModalBody.innerHTML = contentHtml;
+      mediaModal.classList.add('active');
+    };
+
+    window.closeMediaSimulator = function(e) {
+      mediaModal.classList.remove('active');
+      // Stop video play if any
+      mediaModalBody.innerHTML = "";
+    };
+
+    // Direct enquiry function
+    window.enquireLot = function() {
+      if (!activeLot) return;
+      window.location.href = `/contact?lot=${activeLot}`;
+    };
   </script>
 
 </body>
