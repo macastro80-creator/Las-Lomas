@@ -520,9 +520,9 @@ body.no-scroll {
 .btn-whatsapp:hover { background:#1DA851; transform:translateY(-1px); }
 .btn-whatsapp svg { width:18px; height:18px; fill:currentColor; }
 
-/* ── Location ── */
+/* ── Location & Grid Layouts ── */
 .location-section { background:var(--white); }
-.location-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; margin-top:32px; }
+.location-grid, .masterplan-grid { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center; margin-top:32px; }
 .location-map { aspect-ratio:4/3; border-radius:6px; overflow:hidden; background:var(--warm-gray-50); }
 .location-map iframe {
   width: 100%;
@@ -574,7 +574,7 @@ body.no-scroll {
 /* ── Responsive ── */
 @media(max-width:900px) {
   :root { --section-padding: clamp(36px, 5vw, 60px); }
-  .thesis-grid,.opp-layout,.mindset-grid,.property-grid,.location-grid { grid-template-columns:1fr; gap:36px; }
+  .thesis-grid,.opp-layout,.mindset-grid,.property-grid,.location-grid,.masterplan-grid { grid-template-columns:1fr; gap:36px; }
   .eco-cards { grid-template-columns:1fr; max-width:480px; margin-left:auto; margin-right:auto; }
   .features-grid { grid-template-columns:repeat(2, 1fr); }
   .carousel { border-radius:0; }
