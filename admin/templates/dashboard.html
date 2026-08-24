@@ -253,7 +253,9 @@
           <div class="flex items-start gap-4 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition">
             <!-- Phase icon -->
             <div class="p-2 rounded bg-gray-50 text-natural mt-0.5">
-              {% if task.phase == 'Regulación y Permisos' %}
+              {% if task.phase == 'Compra del Lote' %}
+              <i data-lucide="key" class="w-4 h-4"></i>
+              {% elif task.phase == 'Regulación y Permisos' %}
               <i data-lucide="file-text" class="w-4 h-4"></i>
               {% elif task.phase == 'Planificación y Diseño' %}
               <i data-lucide="drafting-compass" class="w-4 h-4"></i>
