@@ -7,3 +7,4 @@ _bmad/
 _bmad-output/
 *.pyc
 .DS_Store
+*.db
