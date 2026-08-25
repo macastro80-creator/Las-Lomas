@@ -95,6 +95,7 @@ def init_db():
         phase TEXT,
         collaborator_id INTEGER,
         decision_path TEXT DEFAULT 'core',
+        budget_usd REAL DEFAULT 0.0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (collaborator_id) REFERENCES collaborators(id) ON DELETE SET NULL
     )
@@ -118,6 +119,7 @@ def init_db():
         tax_amount REAL,
         iva_rate REAL DEFAULT 0.13,
         marketing_channel TEXT,
+        task_id INTEGER REFERENCES tasks(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -217,6 +219,36 @@ def init_db():
     )
     """)
 
+    # 11. Decision Options Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS decision_options (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        decision_key TEXT NOT NULL,
+        option_code TEXT NOT NULL,
+        option_label TEXT NOT NULL,
+        description TEXT,
+        pros TEXT, -- Newline-separated pros
+        cons TEXT, -- Newline-separated cons
+        notes TEXT, -- User annotations
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (decision_key) REFERENCES decisions (key) ON DELETE CASCADE,
+        UNIQUE(decision_key, option_code)
+    )
+    """)
+
+    # 12. Decision History Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS decision_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        decision_key TEXT NOT NULL,
+        option_code TEXT NOT NULL,
+        option_label TEXT NOT NULL,
+        justification TEXT,
+        changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (decision_key) REFERENCES decisions (key) ON DELETE CASCADE
+    )
+    """)
+
     # Migrations: Add new columns if they do not exist
     cursor.execute("PRAGMA table_info(tasks)")
     tasks_cols = [row["name"] for row in cursor.fetchall()]
@@ -224,6 +256,8 @@ def init_db():
         cursor.execute("ALTER TABLE tasks ADD COLUMN collaborator_id INTEGER REFERENCES collaborators(id) ON DELETE SET NULL")
     if "decision_path" not in tasks_cols:
         cursor.execute("ALTER TABLE tasks ADD COLUMN decision_path TEXT DEFAULT 'core'")
+    if "budget_usd" not in tasks_cols:
+        cursor.execute("ALTER TABLE tasks ADD COLUMN budget_usd REAL DEFAULT 0.0")
 
     cursor.execute("PRAGMA table_info(finances)")
     finances_cols = [row["name"] for row in cursor.fetchall()]
@@ -239,6 +273,8 @@ def init_db():
         cursor.execute("ALTER TABLE finances ADD COLUMN iva_rate REAL DEFAULT 0.13")
     if "marketing_channel" not in finances_cols:
         cursor.execute("ALTER TABLE finances ADD COLUMN marketing_channel TEXT")
+    if "task_id" not in finances_cols:
+        cursor.execute("ALTER TABLE finances ADD COLUMN task_id INTEGER REFERENCES tasks(id) ON DELETE SET NULL")
 
     # Leads table migrations
     cursor.execute("PRAGMA table_info(leads)")
@@ -314,11 +350,50 @@ def init_db():
     cursor.execute("SELECT COUNT(*) as count FROM decisions")
     if cursor.fetchone()["count"] == 0:
         decs = [
-            ("water_option", "Abastecimiento de Agua", "ASADA", "Conexión a la red de la ASADA local."),
-            ("internet_option", "Conexión a Internet", "Fibra", "Conectividad física por Fibra Óptica.")
+            ("water_option", "Abastecimiento de Agua", "asada", "Conexión a la red de la ASADA local."),
+            ("internet_option", "Conectividad Digital", "fibra", "Conexión terrestre de alta estabilidad.")
         ]
         for key, title, opt, notes in decs:
             cursor.execute("INSERT INTO decisions (key, title, selected_option, notes) VALUES (?, ?, ?, ?)", (key, title, opt, notes))
+        conn.commit()
+    else:
+        # Migration: ensure existing selected_option values are lowercase for compatibility
+        cursor.execute("UPDATE decisions SET selected_option = 'asada' WHERE key = 'water_option' AND selected_option IN ('ASADA', 'asada')")
+        cursor.execute("UPDATE decisions SET selected_option = 'pozo' WHERE key = 'water_option' AND selected_option IN ('Pozo', 'pozo')")
+        cursor.execute("UPDATE decisions SET selected_option = 'fibra' WHERE key = 'internet_option' AND selected_option IN ('Fibra', 'fibra')")
+        cursor.execute("UPDATE decisions SET selected_option = 'starlink' WHERE key = 'internet_option' AND selected_option IN ('Starlink', 'starlink')")
+        conn.commit()
+
+    # Pre-populate decision options
+    cursor.execute("SELECT COUNT(*) as count FROM decision_options")
+    if cursor.fetchone()["count"] == 0:
+        opts = [
+            ("water_option", "asada", "ASADA", 
+             "Red comunal: Menor inversión inicial, sujeta a trámites de disponibilidad con la junta local.",
+             "Menor inversión inicial\nRed comunal ya existente",
+             "Sujeta a trámites de disponibilidad con la junta local\nPosible desabastecimiento en temporada alta",
+             "Opción convencional y recomendada inicialmente."),
+            ("water_option", "pozo", "Pozo Propio", 
+             "Pozo Propio: Mayor inversión (perforación/caudal), valor de activo directo y control del recurso.",
+             "Control total del recurso hídrico\nValor de activo directo para el proyecto\nIndependencia de la red comunal",
+             "Mayor inversión inicial (perforación/estudios/caudal)\nRiesgo de no encontrar suficiente caudal\nTrámites de concesión largos",
+             "Excelente para valorizar la tierra, pero requiere estudios hidrogeológicos."),
+            ("internet_option", "fibra", "Fibra Óptica", 
+             "Fibra Óptica: Conexión terrestre de alta estabilidad, requiere cotización de tendido por postes.",
+             "Conexión terrestre de alta estabilidad\nVelocidad simétrica constante",
+             "Requiere cotización de tendido por postes\nMayor tiempo de instalación si no hay posteo",
+             "Ideal para residentes de largo plazo."),
+            ("internet_option", "starlink", "Starlink (Sat)", 
+             "Starlink (Elon Musk): Conexión satelital inmediata, sin tendidos, pero con costos de antena fijos.",
+             "Conexión satelital inmediata\nSin necesidad de tendido de postes",
+             "Costos de antena y equipos fijos iniciales\nSusceptibilidad a tormentas fuertes\nLatencia ligeramente mayor que fibra",
+             "Excelente alternativa rápida mientras se coordina la fibra.")
+        ]
+        for key, code, label, desc, pros, cons, notes in opts:
+            cursor.execute("""
+            INSERT INTO decision_options (decision_key, option_code, option_label, description, pros, cons, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (key, code, label, desc, pros, cons, notes))
         conn.commit()
 
     # Pre-populate default Gantt tasks if empty (Las Lomas Development Roadmap)
@@ -351,6 +426,43 @@ def init_db():
         conn.commit()
         
     conn.close()
+
+def get_decisions_data(cursor):
+    cursor.execute("SELECT * FROM decisions ORDER BY id ASC")
+    decisions_list = []
+    for d_row in cursor.fetchall():
+        key = d_row["key"]
+        cursor.execute("SELECT * FROM decision_options WHERE decision_key = ? ORDER BY id ASC", (key,))
+        options = [dict(row) for row in cursor.fetchall()]
+        decisions_list.append({
+            "id": d_row["id"],
+            "key": key,
+            "title": d_row["title"],
+            "selected_option": d_row["selected_option"],
+            "notes": d_row["notes"],
+            "options": options
+        })
+    return decisions_list
+
+def filter_tasks_by_decisions(tasks_list, cursor):
+    cursor.execute("SELECT option_code, decision_key FROM decision_options")
+    option_to_decision = {row["option_code"].lower(): row["decision_key"] for row in cursor.fetchall()}
+    
+    cursor.execute("SELECT key, selected_option FROM decisions")
+    selected_decisions = {row["key"]: (row["selected_option"].lower() if row["selected_option"] else "") for row in cursor.fetchall()}
+    
+    filtered = []
+    for t in tasks_list:
+        dpath = t.get("decision_path")
+        if dpath and dpath != "core":
+            dpath_lower = dpath.lower()
+            dkey = option_to_decision.get(dpath_lower)
+            if dkey:
+                selected_val = selected_decisions.get(dkey)
+                if selected_val and dpath_lower != selected_val:
+                    continue
+        filtered.append(t)
+    return filtered
 
 @app.on_event("startup")
 def startup_event():
@@ -454,19 +566,22 @@ def admin_dashboard(request: Request):
     
     # 2. Project Progress & Upcoming Tasks
     cursor.execute("SELECT * FROM tasks")
-    all_tasks = cursor.fetchall()
-    total_tasks = len(all_tasks)
+    all_tasks = [dict(row) for row in cursor.fetchall()]
+    filtered_all_tasks = filter_tasks_by_decisions(all_tasks, cursor)
+    
+    total_tasks = len(filtered_all_tasks)
     project_progress = 0.0
     if total_tasks > 0:
-        total_progress = sum(t["progress"] for t in all_tasks)
+        total_progress = sum(t["progress"] for t in filtered_all_tasks)
         project_progress = total_progress / total_tasks
         
     cursor.execute("""
     SELECT * FROM tasks 
     WHERE status IN ('Pendiente', 'En Proceso') 
-    ORDER BY due_date ASC LIMIT 5
+    ORDER BY due_date ASC
     """)
-    upcoming_tasks = [dict(row) for row in cursor.fetchall()]
+    upcoming_tasks_raw = [dict(row) for row in cursor.fetchall()]
+    upcoming_tasks = filter_tasks_by_decisions(upcoming_tasks_raw, cursor)[:5]
     
     # 3. Financial Totals
     cursor.execute("SELECT * FROM finances")
@@ -495,6 +610,7 @@ def admin_dashboard(request: Request):
     cursor.execute("SELECT * FROM decisions")
     decisions_rows = cursor.fetchall()
     decisions = {row["key"]: row["selected_option"] for row in decisions_rows}
+    decisions_list = get_decisions_data(cursor)
     
     # 6. Calculate Net Balance, 15% Capital Gains Tax, and Net Utility
     net_balance_usd = total_income_usd - total_expense_usd
@@ -533,7 +649,8 @@ def admin_dashboard(request: Request):
         "net_utility_crc": net_utility_crc,
         "recent_leads": recent_leads,
         "exchange_rate": exchange_rate,
-        "decisions": decisions
+        "decisions": decisions,
+        "decisions_list": decisions_list
     })
 
 @app.get("/admin/crm")
@@ -652,22 +769,12 @@ def admin_gantt(request: Request):
     # Fetch active path decisions
     cursor.execute("SELECT key, selected_option FROM decisions")
     decisions = {row["key"]: row["selected_option"] for row in cursor.fetchall()}
-    water_path = decisions.get("water_option", "ASADA").lower()
-    internet_path = decisions.get("internet_option", "Fibra").lower()
+    decisions_list = get_decisions_data(cursor)
     
     # Fetch all tasks and filter by active decisions
     cursor.execute("SELECT * FROM tasks ORDER BY start_date ASC")
-    all_tasks = cursor.fetchall()
-    tasks_list = []
-    for row in all_tasks:
-        t = dict(row)
-        dpath = t.get("decision_path")
-        if dpath and dpath != "core":
-            if dpath in ["asada", "pozo"] and dpath != water_path:
-                continue
-            if dpath in ["fibra", "starlink"] and dpath != internet_path:
-                continue
-        tasks_list.append(t)
+    all_tasks = [dict(row) for row in cursor.fetchall()]
+    tasks_list = filter_tasks_by_decisions(all_tasks, cursor)
 
     tasks_json = json.dumps(tasks_list, default=str)
     
@@ -700,7 +807,8 @@ def admin_gantt(request: Request):
         "tasks_json": tasks_json,
         "exchange_rate": exchange_rate,
         "collaborators": collaborators_list,
-        "decisions": decisions
+        "decisions": decisions,
+        "decisions_list": decisions_list
     })
 
 @app.get("/admin/finance")
@@ -1564,16 +1672,17 @@ def create_task(
     status_val: str = Form("Pendiente", alias="status"),
     predecessor: str = Form(None),
     collaborator_id: str = Form(None),
-    decision_path: str = Form("core")
+    decision_path: str = Form("core"),
+    budget_usd: float = Form(0.0)
 ):
     pred = int(predecessor) if predecessor else None
     collab = int(collaborator_id) if collaborator_id else None
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-    INSERT INTO tasks (phase, title, description, start_date, due_date, progress, status, predecessor, collaborator_id, decision_path)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (phase, title, description, start_date, due_date, progress, status_val, pred, collab, decision_path))
+    INSERT INTO tasks (phase, title, description, start_date, due_date, progress, status, predecessor, collaborator_id, decision_path, budget_usd)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (phase, title, description, start_date, due_date, progress, status_val, pred, collab, decision_path, budget_usd))
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/gantt", status_code=status.HTTP_303_SEE_OTHER)
@@ -1590,7 +1699,8 @@ def edit_task(
     status_val: str = Form(..., alias="status"),
     predecessor: str = Form(None),
     collaborator_id: str = Form(None),
-    decision_path: str = Form("core")
+    decision_path: str = Form("core"),
+    budget_usd: float = Form(0.0)
 ):
     pred = int(predecessor) if predecessor else None
     collab = int(collaborator_id) if collaborator_id else None
@@ -1620,12 +1730,21 @@ def edit_task(
 
     cursor.execute("""
     UPDATE tasks 
-    SET phase = ?, title = ?, description = ?, start_date = ?, due_date = ?, progress = ?, status = ?, predecessor = ?, collaborator_id = ?, decision_path = ?
+    SET phase = ?, title = ?, description = ?, start_date = ?, due_date = ?, progress = ?, status = ?, predecessor = ?, collaborator_id = ?, decision_path = ?, budget_usd = ?
     WHERE id = ?
-    """, (phase, title, description, start_date, due_date, progress, status_val, pred, collab, decision_path, id))
+    """, (phase, title, description, start_date, due_date, progress, status_val, pred, collab, decision_path, budget_usd, id))
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/gantt", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/tasks/{id}/budget")
+def edit_task_budget(id: int, budget_usd: float = Form(...)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tasks SET budget_usd = ? WHERE id = ?", (budget_usd, id))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/budget", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/api/tasks/{id}/delete")
 def delete_task(id: int):
@@ -1819,9 +1938,9 @@ def api_pay_payment_schedule(
         # B. Insert Gasto into finances ledger (OPEX / CAPEX can be assigned based on task or default to CAPEX)
         category_type = "CAPEX"
         cursor.execute("""
-            INSERT INTO finances (type, category, concept, amount_usd, amount_crc, currency, exchange_rate, date, invoice_path, category_type, base_amount, tax_amount, iva_rate)
-            VALUES ('Gasto', 'Construcción', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (concept_finance, amount_usd, amount_crc, currency, exchange_rate, payment_date, target_path, category_type, base_amount, tax_amount, iva_rate))
+            INSERT INTO finances (type, category, concept, amount_usd, amount_crc, currency, exchange_rate, date, invoice_path, category_type, base_amount, tax_amount, iva_rate, task_id)
+            VALUES ('Gasto', 'Construcción', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (concept_finance, amount_usd, amount_crc, currency, exchange_rate, payment_date, target_path, category_type, base_amount, tax_amount, iva_rate, schedule["task_id"]))
 
         conn.commit()
     except Exception as e:
@@ -1837,18 +1956,162 @@ def api_pay_payment_schedule(
 
 # --- Decisions API ---
 
-@app.patch("/api/decisions/{key}")
-def update_decision(key: str, selected_option: str = Form(...), notes: str = Form(None)):
+@app.post("/api/decisions")
+def create_decision(key: str = Form(...), title: str = Form(...)):
+    import re
+    clean_key = re.sub(r'[^a-zA-Z0-9_]', '', key.lower())
+    if not clean_key:
+        raise HTTPException(status_code=400, detail="Identificador de decisión no válido")
+    
     conn = get_db()
     cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        INSERT INTO decisions (key, title, selected_option, notes)
+        VALUES (?, ?, ?, ?)
+        """, (clean_key, title, "", ""))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Ya existe una decisión con la clave '{clean_key}'")
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"status": "success", "message": f"Decisión '{title}' creada.", "key": clean_key}
+
+@app.delete("/api/decisions/{key}")
+def delete_decision(key: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM decisions WHERE key = ?", (key,))
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": f"Categoría {key} eliminada"}
+
+@app.patch("/api/decisions/{key}")
+def update_decision(key: str, selected_option: str = Form(...), justification: str = Form(None)):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Check if option exists to get label
+    cursor.execute("SELECT option_label FROM decision_options WHERE decision_key = ? AND option_code = ?", (key, selected_option))
+    row = cursor.fetchone()
+    if row:
+        option_label = row["option_label"]
+    else:
+        option_label = selected_option.upper()
+        
+    # Update decisions table
     cursor.execute("""
     UPDATE decisions 
     SET selected_option = ?, notes = ?, updated_at = CURRENT_TIMESTAMP 
     WHERE key = ?
-    """, (selected_option, notes, key))
+    """, (selected_option, justification, key))
+    
+    # Record in history log
+    cursor.execute("""
+    INSERT INTO decision_history (decision_key, option_code, option_label, justification)
+    VALUES (?, ?, ?, ?)
+    """, (key, selected_option, option_label, justification))
+    
     conn.commit()
     conn.close()
     return {"status": "success", "message": f"Decisión {key} actualizada a {selected_option}"}
+
+@app.get("/api/decisions/{key}/history")
+def get_decision_history(key: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM decision_history WHERE decision_key = ? ORDER BY changed_at DESC", (key,))
+    rows = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+@app.post("/api/decisions/{key}/options")
+def create_decision_option(
+    key: str,
+    option_code: str = Form(...),
+    option_label: str = Form(...),
+    description: str = Form(None),
+    pros: str = Form(None),
+    cons: str = Form(None),
+    notes: str = Form(None)
+):
+    import re
+    clean_code = re.sub(r'[^a-zA-Z0-9_]', '', option_code.lower())
+    if not clean_code:
+        raise HTTPException(status_code=400, detail="Código de opción no válido")
+        
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        INSERT INTO decision_options (decision_key, option_code, option_label, description, pros, cons, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (key, clean_code, option_label, description, pros, cons, notes))
+        
+        # If this is the only option, or the decision's selected_option is empty, select it by default!
+        cursor.execute("SELECT selected_option FROM decisions WHERE key = ?", (key,))
+        dec_row = cursor.fetchone()
+        if dec_row and (not dec_row["selected_option"]):
+            cursor.execute("UPDATE decisions SET selected_option = ? WHERE key = ?", (clean_code, key))
+            
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"La opción con código '{clean_code}' ya existe para esta decisión")
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"status": "success", "message": f"Opción '{option_label}' creada"}
+
+@app.patch("/api/decisions/{key}/options/{option_code}")
+def update_decision_option(
+    key: str,
+    option_code: str,
+    option_label: str = Form(...),
+    description: str = Form(None),
+    pros: str = Form(None),
+    cons: str = Form(None),
+    notes: str = Form(None)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        UPDATE decision_options
+        SET option_label = ?, description = ?, pros = ?, cons = ?, notes = ?
+        WHERE decision_key = ? AND option_code = ?
+        """, (option_label, description, pros, cons, notes, key, option_code))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"status": "success", "message": f"Opción '{option_label}' actualizada"}
+
+@app.delete("/api/decisions/{key}/options/{option_code}")
+def delete_decision_option(key: str, option_code: str):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM decision_options WHERE decision_key = ? AND option_code = ?", (key, option_code))
+    
+    # If the deleted option was selected_option, clear it or select another one
+    cursor.execute("SELECT selected_option FROM decisions WHERE key = ?", (key,))
+    dec_row = cursor.fetchone()
+    if dec_row and dec_row["selected_option"] == option_code:
+        # Get another available option
+        cursor.execute("SELECT option_code FROM decision_options WHERE decision_key = ? LIMIT 1", (key,))
+        next_opt = cursor.fetchone()
+        next_code = next_opt["option_code"] if next_opt else ""
+        cursor.execute("UPDATE decisions SET selected_option = ? WHERE key = ?", (next_code, key))
+        
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": f"Opción '{option_code}' eliminada"}
+
 
 # --- Finances API ---
 
@@ -1918,15 +2181,10 @@ def get_calendar_feed():
     conn = get_db()
     cursor = conn.cursor()
     
-    # Fetch active path decisions
-    cursor.execute("SELECT key, selected_option FROM decisions")
-    decisions = {row["key"]: row["selected_option"] for row in cursor.fetchall()}
-    water_path = decisions.get("water_option", "ASADA").lower()
-    internet_path = decisions.get("internet_option", "Fibra").lower()
-    
     # Fetch tasks
     cursor.execute("SELECT * FROM tasks")
-    tasks = cursor.fetchall()
+    all_tasks = [dict(row) for row in cursor.fetchall()]
+    tasks = filter_tasks_by_decisions(all_tasks, cursor)
     conn.close()
     
     # Standard iCalendar formatting (RFC 5545)
@@ -1941,14 +2199,6 @@ def get_calendar_feed():
     ]
     
     for task in tasks:
-        # Filter decision paths
-        dpath = task["decision_path"]
-        if dpath and dpath != "core":
-            if dpath in ["asada", "pozo"] and dpath != water_path:
-                continue
-            if dpath in ["fibra", "starlink"] and dpath != internet_path:
-                continue
-
         start_date = task["start_date"].replace("-", "") if task["start_date"] else ""
         due_date = task["due_date"].replace("-", "") if task["due_date"] else ""
         

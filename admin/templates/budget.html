@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Presupuesto - Las Lomas{% endblock %}
+{% block header_title %}Control Presupuestario del Proyecto{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Financial KPI Cards (USD and CRC equivalents) -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <!-- Total Budget -->
+    <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Presupuesto del Plan</p>
+        <h3 class="text-xl font-bold text-gray-800 mt-1">${{ "{:,.2f}".format(total_budget_usd) }}</h3>
+        <p class="text-[9px] text-[#948A7C] mt-0.5">₡{{ "{:,.0f}".format(total_budget_crc) }}</p>
+      </div>
+      <div class="p-2.5 rounded-full bg-blue-50 text-blue-600">
+        <i data-lucide="calculator" class="w-5 h-5"></i>
+      </div>
+    </div>
+
+    <!-- Spent on Tasks -->
+    <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Gastado en Ítems</p>
+        <h3 class="text-xl font-bold text-amber-700 mt-1">${{ "{:,.2f}".format(total_task_spent_usd) }}</h3>
+        <p class="text-[9px] text-[#948A7C] mt-0.5">₡{{ "{:,.0f}".format(total_task_spent_crc) }}</p>
+      </div>
+      <div class="p-2.5 rounded-full bg-amber-50 text-amber-600">
+        <i data-lucide="wallet" class="w-5 h-5"></i>
+      </div>
+    </div>
+
+    <!-- Variance / Remaining -->
+    <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Saldo Disponible</p>
+        <h3 class="text-xl font-bold mt-1 {% if total_remaining_usd >= 0 %}text-green-700{% else %}text-red-700{% endif %}">
+          ${{ "{:,.2f}".format(total_remaining_usd) }}
+        </h3>
+        <p class="text-[9px] text-[#948A7C] mt-0.5">₡{{ "{:,.0f}".format(total_remaining_crc) }}</p>
+      </div>
+      <div class="p-2.5 rounded-full {% if total_remaining_usd >= 0 %}bg-green-50 text-green-600{% else %}bg-red-50 text-red-600{% endif %}">
+        <i data-lucide="piggy-bank" class="w-5 h-5"></i>
+      </div>
+    </div>
+
+    <!-- General Spent (Total) -->
+    <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Gastado General</p>
+        <h3 class="text-xl font-bold text-gray-800 mt-1">${{ "{:,.2f}".format(total_general_spent_usd) }}</h3>
+        <p class="text-[9px] text-[#948A7C] mt-0.5">₡{{ "{:,.0f}".format(total_general_spent_crc) }}</p>
+      </div>
+      <div class="p-2.5 rounded-full bg-gray-50 text-gray-600">
+        <i data-lucide="receipt" class="w-5 h-5"></i>
+      </div>
+    </div>
+
+    <!-- Unallocated Expenses -->
+    <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider">Gastos No Asignados</p>
+        <h3 class="text-xl font-bold text-gray-500 mt-1">${{ "{:,.2f}".format(unallocated_spent_usd) }}</h3>
+        <p class="text-[9px] text-[#948A7C] mt-0.5">₡{{ "{:,.0f}".format(unallocated_spent_crc) }}</p>
+      </div>
+      <div class="p-2.5 rounded-full bg-gray-100 text-gray-400">
+        <i data-lucide="help-circle" class="w-5 h-5"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overall Progress Bar Card -->
+  <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm">
+    <div class="flex justify-between items-center mb-2">
+      <span class="text-xs font-semibold text-gray-700 uppercase tracking-wider">Eficiencia de Consumo del Presupuesto (Gastado vs Plan)</span>
+      <span class="text-sm font-extrabold text-natural">
+        {% if total_budget_usd > 0 %}
+        {{ "%.1f"|format((total_task_spent_usd / total_budget_usd) * 100) }}%
+        {% else %}
+        0%
+        {% endif %}
+      </span>
+    </div>
+    <div class="w-full bg-gray-100 rounded-full h-3">
+      {% set ratio = (total_task_spent_usd / total_budget_usd * 100) if total_budget_usd > 0 else 0 %}
+      <div class="h-3 rounded-full {% if ratio > 100 %}bg-red-500{% elif ratio > 85 %}bg-yellow-500{% else %}bg-natural{% endif %}" style="width: {{ min(ratio, 100) }}%"></div>
+    </div>
+    <div class="flex justify-between items-center mt-2 text-[10px] text-[#948A7C]">
+      <span>$0.00 Gastados</span>
+      {% if ratio > 100 %}
+      <span class="text-red-600 font-bold flex items-center gap-1">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> ¡Presupuesto de Ítems Excedido en ${{ "{:,.2f}".format(total_task_spent_usd - total_budget_usd) }}!
+      </span>
+      {% endif %}
+      <span>Plan Máximo: ${{ "{:,.2f}".format(total_budget_usd) }}</span>
+    </div>
+  </div>
+
+  <!-- Detailed Table grouped by Phase -->
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+    <div class="p-6 border-b border-[#EDE9E3]">
+      <h3 class="font-bold text-gray-800 text-base">Desglose Presupuestario por Fases del Desarrollo</h3>
+    </div>
+    
+    <div class="space-y-6 p-6">
+      {% for phase, phase_tasks in grouped_tasks.items() %}
+      <div class="space-y-3">
+        <!-- Phase Header -->
+        <div class="flex items-center gap-2 border-b border-[#EDE9E3] pb-2">
+          <span class="p-1 rounded bg-[#FAF8F5] text-natural">
+            {% if phase == 'Regulación y Permisos' %}
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            {% elif phase == 'Planificación y Diseño' %}
+            <i data-lucide="drafting-compass" class="w-4 h-4"></i>
+            {% elif phase == 'Mercadeo y Ventas' %}
+            <i data-lucide="megaphone" class="w-4 h-4"></i>
+            {% elif phase == 'Construcción e Infraestructura' %}
+            <i data-lucide="shovel" class="w-4 h-4"></i>
+            {% else %}
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            {% endif %}
+          </span>
+          <h4 class="font-bold text-sm text-gray-800 uppercase tracking-wide">{{ phase }}</h4>
+          
+          <!-- Phase aggregates calculation in Jinja -->
+          {% set phase_budget = phase_tasks | map(attribute='budget_usd') | sum %}
+          {% set phase_spent = phase_tasks | map(attribute='spent_usd') | sum %}
+          {% set phase_ratio = (phase_spent / phase_budget * 100) if phase_budget > 0 else 0 %}
+          <span class="ml-auto text-xs text-gray-600 font-semibold">
+            Gastado: <span class="text-amber-700">${{ "{:,.2f}".format(phase_spent) }}</span> / ${{ "{:,.2f}".format(phase_budget) }}
+          </span>
+        </div>
+        
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs whitespace-nowrap">
+            <thead>
+              <tr class="text-[10px] uppercase text-[#948A7C] font-bold tracking-wider border-b border-[#EDE9E3] bg-[#FAF8F5]">
+                <th class="py-2.5 px-4 w-5/12">Ítem / Tarea</th>
+                <th class="py-2.5 px-4 text-center">Estado</th>
+                <th class="py-2.5 px-4 text-center">Prog. Físico</th>
+                <th class="py-2.5 px-4 text-right">Presupuesto (USD)</th>
+                <th class="py-2.5 px-4 text-right">Gastado Real (USD)</th>
+                <th class="py-2.5 px-4 text-right">Desviación (USD)</th>
+                <th class="py-2.5 px-4 w-2/12">Consumo</th>
+                <th class="py-2.5 px-4 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#EDE9E3]">
+              {% for task in phase_tasks %}
+              <tr class="hover:bg-gray-50 transition">
+                <!-- Task Title -->
+                <td class="py-3 px-4">
+                  <div class="font-semibold text-gray-800">{{ task.title }}</div>
+                  <div class="text-[9px] text-[#948A7C] mt-0.5">Vence: {{ task.due_date }}</div>
+                </td>
+                
+                <!-- Status -->
+                <td class="py-3 px-4 text-center">
+                  <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider
+                    {% if task.status == 'Completado' %}bg-green-50 text-green-700
+                    {% elif task.status == 'En Proceso' %}bg-yellow-50 text-yellow-700
+                    {% else %}bg-gray-50 text-gray-500{% endif %}">
+                    {{ task.status }}
+                  </span>
+                </td>
+                
+                <!-- Physical Progress -->
+                <td class="py-3 px-4 text-center font-mono font-bold text-gray-700">
+                  {{ task.progress }}%
+                </td>
+
+                <!-- Budget -->
+                <td class="py-3 px-4 text-right font-semibold text-gray-800">
+                  ${{ "{:,.2f}".format(task.budget_usd) }}
+                </td>
+
+                <!-- Spent -->
+                <td class="py-3 px-4 text-right font-semibold text-amber-700">
+                  ${{ "{:,.2f}".format(task.spent_usd) }}
+                </td>
+
+                <!-- Variance -->
+                <td class="py-3 px-4 text-right font-bold {% if task.variance_usd >= 0 %}text-green-700{% else %}text-red-700{% endif %}">
+                  {% if task.variance_usd < 0 %}-{% endif %}${{ "{:,.2f}".format(task.variance_usd | abs) }}
+                </td>
+
+                <!-- Progress Bar -->
+                <td class="py-3 px-4">
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1 bg-gray-100 rounded-full h-2 min-w-[60px]">
+                      <div class="h-2 rounded-full {% if task.financial_progress_exact > 100 %}bg-red-500{% elif task.financial_progress_exact > 85 %}bg-yellow-500{% else %}bg-natural{% endif %}" style="width: {{ min(task.financial_progress, 100) }}%"></div>
+                    </div>
+                    <span class="font-mono text-[9px] font-semibold text-gray-600">
+                      {{ "%.0f"|format(task.financial_progress_exact) }}%
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Actions -->
+                <td class="py-3 px-4 text-center">
+                  <button onclick="openBudgetEditModal({{ task.id }}, '{{ task.title|replace('\'', '\\\'') }}', {{ task.budget_usd }})" class="p-1 text-[#9E7A38] hover:bg-gray-100 rounded transition" title="Editar Presupuesto">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Budget Quick Edit Modal -->
+<div id="budgetModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-sm w-full overflow-hidden">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 class="font-bold text-gray-800 text-sm uppercase">Editar Presupuesto de Ítems</h3>
+      <button onclick="closeBudgetEditModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <form id="budgetEditForm" method="POST" action="" class="p-6 space-y-4 text-sm">
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Ítem Seleccionado</label>
+        <div id="modalTaskTitle" class="font-bold text-gray-800 bg-gray-50 px-3 py-2 rounded border border-gray-100"></div>
+      </div>
+      
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Presupuesto Asignado (USD)</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 font-bold">$</span>
+          <input type="number" step="0.01" id="modalTaskBudget" name="budget_usd" required class="w-full pl-7 pr-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural font-semibold" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end gap-3">
+        <button type="button" onclick="closeBudgetEditModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-xs font-semibold transition">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-[#9E7A38] hover:bg-opacity-90 text-white px-4 py-2 rounded text-xs font-semibold transition">
+          Guardar Presupuesto
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openBudgetEditModal(taskId, title, currentBudget) {
+    document.getElementById('budgetEditForm').action = '/api/tasks/' + taskId + '/budget';
+    document.getElementById('modalTaskTitle').textContent = title;
+    document.getElementById('modalTaskBudget').value = currentBudget || 0;
+    
+    document.getElementById('budgetModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function closeBudgetEditModal() {
+    document.getElementById('budgetModal').classList.add('hidden');
+  }
+</script>
+{% endblock %}
