@@ -388,11 +388,50 @@ def init_db():
     cursor.execute("SELECT COUNT(*) as count FROM decisions")
     if cursor.fetchone()["count"] == 0:
         decs = [
-            ("water_option", "Abastecimiento de Agua", "ASADA", "Conexión a la red de la ASADA local."),
-            ("internet_option", "Conexión a Internet", "Fibra", "Conectividad física por Fibra Óptica.")
+            ("water_option", "Abastecimiento de Agua", "asada", "Conexión a la red de la ASADA local."),
+            ("internet_option", "Conectividad Digital", "fibra", "Conexión terrestre de alta estabilidad.")
         ]
         for key, title, opt, notes in decs:
             cursor.execute("INSERT INTO decisions (key, title, selected_option, notes) VALUES (?, ?, ?, ?)", (key, title, opt, notes))
+        conn.commit()
+    else:
+        # Migration: ensure existing selected_option values are lowercase for compatibility
+        cursor.execute("UPDATE decisions SET selected_option = 'asada' WHERE key = 'water_option' AND selected_option IN ('ASADA', 'asada')")
+        cursor.execute("UPDATE decisions SET selected_option = 'pozo' WHERE key = 'water_option' AND selected_option IN ('Pozo', 'pozo')")
+        cursor.execute("UPDATE decisions SET selected_option = 'fibra' WHERE key = 'internet_option' AND selected_option IN ('Fibra', 'fibra')")
+        cursor.execute("UPDATE decisions SET selected_option = 'starlink' WHERE key = 'internet_option' AND selected_option IN ('Starlink', 'starlink')")
+        conn.commit()
+
+    # Pre-populate decision options
+    cursor.execute("SELECT COUNT(*) as count FROM decision_options")
+    if cursor.fetchone()["count"] == 0:
+        opts = [
+            ("water_option", "asada", "ASADA", 
+             "Red comunal: Menor inversión inicial, sujeta a trámites de disponibilidad con la junta local.",
+             "Menor inversión inicial\nRed comunal ya existente",
+             "Sujeta a trámites de disponibilidad con la junta local\nPosible desabastecimiento en temporada alta",
+             "Opción convencional y recomendada inicialmente."),
+            ("water_option", "pozo", "Pozo Propio", 
+             "Pozo Propio: Mayor inversión (perforación/caudal), valor de activo directo y control del recurso.",
+             "Control total del recurso hídrico\nValor de activo directo para el proyecto\nIndependencia de la red comunal",
+             "Mayor inversión inicial (perforación/estudios/caudal)\nRiesgo de no encontrar suficiente caudal\nTrámites de concesión largos",
+             "Excelente para valorizar la tierra, pero requiere estudios hidrogeológicos."),
+            ("internet_option", "fibra", "Fibra Óptica", 
+             "Fibra Óptica: Conexión terrestre de alta estabilidad, requiere cotización de tendido por postes.",
+             "Conexión terrestre de alta estabilidad\nVelocidad simétrica constante",
+             "Requiere cotización de tendido por postes\nMayor tiempo de instalación si no hay posteo",
+             "Ideal para residentes de largo plazo."),
+            ("internet_option", "starlink", "Starlink (Sat)", 
+             "Starlink (Elon Musk): Conexión satelital inmediata, sin tendidos, pero con costos de antena fijos.",
+             "Conexión satelital inmediata\nSin necesidad de tendido de postes",
+             "Costos de antena y equipos fijos iniciales\nSusceptibilidad a tormentas fuertes\nLatencia ligeramente mayor que fibra",
+             "Excelente alternativa rápida mientras se coordina la fibra.")
+        ]
+        for key, code, label, desc, pros, cons, notes in opts:
+            cursor.execute("""
+            INSERT INTO decision_options (decision_key, option_code, option_label, description, pros, cons, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (key, code, label, desc, pros, cons, notes))
         conn.commit()
 
     # Pre-populate decision options
@@ -599,19 +638,22 @@ def admin_dashboard(request: Request):
     
     # 2. Project Progress & Upcoming Tasks
     cursor.execute("SELECT * FROM tasks")
-    all_tasks = cursor.fetchall()
-    total_tasks = len(all_tasks)
+    all_tasks = [dict(row) for row in cursor.fetchall()]
+    filtered_all_tasks = filter_tasks_by_decisions(all_tasks, cursor)
+    
+    total_tasks = len(filtered_all_tasks)
     project_progress = 0.0
     if total_tasks > 0:
-        total_progress = sum(t["progress"] for t in all_tasks)
+        total_progress = sum(t["progress"] for t in filtered_all_tasks)
         project_progress = total_progress / total_tasks
         
     cursor.execute("""
     SELECT * FROM tasks 
     WHERE status IN ('Pendiente', 'En Proceso') 
-    ORDER BY due_date ASC LIMIT 5
+    ORDER BY due_date ASC
     """)
-    upcoming_tasks = [dict(row) for row in cursor.fetchall()]
+    upcoming_tasks_raw = [dict(row) for row in cursor.fetchall()]
+    upcoming_tasks = filter_tasks_by_decisions(upcoming_tasks_raw, cursor)[:5]
     
     # 3. Financial Totals
     cursor.execute("SELECT * FROM finances")
@@ -640,6 +682,7 @@ def admin_dashboard(request: Request):
     cursor.execute("SELECT * FROM decisions")
     decisions_rows = cursor.fetchall()
     decisions = {row["key"]: row["selected_option"] for row in decisions_rows}
+    decisions_list = get_decisions_data(cursor)
     
     # 6. Calculate Net Balance, 15% Capital Gains Tax, and Net Utility
     net_balance_usd = total_income_usd - total_expense_usd
@@ -678,7 +721,8 @@ def admin_dashboard(request: Request):
         "net_utility_crc": net_utility_crc,
         "recent_leads": recent_leads,
         "exchange_rate": exchange_rate,
-        "decisions": decisions
+        "decisions": decisions,
+        "decisions_list": decisions_list
     })
 
 @app.get("/admin/crm")
@@ -797,22 +841,12 @@ def admin_gantt(request: Request):
     # Fetch active path decisions
     cursor.execute("SELECT key, selected_option FROM decisions")
     decisions = {row["key"]: row["selected_option"] for row in cursor.fetchall()}
-    water_path = decisions.get("water_option", "ASADA").lower()
-    internet_path = decisions.get("internet_option", "Fibra").lower()
+    decisions_list = get_decisions_data(cursor)
     
     # Fetch all tasks and filter by active decisions
     cursor.execute("SELECT * FROM tasks ORDER BY start_date ASC")
-    all_tasks = cursor.fetchall()
-    tasks_list = []
-    for row in all_tasks:
-        t = dict(row)
-        dpath = t.get("decision_path")
-        if dpath and dpath != "core":
-            if dpath in ["asada", "pozo"] and dpath != water_path:
-                continue
-            if dpath in ["fibra", "starlink"] and dpath != internet_path:
-                continue
-        tasks_list.append(t)
+    all_tasks = [dict(row) for row in cursor.fetchall()]
+    tasks_list = filter_tasks_by_decisions(all_tasks, cursor)
 
     tasks_json = json.dumps(tasks_list, default=str)
     
@@ -845,7 +879,8 @@ def admin_gantt(request: Request):
         "tasks_json": tasks_json,
         "exchange_rate": exchange_rate,
         "collaborators": collaborators_list,
-        "decisions": decisions
+        "decisions": decisions,
+        "decisions_list": decisions_list
     })
 
 @app.get("/admin/finance")
@@ -2265,15 +2300,10 @@ def get_calendar_feed():
     conn = get_db()
     cursor = conn.cursor()
     
-    # Fetch active path decisions
-    cursor.execute("SELECT key, selected_option FROM decisions")
-    decisions = {row["key"]: row["selected_option"] for row in cursor.fetchall()}
-    water_path = decisions.get("water_option", "ASADA").lower()
-    internet_path = decisions.get("internet_option", "Fibra").lower()
-    
     # Fetch tasks
     cursor.execute("SELECT * FROM tasks")
-    tasks = cursor.fetchall()
+    all_tasks = [dict(row) for row in cursor.fetchall()]
+    tasks = filter_tasks_by_decisions(all_tasks, cursor)
     conn.close()
     
     # Standard iCalendar formatting (RFC 5545)
@@ -2288,14 +2318,6 @@ def get_calendar_feed():
     ]
     
     for task in tasks:
-        # Filter decision paths
-        dpath = task["decision_path"]
-        if dpath and dpath != "core":
-            if dpath in ["asada", "pozo"] and dpath != water_path:
-                continue
-            if dpath in ["fibra", "starlink"] and dpath != internet_path:
-                continue
-
         start_date = task["start_date"].replace("-", "") if task["start_date"] else ""
         due_date = task["due_date"].replace("-", "") if task["due_date"] else ""
         

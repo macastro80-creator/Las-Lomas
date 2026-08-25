@@ -269,5 +269,158 @@
   </div>
 
 </div>
-{% endblock %}
+<!-- Create Decision Modal -->
+<div id="createDecisionModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-md w-full overflow-hidden flex flex-col">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 class="font-bold text-gray-800 text-lg">Nueva Categoría de Decisión</h3>
+      <button onclick="closeCreateDecisionModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <form onsubmit="submitCreateDecision(event)" class="p-6 space-y-4 text-sm">
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Título de la Categoría</label>
+        <input type="text" id="decTitleInput" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-gray-800" placeholder="Ej. Contratación de Personal">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Clave de Decisión (Identificador único)</label>
+        <input type="text" id="decKeyInput" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-gray-800" placeholder="Ej. staff_option (solo letras y guión bajo)">
+      </div>
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeCreateDecisionModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition text-gray-700">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Crear Categoría
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
+<!-- Justification Modal -->
+<div id="justificationModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-md w-full overflow-hidden flex flex-col">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 id="justificationModalTitle" class="font-bold text-gray-800 text-lg">Justificar Elección</h3>
+      <button onclick="closeJustificationModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <form onsubmit="submitSelectDecision(event)" class="p-6 space-y-4 text-sm">
+      <input type="hidden" id="justificationDecKey">
+      <input type="hidden" id="justificationOptCode">
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Justificación del Cambio (¿Por qué se toma esta decisión?)</label>
+        <textarea id="justificationText" required rows="4" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-gray-800" placeholder="Escribe el motivo de la elección, ej. Recomendación legal, menores costos, mayor independencia..."></textarea>
+      </div>
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeJustificationModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition text-gray-700">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Confirmar y Registrar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Manage Decisions & Options Modal (Matrix Comparison) -->
+<div id="manageDecisionModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-5xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <div>
+        <h3 id="manageDecisionModalTitle" class="font-bold text-gray-800 text-lg">Comparar y Administrar Opciones</h3>
+        <p class="text-xs text-[#948A7C]">Agrega, edita y compara las opciones para tomar la decisión.</p>
+      </div>
+      <button onclick="closeManageDecisionModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <div class="p-6 overflow-y-auto flex-1 space-y-6 text-sm">
+      <!-- Options Side-by-Side Comparison Container -->
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <h4 class="font-bold text-gray-800 text-sm">Matriz Comparativa</h4>
+          <button onclick="triggerAddOption()" class="bg-natural hover:bg-opacity-90 text-white px-3 py-1.5 rounded text-xs font-semibold transition flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar Opción
+          </button>
+        </div>
+        
+        <div id="comparisonContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+      
+      <!-- Change Log History -->
+      <div class="border-t border-[#EDE9E3] pt-4">
+        <h4 class="font-bold text-gray-800 text-sm mb-3">Historial de Decisiones (Bitácora)</h4>
+        <div id="decisionHistoryTimeline" class="space-y-3 max-h-[180px] overflow-y-auto pr-2">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Option Modal -->
+<div id="addEditOptionModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-lg w-full overflow-hidden flex flex-col">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 id="addEditOptionModalTitle" class="font-bold text-gray-800 text-lg">Agregar Opción</h3>
+      <button onclick="closeAddEditOptionModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <form id="addEditOptionForm" onsubmit="submitAddEditOption(event)" class="p-6 space-y-4 text-sm">
+      <input type="hidden" id="optionDecKey">
+      <input type="hidden" id="optionIsEdit">
+      
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Nombre de la Opción</label>
+        <input type="text" id="optionLabelInput" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-gray-800" placeholder="Ej. Sociedad de Usuarios de Agua (SUA)">
+      </div>
+      
+      <div id="optionCodeContainer">
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Código Identificador (Slug)</label>
+        <input type="text" id="optionCodeInput" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-gray-800" placeholder="Ej. sua (solo letras sin espacios)">
+      </div>
+      
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Descripción Breve</label>
+        <textarea id="optionDescriptionInput" rows="2" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-gray-800" placeholder="Ej. Red comunal alternativa administrada por los usuarios de la zona."></textarea>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-green-700 uppercase tracking-wider mb-1">Pros (Uno por línea)</label>
+          <textarea id="optionProsInput" rows="3" class="w-full px-3 py-2 border border-green-200 focus:border-green-500 rounded focus:outline-none bg-green-50 text-green-900" placeholder="Ej. Costos iniciales menores&#10;Mayor rapidez de conexión"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-red-700 uppercase tracking-wider mb-1">Contras (Uno por línea)</label>
+          <textarea id="optionConsInput" rows="3" class="w-full px-3 py-2 border border-red-200 focus:border-red-500 rounded focus:outline-none bg-red-50 text-red-900" placeholder="Ej. Limitada capacidad de caudal&#10;Requiere administración local"></textarea>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Anotaciones / Notas de Análisis</label>
+        <textarea id="optionNotesInput" rows="2" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-gray-800" placeholder="Ej. Gonzalo indica que el trámite de SUA toma unos 3 meses ante el MINAE."></textarea>
+      </div>
+      
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeAddEditOptionModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition text-gray-700">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Guardar Opción
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</div>
+{% endblock %}

@@ -8,15 +8,49 @@
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
   mermaid.initialize({
-    startOnLoad: true,
+    startOnLoad: false,
     theme: 'base',
+    gantt: {
+      fontSize: 12,
+      sectionFontSize: 11,
+      numberSectionHeaderFontSize: 11,
+      titleFontSize: 16,
+      barHeight: 24,
+      barGap: 4,
+      topPadding: 50,
+      sidePadding: 75
+    },
     themeVariables: {
       primaryColor: '#FAF8F5',
       primaryTextColor: '#3D372F',
       primaryBorderColor: '#EDE9E3',
       lineColor: '#2D5A3F',
       secondaryColor: '#E6EFEA',
-      tertiaryColor: '#FAF8F5'
+      tertiaryColor: '#FAF8F5',
+      fontFamily: 'Inter, sans-serif',
+      fontSize: '11px',
+      sectionFontSize: '11px',
+      titleFontSize: '16px'
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", async function() {
+    try {
+      // Wait for Google fonts to be ready to avoid miscalculated bounding boxes
+      await Promise.race([
+        document.fonts.ready,
+        new Promise(resolve => setTimeout(resolve, 1500))
+      ]);
+    } catch (e) {
+      console.warn("Error waiting for fonts to load:", e);
+    }
+    
+    try {
+      await mermaid.run({
+        querySelector: '.mermaid'
+      });
+    } catch (e) {
+      console.error("Error rendering mermaid diagram:", e);
     }
   });
 </script>
@@ -24,6 +58,17 @@
   .mermaid svg {
     max-width: 100% !important;
     height: auto !important;
+  }
+  .mermaid svg text {
+    font-family: 'Inter', sans-serif !important;
+  }
+  .mermaid svg .titleText {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 700 !important;
+  }
+  .mermaid svg .sectionText {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 600 !important;
   }
 </style>
 {% endblock %}
@@ -253,10 +298,11 @@
           <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Ruta de Decisión</label>
           <select id="taskDecisionPath" name="decision_path" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
             <option value="core">General (Core)</option>
-            <option value="asada">Opción ASADA (Agua)</option>
-            <option value="pozo">Opción Pozo (Agua)</option>
-            <option value="fibra">Opción Fibra (Internet)</option>
-            <option value="starlink">Opción Starlink (Internet)</option>
+            {% for dec in decisions_list %}
+              {% for opt in dec.options %}
+                <option value="{{ opt.option_code }}">Opción {{ opt.option_label }} ({{ dec.title }})</option>
+              {% endfor %}
+            {% endfor %}
           </select>
         </div>
       </div>
