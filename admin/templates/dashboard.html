@@ -7,7 +7,7 @@
 <div class="space-y-6">
   
   <!-- KPI Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
     
     <!-- Leads Card -->
     <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
@@ -38,6 +38,33 @@
       </div>
       <div class="bg-green-50 p-3 rounded-full text-natural">
         <i data-lucide="milestone" class="w-6 h-6"></i>
+      </div>
+    </div>
+
+    <!-- Decisions Card -->
+    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Decisiones Críticas</p>
+        {% set total_decs = decisions_list | length %}
+        {% set resolved_decs = namespace(count=0) %}
+        {% for dec in decisions_list %}
+          {% if dec.selected_option %}
+            {% set resolved_decs.count = resolved_decs.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        <h3 class="text-2xl font-bold text-gray-800 mt-2">
+          {{ resolved_decs.count }} / {{ total_decs }}
+        </h3>
+        <p class="text-xs text-[#574F45] mt-1">
+          {% if total_decs - resolved_decs.count > 0 %}
+          <span class="text-amber-600 font-semibold">{{ total_decs - resolved_decs.count }} pendientes</span>
+          {% else %}
+          <span class="text-green-600 font-semibold">Todas definidas</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="bg-purple-50 p-3 rounded-full text-purple-600">
+        <i data-lucide="git-compare" class="w-6 h-6"></i>
       </div>
     </div>
 
@@ -109,72 +136,9 @@
     <a href="/admin/gantt?show_modal=true" class="border border-[#EDE9E3] hover:bg-gray-50 text-[#574F45] px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
       <i data-lucide="plus" class="w-4 h-4"></i> Agregar Tarea al Gantt
     </a>
-  </div>
-
-  <!-- Decisions Center Widget -->
-  <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm space-y-4">
-    <div>
-      <h3 class="font-bold text-gray-800 text-lg">Centro de Decisiones Críticas</h3>
-      <p class="text-xs text-[#948A7C]">Modificar una opción reconfigura automáticamente las tareas del Gantt y cronograma.</p>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Water Decision Card -->
-      <div class="border border-[#EDE9E3] p-5 rounded-lg flex flex-col justify-between space-y-4 bg-[#FAF8F5]">
-        <div>
-          <div class="flex justify-between items-start">
-            <span class="text-xs uppercase tracking-wider font-bold text-[#948A7C]">Infraestructura Hídrica</span>
-            <span class="text-xs px-2.5 py-1 rounded font-bold bg-blue-100 text-blue-800">
-              {{ decisions.get('water_option', 'ASADA') }}
-            </span>
-          </div>
-          <h4 class="font-bold text-gray-800 mt-2 text-sm">Abastecimiento de Agua</h4>
-          <p class="text-xs text-[#574F45] mt-1">
-            {% if decisions.get('water_option', 'ASADA') == 'ASADA' %}
-            Red comunal: Menor inversión inicial, sujeta a trámites de disponibilidad con la junta local.
-            {% else %}
-            Pozo Propio: Mayor inversión (perforación/caudal), valor de activo directo y control del recurso.
-            {% endif %}
-          </p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="toggleDecision('water_option', 'ASADA')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('water_option', 'ASADA') == 'ASADA' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
-            ASADA
-          </button>
-          <button onclick="toggleDecision('water_option', 'Pozo')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('water_option', 'ASADA') == 'Pozo' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
-            Pozo Propio
-          </button>
-        </div>
-      </div>
-
-      <!-- Internet Decision Card -->
-      <div class="border border-[#EDE9E3] p-5 rounded-lg flex flex-col justify-between space-y-4 bg-[#FAF8F5]">
-        <div>
-          <div class="flex justify-between items-start">
-            <span class="text-xs uppercase tracking-wider font-bold text-[#948A7C]">Conectividad Digital</span>
-            <span class="text-xs px-2.5 py-1 rounded font-bold bg-purple-100 text-purple-800">
-              {{ decisions.get('internet_option', 'Fibra') }}
-            </span>
-          </div>
-          <h4 class="font-bold text-gray-800 mt-2 text-sm">Fibra Óptica vs Starlink</h4>
-          <p class="text-xs text-[#574F45] mt-1">
-            {% if decisions.get('internet_option', 'Fibra') == 'Fibra' %}
-            Fibra Óptica: Conexión terrestre de alta estabilidad, requiere cotización de tendido por postes.
-            {% else %}
-            Starlink (Elon Musk): Conexión satelital inmediata, sin tendidos, pero con costos de antena fijos.
-            {% endif %}
-          </p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="toggleDecision('internet_option', 'Fibra')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('internet_option', 'Fibra') == 'Fibra' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
-            Fibra Óptica
-          </button>
-          <button onclick="toggleDecision('internet_option', 'Starlink')" class="flex-1 px-3 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold text-gray-700 transition {% if decisions.get('internet_option', 'Fibra') == 'Starlink' %}bg-white border-natural text-natural ring-1 ring-natural{% endif %}">
-            Starlink (Sat)
-          </button>
-        </div>
-      </div>
-    </div>
+    <a href="/admin/decisions" class="border border-[#EDE9E3] hover:bg-gray-50 text-[#574F45] px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
+      <i data-lucide="git-compare" class="w-4 h-4"></i> Centro de Decisiones
+    </a>
   </div>
 
   <!-- Split Panel -->
@@ -307,27 +271,3 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script>
-  async function toggleDecision(key, selectedOption) {
-    const formData = new FormData();
-    formData.append("selected_option", selectedOption);
-    formData.append("notes", `Modificación de decisión a ${selectedOption}`);
-
-    try {
-      const response = await fetch(`/api/decisions/${key}`, {
-        method: "PATCH",
-        body: formData
-      });
-      if (response.ok) {
-        window.location.reload();
-      } else {
-        alert("Error al actualizar la decisión.");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error de conexión al cambiar decisión.");
-    }
-  }
-</script>
-{% endblock %}
