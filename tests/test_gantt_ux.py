@@ -201,3 +201,72 @@ def test_atomic_rollback_on_failure():
     assert schedule[0] == "Pendiente"
     assert schedule[1] is None
     conn.close()
+
+
+def test_create_lead_from_website_contact():
+    """
+    Verifica que el API de leads funcione correctamente para el formulario de contacto regular.
+    """
+    payload = {
+        "name": "Jane Doe",
+        "email": "jane@example.com",
+        "phone": "+506 8888 7777",
+        "origin": "Website Landing",
+        "details": "Proyecto Seleccionado: Las Lomas Eco-Residencial (Lote 1 ha - $190,000).\nMensaje del cliente: Hola, me interesa.",
+        "status": "New Lead"
+    }
+    
+    response = client.post("/api/leads", json=payload)
+    assert response.status_code == 200
+    assert response.json() == {"status": "success", "message": "Lead registrado en el CRM de Las Lomas."}
+    
+    # Verificar inserción en base de datos
+    conn = sqlite3.connect(TEST_DB)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM leads WHERE email = ?", ("jane@example.com",))
+    lead = cursor.fetchone()
+    assert lead is not None
+    assert lead[1] == "Jane Doe" # name
+    assert lead[2] == "jane@example.com" # email
+    assert lead[3] == "+506 8888 7777" # phone
+    assert lead[4] == "Website Landing" # origin
+    assert "Proyecto Seleccionado" in lead[5] # details
+    assert lead[6] == "New Lead" # status
+    assert lead[7] == 0 # replied default
+    conn.close()
+
+
+def test_create_booking_lead_from_website():
+    """
+    Verifica que la reservación de citas en el sitio web se almacene correctamente con origen 'Website Booking' y metadatos detallados.
+    """
+    payload = {
+        "name": "John Smith",
+        "email": "john.smith@example.com",
+        "phone": "+1 555 1234",
+        "origin": "Website Booking",
+        "details": "Tipo de Cita: Visita Presencial a la Propiedad\nFecha Propuesta: 2026-09-01\nHora Propuesta: 10:00\nNotas del cliente: Quiero ver el lote 4.",
+        "status": "New Lead"
+    }
+    
+    response = client.post("/api/leads", json=payload)
+    assert response.status_code == 200
+    assert response.json() == {"status": "success", "message": "Lead registrado en el CRM de Las Lomas."}
+    
+    # Verificar inserción en base de datos
+    conn = sqlite3.connect(TEST_DB)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM leads WHERE email = ?", ("john.smith@example.com",))
+    lead = cursor.fetchone()
+    assert lead is not None
+    assert lead[1] == "John Smith"
+    assert lead[2] == "john.smith@example.com"
+    assert lead[3] == "+1 555 1234"
+    assert lead[4] == "Website Booking"
+    assert "Tipo de Cita: Visita Presencial" in lead[5]
+    assert "Fecha Propuesta: 2026-09-01" in lead[5]
+    assert "Hora Propuesta: 10:00" in lead[5]
+    assert "Quiero ver el lote 4" in lead[5]
+    assert lead[6] == "New Lead"
+    assert lead[7] == 0
+    conn.close()
