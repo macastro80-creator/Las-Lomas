@@ -156,13 +156,36 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Canal de Origen</label>
-          <select id="leadOrigin" name="origin" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
-            <option value="Website Landing">Sitio Web</option>
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Instagram">Instagram</option>
-            <option value="Llamada Telefónica">Llamada</option>
-            <option value="Recomendación">Recomendación</option>
-            <option value="Otro">Otro</option>
+          <select id="leadOrigin" name="origin" onchange="toggleCustomOriginInput()" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="Meta organico">Meta Orgánico</option>
+            <option value="Meta Pago">Meta Pago</option>
+            <option value="Google organico">Google Orgánico</option>
+            <option value="Google pago">Google Pago</option>
+            <option value="Youtube organico">Youtube Orgánico</option>
+            <option value="Youtube pago">Youtube Pago</option>
+            <option value="Motores de IA">Motores de IA</option>
+            <option value="Base de datos">Base de datos</option>
+            <option value="F&F">F&F</option>
+            <option value="Website Booking">Agenda Cita (Web)</option>
+            <option value="directo">Directo</option>
+            <option value="Otros">Otros (Especificar)</option>
+          </select>
+        </div>
+        <div id="custom-origin-container" class="hidden">
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Etiqueta Personalizada</label>
+          <input type="text" id="leadCustomOrigin" name="origin_custom_label" placeholder="ej. TikTok, Volante..." class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+      </div>
+
+      <!-- Agent Assignment & Language -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Asignar Agente</label>
+          <select id="leadAgent" name="assigned_agent_id" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="auto">Auto (Reglas / Round Robin)</option>
+            {% for agent in collaborators %}
+            <option value="{{ agent.id }}">{{ agent.name }}</option>
+            {% endfor %}
           </select>
         </div>
         <div>
