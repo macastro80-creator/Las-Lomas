@@ -7,7 +7,7 @@
 <div class="space-y-6">
   
   <!-- KPI Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
     
     <!-- Leads Card -->
     <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
@@ -38,6 +38,33 @@
       </div>
       <div class="bg-green-50 p-3 rounded-full text-natural">
         <i data-lucide="milestone" class="w-6 h-6"></i>
+      </div>
+    </div>
+
+    <!-- Decisions Card -->
+    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-[#948A7C] uppercase tracking-wider">Decisiones Críticas</p>
+        {% set total_decs = decisions_list | length %}
+        {% set resolved_decs = namespace(count=0) %}
+        {% for dec in decisions_list %}
+          {% if dec.selected_option %}
+            {% set resolved_decs.count = resolved_decs.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        <h3 class="text-2xl font-bold text-gray-800 mt-2">
+          {{ resolved_decs.count }} / {{ total_decs }}
+        </h3>
+        <p class="text-xs text-[#574F45] mt-1">
+          {% if total_decs - resolved_decs.count > 0 %}
+          <span class="text-amber-600 font-semibold">{{ total_decs - resolved_decs.count }} pendientes</span>
+          {% else %}
+          <span class="text-green-600 font-semibold">Todas definidas</span>
+          {% endif %}
+        </p>
+      </div>
+      <div class="bg-purple-50 p-3 rounded-full text-purple-600">
+        <i data-lucide="git-compare" class="w-6 h-6"></i>
       </div>
     </div>
 
@@ -109,93 +136,9 @@
     <a href="/admin/gantt?show_modal=true" class="border border-[#EDE9E3] hover:bg-gray-50 text-[#574F45] px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
       <i data-lucide="plus" class="w-4 h-4"></i> Agregar Tarea al Gantt
     </a>
-  </div>
-
-  <!-- Decisions Center Widget -->
-  <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm space-y-4">
-    <div class="flex justify-between items-center">
-      <div>
-        <h3 class="font-bold text-gray-800 text-lg">Centro de Decisiones Críticas</h3>
-        <p class="text-xs text-[#948A7C]">Modificar una opción reconfigura automáticamente las tareas del Gantt y cronograma.</p>
-      </div>
-      <button onclick="openCreateDecisionModal()" class="bg-natural hover:bg-opacity-90 text-white px-3 py-1.5 rounded text-xs font-semibold transition flex items-center gap-1">
-        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Nueva Categoría
-      </button>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {% for dec in decisions_list %}
-      <div class="border border-[#EDE9E3] p-5 rounded-lg flex flex-col justify-between space-y-4 bg-[#FAF8F5]">
-        <div>
-          <div class="flex justify-between items-start">
-            <span class="text-xs uppercase tracking-wider font-bold text-[#948A7C] truncate max-w-[70%]" title="{{ dec.title }}">
-              {{ dec.title }}
-            </span>
-            <div class="flex items-center gap-2">
-              {% if dec.selected_option %}
-              <span class="text-xs px-2.5 py-1 rounded font-bold bg-blue-100 text-blue-800">
-                {% set found = false %}
-                {% for opt in dec.options %}
-                  {% if opt.option_code == dec.selected_option %}
-                    {{ opt.option_label }}
-                    {% set found = true %}
-                  {% endif %}
-                {% endfor %}
-                {% if not found %}{{ dec.selected_option | upper }}{% endif %}
-              </span>
-              {% else %}
-              <span class="text-xs px-2.5 py-1 rounded font-bold bg-yellow-100 text-yellow-800">Pendiente</span>
-              {% endif %}
-            </div>
-          </div>
-          
-          <h4 class="font-bold text-gray-800 mt-2 text-xs uppercase tracking-wider text-gray-500">Opción Activa</h4>
-          
-          <p class="text-xs text-[#574F45] mt-1">
-            {% set active_desc = "" %}
-            {% for opt in dec.options %}
-              {% if opt.option_code == dec.selected_option %}
-                {{ opt.description or "Sin descripción registrada." }}
-                {% set active_desc = opt.description %}
-              {% endif %}
-            {% endfor %}
-            {% if not dec.selected_option or not dec.options %}
-              No hay ninguna opción seleccionada aún.
-            {% endif %}
-          </p>
-
-          {% if dec.notes %}
-          <div class="mt-3 p-2 bg-white rounded border border-[#EDE9E3] text-[10px] text-[#574F45] italic">
-            <strong class="text-natural font-bold">Justificación:</strong> {{ dec.notes }}
-          </div>
-          {% endif %}
-        </div>
-        
-        <div class="space-y-2 pt-2 border-t border-gray-100">
-          <div class="flex flex-wrap gap-1.5">
-            {% for opt in dec.options %}
-            <button onclick="promptSelectDecision('{{ dec.key }}', '{{ opt.option_code }}', '{{ opt.option_label }}')" 
-                    class="flex-1 min-w-[70px] px-2.5 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-[11px] font-semibold text-gray-700 transition {% if dec.selected_option == opt.option_code %}bg-white border-natural text-natural ring-1 ring-natural font-bold{% endif %}">
-              {{ opt.option_label }}
-            </button>
-            {% endfor %}
-            {% if not dec.options %}
-            <p class="text-xs text-gray-400 italic py-1">Sin opciones registradas.</p>
-            {% endif %}
-          </div>
-          
-          <div class="flex justify-between items-center pt-2 border-t border-[#EDE9E3] text-xs">
-            <button onclick="openManageDecisionModal('{{ dec.key }}', '{{ dec.title }}')" class="text-natural font-bold hover:underline flex items-center gap-1">
-              <i data-lucide="git-compare" class="w-3.5 h-3.5"></i> Comparar y Administrar
-            </button>
-            <button onclick="confirmDeleteDecision('{{ dec.key }}', '{{ dec.title }}')" class="text-red-400 hover:text-red-600 transition" title="Eliminar Categoría">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
+    <a href="/admin/decisions" class="border border-[#EDE9E3] hover:bg-gray-50 text-[#574F45] px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
+      <i data-lucide="git-compare" class="w-4 h-4"></i> Centro de Decisiones
+    </a>
   </div>
 
   <!-- Split Panel -->
@@ -480,392 +423,4 @@
 </div>
 
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-  // Dynamic decisions list injected from backend
-  let decisionsData = {{ decisions_list | tojson | safe }};
-  let activeManageKey = null;
-
-  // Escaping helpers
-  function escapeHtml(text) {
-    if (!text) return '';
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  // --- Create Decision Modal ---
-  function openCreateDecisionModal() {
-    document.getElementById('createDecisionModal').classList.remove('hidden');
-  }
-
-  function closeCreateDecisionModal() {
-    document.getElementById('createDecisionModal').classList.add('hidden');
-    document.getElementById('decTitleInput').value = '';
-    document.getElementById('decKeyInput').value = '';
-  }
-
-  async function submitCreateDecision(event) {
-    event.preventDefault();
-    const key = document.getElementById('decKeyInput').value;
-    const title = document.getElementById('decTitleInput').value;
-
-    const formData = new FormData();
-    formData.append("key", key);
-    formData.append("title", title);
-
-    try {
-      const res = await fetch("/api/decisions", {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      if (res.ok) {
-        window.location.reload();
-      } else {
-        alert("Error: " + data.detail);
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error al conectar con la API.");
-    }
-  }
-
-  async function confirmDeleteDecision(key, title) {
-    if (confirm(`¿Estás seguro de que deseas eliminar la categoría de decisión "${title}"?\nEsto eliminará todas sus opciones y el historial permanentemente.`)) {
-      try {
-        const res = await fetch(`/api/decisions/${key}`, { method: "DELETE" });
-        if (res.ok) {
-          window.location.reload();
-        } else {
-          alert("Error al eliminar la decisión.");
-        }
-      } catch (e) {
-        console.error(e);
-        alert("Error de conexión.");
-      }
-    }
-  }
-
-  // --- Justification / Selector Prompt ---
-  function promptSelectDecision(key, optionCode, optionLabel) {
-    document.getElementById('justificationDecKey').value = key;
-    document.getElementById('justificationOptCode').value = optionCode;
-    document.getElementById('justificationModalTitle').textContent = `Justificar Elección: ${optionLabel}`;
-    document.getElementById('justificationText').value = '';
-    
-    // Hide manage modal if open to prevent stacking confusion, but remember key
-    closeManageDecisionModal();
-    activeManageKey = key;
-    
-    document.getElementById('justificationModal').classList.remove('hidden');
-  }
-
-  function closeJustificationModal() {
-    document.getElementById('justificationModal').classList.add('hidden');
-    // If we came from the manage modal, reopen it
-    if (activeManageKey) {
-      const dec = decisionsData.find(d => d.key === activeManageKey);
-      if (dec) openManageDecisionModal(activeManageKey, dec.title);
-    }
-  }
-
-  async function submitSelectDecision(event) {
-    event.preventDefault();
-    const key = document.getElementById('justificationDecKey').value;
-    const code = document.getElementById('justificationOptCode').value;
-    const justification = document.getElementById('justificationText').value;
-
-    const formData = new FormData();
-    formData.append("selected_option", code);
-    formData.append("justification", justification);
-
-    try {
-      const res = await fetch(`/api/decisions/${key}`, {
-        method: "PATCH",
-        body: formData
-      });
-      if (res.ok) {
-        window.location.reload();
-      } else {
-        alert("Error al guardar la elección.");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error de conexión.");
-    }
-  }
-
-  // --- Manage Decisions & Compare Modal ---
-  function openManageDecisionModal(key, title) {
-    activeManageKey = key;
-    const dec = decisionsData.find(d => d.key === key);
-    if (!dec) return;
-
-    document.getElementById('manageDecisionModalTitle').innerHTML = `Administrar y Comparar: <span class="text-natural">${escapeHtml(title)}</span>`;
-    
-    // Render comparison cards side-by-side
-    renderComparison(dec);
-
-    // Fetch and render history timeline
-    fetchAndRenderHistory(key);
-
-    document.getElementById('manageDecisionModal').classList.remove('hidden');
-    lucide.createIcons();
-  }
-
-  function closeManageDecisionModal() {
-    document.getElementById('manageDecisionModal').classList.add('hidden');
-    activeManageKey = null;
-  }
-
-  function renderComparison(dec) {
-    const comparisonContainer = document.getElementById('comparisonContainer');
-    comparisonContainer.innerHTML = '';
-
-    if (!dec.options || dec.options.length === 0) {
-      comparisonContainer.innerHTML = `
-        <div class="col-span-full text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-400">
-          <i data-lucide="info" class="w-8 h-8 mx-auto mb-2"></i>
-          <p class="text-xs font-semibold">No hay alternativas registradas para esta decisión.</p>
-          <p class="text-[10px] mt-1">Usa "Agregar Opción" para registrar la primera alternativa y sus detalles.</p>
-        </div>
-      `;
-      return;
-    }
-
-    const count = dec.options.length;
-    comparisonContainer.className = `grid grid-cols-1 md:grid-cols-${Math.min(count, 3)} gap-4`;
-
-    dec.options.forEach(opt => {
-      const isActive = opt.option_code === dec.selected_option;
-      const prosList = opt.pros ? opt.pros.split('\n').filter(p => p.trim()) : [];
-      const consList = opt.cons ? opt.cons.split('\n').filter(c => c.trim()) : [];
-
-      const card = document.createElement('div');
-      card.className = `border rounded-lg p-5 flex flex-col justify-between space-y-4 shadow-sm ${isActive ? 'bg-white border-natural ring-2 ring-natural/20' : 'bg-[#FAF8F5] border-[#EDE9E3]'}`;
-
-      let prosHtml = prosList.map(p => `<li class="flex items-start gap-1.5 text-xs text-green-800"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-green-600 mt-0.5 flex-shrink-0"></i> <span>${escapeHtml(p)}</span></li>`).join('');
-      let consHtml = consList.map(c => `<li class="flex items-start gap-1.5 text-xs text-red-800"><i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-600 mt-0.5 flex-shrink-0"></i> <span>${escapeHtml(c)}</span></li>`).join('');
-
-      card.innerHTML = `
-        <div>
-          <div class="flex justify-between items-start">
-            <h5 class="font-bold text-gray-800 text-sm">${escapeHtml(opt.option_label)}</h5>
-            ${isActive ? '<span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded">SELECCIONADA</span>' : ''}
-          </div>
-          
-          <p class="text-xs text-[#574F45] mt-2">${escapeHtml(opt.description || 'Sin descripción.')}</p>
-          
-          <div class="mt-4 space-y-3">
-            <div>
-              <span class="text-[10px] font-bold text-green-700 uppercase tracking-wider block">Ventajas (PROS)</span>
-              <ul class="mt-1 space-y-1.5">${prosHtml || '<li class="text-xs text-gray-400 italic">No registradas</li>'}</ul>
-            </div>
-            <div>
-              <span class="text-[10px] font-bold text-red-700 uppercase tracking-wider block">Desventajas (CONTRAS)</span>
-              <ul class="mt-1 space-y-1.5">${consHtml || '<li class="text-xs text-gray-400 italic">No registradas</li>'}</ul>
-            </div>
-          </div>
-          
-          ${opt.notes ? `
-          <div class="mt-4 p-2.5 bg-white rounded border border-[#EDE9E3] text-[11px] text-[#574F45]">
-            <strong class="text-natural font-bold">Anotaciones:</strong> ${escapeHtml(opt.notes)}
-          </div>
-          ` : ''}
-        </div>
-        
-        <div class="pt-3 border-t border-gray-200 flex justify-between items-center">
-          ${isActive ? `
-            <span class="text-xs text-green-700 font-bold flex items-center gap-1">
-              <i data-lucide="check" class="w-4 h-4"></i> Opción Activa
-            </span>
-          ` : `
-            <button onclick="promptSelectDecision('${dec.key}', '${opt.option_code}', '${opt.option_label}')" class="bg-natural hover:bg-opacity-90 text-white text-xs px-3 py-1.5 rounded font-semibold transition">
-              Seleccionar
-            </button>
-          `}
-          
-          <div class="flex items-center gap-1.5">
-            <button onclick="triggerEditOption('${dec.key}', '${opt.option_code}')" class="text-[#9E7A38] hover:text-[#826227] transition p-1 hover:bg-gray-100 rounded" title="Editar detalles">
-              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-            </button>
-            <button onclick="confirmDeleteOption('${dec.key}', '${opt.option_code}', '${opt.option_label}')" class="text-red-400 hover:text-red-600 transition p-1 hover:bg-gray-100 rounded" title="Eliminar alternativa">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        </div>
-      `;
-      comparisonContainer.appendChild(card);
-    });
-  }
-
-  async function fetchAndRenderHistory(key) {
-    const timeline = document.getElementById('decisionHistoryTimeline');
-    timeline.innerHTML = '<p class="text-xs text-gray-400 italic">Cargando historial...</p>';
-
-    try {
-      const res = await fetch(`/api/decisions/${key}/history`);
-      if (res.ok) {
-        const history = await res.json();
-        timeline.innerHTML = '';
-        if (history.length === 0) {
-          timeline.innerHTML = '<p class="text-xs text-gray-400 italic">No hay elecciones registradas en la bitácora aún.</p>';
-          return;
-        }
-        
-        history.forEach(item => {
-          const date = new Date(item.changed_at).toLocaleString();
-          const entry = document.createElement('div');
-          entry.className = "p-2.5 bg-white border border-[#EDE9E3] rounded shadow-xs text-xs space-y-1";
-          entry.innerHTML = `
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-gray-700">Elección: <span class="text-natural">${escapeHtml(item.option_label)}</span></span>
-              <span class="text-[10px] text-gray-400">${date}</span>
-            </div>
-            <p class="text-gray-600 text-[11px]"><strong class="text-gray-500">Justificación:</strong> ${escapeHtml(item.justification || 'Sin justificación registrada.')}</p>
-          `;
-          timeline.appendChild(entry);
-        });
-      } else {
-        timeline.innerHTML = '<p class="text-xs text-red-500 italic">Error al cargar historial.</p>';
-      }
-    } catch (e) {
-      console.error(e);
-      timeline.innerHTML = '<p class="text-xs text-red-500 italic">Error de conexión al cargar historial.</p>';
-    }
-  }
-
-  // --- Add / Edit Option Details ---
-  function triggerAddOption() {
-    document.getElementById('addEditOptionModalTitle').textContent = 'Agregar Alternativa';
-    document.getElementById('optionDecKey').value = activeManageKey;
-    document.getElementById('optionIsEdit').value = '';
-    
-    document.getElementById('optionLabelInput').value = '';
-    document.getElementById('optionCodeInput').value = '';
-    document.getElementById('optionCodeInput').readOnly = false;
-    document.getElementById('optionCodeContainer').classList.remove('hidden');
-    document.getElementById('optionDescriptionInput').value = '';
-    document.getElementById('optionProsInput').value = '';
-    document.getElementById('optionConsInput').value = '';
-    document.getElementById('optionNotesInput').value = '';
-    
-    closeManageDecisionModal();
-    document.getElementById('addEditOptionModal').classList.remove('hidden');
-  }
-
-  function triggerEditOption(key, optionCode) {
-    const dec = decisionsData.find(d => d.key === key);
-    if (!dec) return;
-    const opt = dec.options.find(o => o.option_code === optionCode);
-    if (!opt) return;
-
-    document.getElementById('addEditOptionModalTitle').textContent = `Editar Opción: ${opt.option_label}`;
-    document.getElementById('optionDecKey').value = key;
-    document.getElementById('optionIsEdit').value = '1';
-    
-    document.getElementById('optionLabelInput').value = opt.option_label;
-    document.getElementById('optionCodeInput').value = opt.option_code;
-    document.getElementById('optionCodeInput').readOnly = true;
-    document.getElementById('optionCodeContainer').classList.add('hidden'); // Hide code field on edit
-    document.getElementById('optionDescriptionInput').value = opt.description || '';
-    document.getElementById('optionProsInput').value = opt.pros || '';
-    document.getElementById('optionConsInput').value = opt.cons || '';
-    document.getElementById('optionNotesInput').value = opt.notes || '';
-    
-    closeManageDecisionModal();
-    document.getElementById('addEditOptionModal').classList.remove('hidden');
-  }
-
-  function closeAddEditOptionModal() {
-    document.getElementById('addEditOptionModal').classList.add('hidden');
-    // Reopen parent manage modal if active key is set
-    if (activeManageKey) {
-      const dec = decisionsData.find(d => d.key === activeManageKey);
-      if (dec) openManageDecisionModal(activeManageKey, dec.title);
-    }
-  }
-
-  async function submitAddEditOption(event) {
-    event.preventDefault();
-    const key = document.getElementById('optionDecKey').value;
-    const isEdit = document.getElementById('optionIsEdit').value === '1';
-    const label = document.getElementById('optionLabelInput').value;
-    const code = document.getElementById('optionCodeInput').value;
-    const desc = document.getElementById('optionDescriptionInput').value;
-    const pros = document.getElementById('optionProsInput').value;
-    const cons = document.getElementById('optionConsInput').value;
-    const notes = document.getElementById('optionNotesInput').value;
-
-    const formData = new FormData();
-    formData.append("option_label", label);
-    formData.append("description", desc);
-    formData.append("pros", pros);
-    formData.append("cons", cons);
-    formData.append("notes", notes);
-    
-    let url = `/api/decisions/${key}/options`;
-    let method = "POST";
-    
-    if (isEdit) {
-      url = `/api/decisions/${key}/options/${code}`;
-      method = "PATCH";
-    } else {
-      formData.append("option_code", code);
-    }
-
-    try {
-      const res = await fetch(url, {
-        method: method,
-        body: formData
-      });
-      const data = await res.json();
-      if (res.ok) {
-        window.location.reload();
-      } else {
-        alert("Error: " + data.detail);
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error de conexión al guardar la opción.");
-    }
-  }
-
-  async function confirmDeleteOption(key, optionCode, optionLabel) {
-    if (confirm(`¿Estás seguro de que deseas eliminar la alternativa "${optionLabel}"?`)) {
-      try {
-        const res = await fetch(`/api/decisions/${key}/options/${optionCode}`, {
-          method: "DELETE"
-        });
-        if (res.ok) {
-          window.location.reload();
-        } else {
-          alert("Error al eliminar la opción.");
-        }
-      } catch (e) {
-        console.error(e);
-        alert("Error de conexión.");
-      }
-    }
-  }
-
-  // Auto-slugify option label into option code on type
-  const labelInput = document.getElementById('optionLabelInput');
-  const codeInput = document.getElementById('optionCodeInput');
-  labelInput.addEventListener('input', () => {
-    if (!document.getElementById('optionIsEdit').value) {
-      codeInput.value = labelInput.value
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '_')
-        .replace(/_+/g, '_')
-        .replace(/(^_|_$)/g, '');
-    }
-  });
-</script>
 {% endblock %}

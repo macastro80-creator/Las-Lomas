@@ -270,3 +270,5 @@ def test_create_booking_lead_from_website():
     assert lead[6] == "New Lead"
     assert lead[7] == 0
     conn.close()
+
+

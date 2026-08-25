@@ -200,3 +200,43 @@ def test_delete_decision_option():
     cursor.execute("SELECT selected_option FROM decisions WHERE key = 'test_del'")
     assert cursor.fetchone()[0] == ""
     conn.close()
+
+def test_admin_decisions_route():
+    # Probar que la nueva ruta /admin/decisions cargue correctamente
+    response = client.get("/admin/decisions")
+    assert response.status_code == 200
+    assert "Centro de Decisiones" in response.text
+
+def test_reorder_decisions():
+    # 1. Crear dos decisiones
+    client.post("/api/decisions", data={"key": "dec_a", "title": "Decisión A"})
+    client.post("/api/decisions", data={"key": "dec_b", "title": "Decisión B"})
+
+    # Por defecto deben estar en 'Identificadas' y con sort_order = 0
+    conn = sqlite3.connect(TEST_DB)
+    cursor = conn.cursor()
+    cursor.execute("SELECT lane, sort_order FROM decisions WHERE key = 'dec_a'")
+    row_a = cursor.fetchone()
+    assert row_a[0] == "Identificadas"
+    
+    # 2. Enviar solicitud de reordenación
+    # Mover dec_b y dec_a al carril 'En Análisis' en ese orden específico (dec_b primero, dec_a segundo)
+    response = client.post("/api/decisions/reorder", json={
+        "lane": "En Análisis",
+        "keys": ["dec_b", "dec_a"]
+    })
+    assert response.status_code == 200
+    assert response.json()["status"] == "success"
+
+    # Verificar que el orden y el carril se actualizaron correctamente
+    cursor.execute("SELECT lane, sort_order FROM decisions WHERE key = 'dec_b'")
+    row_b = cursor.fetchone()
+    assert row_b[0] == "En Análisis"
+    assert row_b[1] == 0
+
+    cursor.execute("SELECT lane, sort_order FROM decisions WHERE key = 'dec_a'")
+    row_a = cursor.fetchone()
+    assert row_a[0] == "En Análisis"
+    assert row_a[1] == 1
+    
+    conn.close()

@@ -179,7 +179,37 @@ def init_db():
     )
     """)
 
-    # 8. Meetings Table
+    # 8. Decision Options Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS decision_options (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        decision_key TEXT NOT NULL,
+        option_code TEXT NOT NULL,
+        option_label TEXT NOT NULL,
+        description TEXT,
+        pros TEXT, -- Newline-separated pros
+        cons TEXT, -- Newline-separated cons
+        notes TEXT, -- User annotations
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (decision_key) REFERENCES decisions (key) ON DELETE CASCADE,
+        UNIQUE(decision_key, option_code)
+    )
+    """)
+
+    # 9. Decision History Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS decision_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        decision_key TEXT NOT NULL,
+        option_code TEXT NOT NULL,
+        option_label TEXT NOT NULL,
+        justification TEXT,
+        changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (decision_key) REFERENCES decisions (key) ON DELETE CASCADE
+    )
+    """)
+
+    # 10. Meetings Table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS meetings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -309,6 +339,14 @@ def init_db():
         if col_name not in collaborators_cols:
             cursor.execute(f"ALTER TABLE collaborators ADD COLUMN {col_name} {col_type}")
 
+    # Decisions table migrations
+    cursor.execute("PRAGMA table_info(decisions)")
+    decisions_cols = [row["name"] for row in cursor.fetchall()]
+    if "lane" not in decisions_cols:
+        cursor.execute("ALTER TABLE decisions ADD COLUMN lane TEXT DEFAULT 'Identificadas'")
+    if "sort_order" not in decisions_cols:
+        cursor.execute("ALTER TABLE decisions ADD COLUMN sort_order INTEGER DEFAULT 0")
+
     # Pre-populate collaborators
     cursor.execute("SELECT COUNT(*) as count FROM collaborators")
     if cursor.fetchone()["count"] == 0:
@@ -396,6 +434,38 @@ def init_db():
             """, (key, code, label, desc, pros, cons, notes))
         conn.commit()
 
+    # Pre-populate decision options
+    cursor.execute("SELECT COUNT(*) as count FROM decision_options")
+    if cursor.fetchone()["count"] == 0:
+        opts = [
+            ("water_option", "asada", "ASADA", 
+             "Red comunal: Menor inversión inicial, sujeta a trámites de disponibilidad con la junta local.",
+             "Menor inversión inicial\nRed comunal ya existente",
+             "Sujeta a trámites de disponibilidad con la junta local\nPosible desabastecimiento en temporada alta",
+             "Opción convencional y recomendada inicialmente."),
+            ("water_option", "pozo", "Pozo Propio", 
+             "Pozo Propio: Mayor inversión (perforación/caudal), valor de activo directo y control del recurso.",
+             "Control total del recurso hídrico\nValor de activo directo para el proyecto\nIndependencia de la red comunal",
+             "Mayor inversión inicial (perforación/estudios/caudal)\nRiesgo de no encontrar suficiente caudal\nTrámites de concesión largos",
+             "Excelente para valorizar la tierra, pero requiere estudios hidrogeológicos."),
+            ("internet_option", "fibra", "Fibra Óptica", 
+             "Fibra Óptica: Conexión terrestre de alta estabilidad, requiere cotización de tendido por postes.",
+             "Conexión terrestre de alta estabilidad\nVelocidad simétrica constante",
+             "Requiere cotización de tendido por postes\nMayor tiempo de instalación si no hay posteo",
+             "Ideal para residentes de largo plazo."),
+            ("internet_option", "starlink", "Starlink (Sat)", 
+             "Starlink (Elon Musk): Conexión satelital inmediata, sin tendidos, pero con costos de antena fijos.",
+             "Conexión satelital inmediata\nSin necesidad de tendido de postes",
+             "Costos de antena y equipos fijos iniciales\nSusceptibilidad a tormentas fuertes\nLatencia ligeramente mayor que fibra",
+             "Excelente alternativa rápida mientras se coordina la fibra.")
+        ]
+        for key, code, label, desc, pros, cons, notes in opts:
+            cursor.execute("""
+            INSERT INTO decision_options (decision_key, option_code, option_label, description, pros, cons, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (key, code, label, desc, pros, cons, notes))
+        conn.commit()
+
     # Pre-populate default Gantt tasks if empty (Las Lomas Development Roadmap)
     cursor.execute("SELECT COUNT(*) as count FROM tasks")
     if cursor.fetchone()["count"] == 0:
@@ -428,7 +498,7 @@ def init_db():
     conn.close()
 
 def get_decisions_data(cursor):
-    cursor.execute("SELECT * FROM decisions ORDER BY id ASC")
+    cursor.execute("SELECT * FROM decisions ORDER BY sort_order ASC")
     decisions_list = []
     for d_row in cursor.fetchall():
         key = d_row["key"]
@@ -440,6 +510,8 @@ def get_decisions_data(cursor):
             "title": d_row["title"],
             "selected_option": d_row["selected_option"],
             "notes": d_row["notes"],
+            "lane": d_row["lane"],
+            "sort_order": d_row["sort_order"],
             "options": options
         })
     return decisions_list
@@ -872,6 +944,29 @@ def admin_finance(request: Request):
         "capital_gains_tax_crc": capital_gains_tax_crc,
         "net_utility_usd": net_utility_usd,
         "net_utility_crc": net_utility_crc,
+        "exchange_rate": exchange_rate
+    })
+
+@app.get("/admin/decisions")
+def admin_decisions(request: Request):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get pending leads count
+    cursor.execute("SELECT COUNT(*) as pending FROM leads WHERE replied = 0")
+    pending_leads_count = cursor.fetchone()["pending"]
+    
+    # Get decisions list
+    decisions_list = get_decisions_data(cursor)
+    
+    conn.close()
+    
+    exchange_rate = get_exchange_rate()
+    
+    return templates.TemplateResponse(request, "decisions.html", {
+        "active_page": "decisions",
+        "pending_leads_count": pending_leads_count,
+        "decisions_list": decisions_list,
         "exchange_rate": exchange_rate
     })
 
@@ -1956,6 +2051,28 @@ def api_pay_payment_schedule(
 
 # --- Decisions API ---
 
+class ReorderPayload(BaseModel):
+    lane: str
+    keys: list[str]
+
+@app.post("/api/decisions/reorder")
+def reorder_decisions(payload: ReorderPayload):
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        for index, key in enumerate(payload.keys):
+            cursor.execute("""
+            UPDATE decisions 
+            SET lane = ?, sort_order = ?, updated_at = CURRENT_TIMESTAMP 
+            WHERE key = ?
+            """, (payload.lane, index, key))
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"status": "success", "message": "Orden de decisiones actualizado."}
+
 @app.post("/api/decisions")
 def create_decision(key: str = Form(...), title: str = Form(...)):
     import re
@@ -2112,7 +2229,6 @@ def delete_decision_option(key: str, option_code: str):
     conn.close()
     return {"status": "success", "message": f"Opción '{option_code}' eliminada"}
 
-
 # --- Finances API ---
 
 @app.post("/api/finances/new")
@@ -2126,7 +2242,8 @@ async def create_transaction(
     exchange_rate: float = Form(...),
     category_type: str = Form("OPEX"),
     apply_tax: bool = Form(False),  # Toggle 13% IVA
-    invoice_file: UploadFile = File(None)
+    invoice_file: UploadFile = File(None),
+    task_id: str = Form(None)
 ):
     # Costa Rican 13% IVA calculation
     iva_rate = 0.13
@@ -2155,12 +2272,14 @@ async def create_transaction(
             shutil.copyfileobj(invoice_file.file, buffer)
         invoice_path = file_path
 
+    t_id = int(task_id) if (task_id and task_id.strip() != "") else None
+
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-    INSERT INTO finances (date, type, category, concept, amount_usd, amount_crc, currency, exchange_rate, invoice_path, category_type, base_amount, tax_amount, iva_rate)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (date, type, category, concept, amount_usd, amount_crc, currency, exchange_rate, invoice_path, category_type, base_amount, tax_amount, iva_rate))
+    INSERT INTO finances (date, type, category, concept, amount_usd, amount_crc, currency, exchange_rate, invoice_path, category_type, base_amount, tax_amount, iva_rate, task_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (date, type, category, concept, amount_usd, amount_crc, currency, exchange_rate, invoice_path, category_type, base_amount, tax_amount, iva_rate, t_id))
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/finance", status_code=status.HTTP_303_SEE_OTHER)
