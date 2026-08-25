@@ -13,6 +13,7 @@ main.DATABASE_NAME = TEST_DB
 
 @pytest.fixture(autouse=True)
 def setup_test_db():
+    main.DATABASE_NAME = TEST_DB
     # Sobrescribir get_db para usar la base de datos de pruebas
     def get_test_db():
         conn = sqlite3.connect(TEST_DB)

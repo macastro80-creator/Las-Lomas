@@ -4,7 +4,7 @@ import sqlite3
 import urllib.request
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import FastAPI, Request, Form, HTTPException, status, UploadFile, File, Response
 from fastapi.responses import RedirectResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -66,7 +66,18 @@ def init_db():
         details TEXT,
         status TEXT,
         replied INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        assigned_agent_id INTEGER,
+        language TEXT DEFAULT 'es',
+        lead_temperature TEXT DEFAULT 'frio',
+        deal_value REAL DEFAULT 0.0,
+        origin_custom_label TEXT,
+        contacted_at TEXT,
+        meeting_at TEXT,
+        visited_at TEXT,
+        reserved_at TEXT,
+        closed_at TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (assigned_agent_id) REFERENCES collaborators(id) ON DELETE SET NULL
     )
     """)
     
@@ -106,6 +117,7 @@ def init_db():
         base_amount REAL,
         tax_amount REAL,
         iva_rate REAL DEFAULT 0.13,
+        marketing_channel TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -115,7 +127,12 @@ def init_db():
     CREATE TABLE IF NOT EXISTS collaborators (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
-        role TEXT
+        role TEXT,
+        languages TEXT DEFAULT 'es,en',
+        is_active_round_robin INTEGER DEFAULT 1,
+        last_assigned_at TEXT,
+        commission_rate REAL DEFAULT 3.0,
+        zoom_link TEXT DEFAULT 'https://zoom.us/j/laslomas'
     )
     """)
 
@@ -160,6 +177,46 @@ def init_db():
     )
     """)
 
+    # 8. Meetings Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS meetings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        lead_id INTEGER NOT NULL,
+        title TEXT,
+        scheduled_at TEXT NOT NULL,
+        language TEXT NOT NULL,
+        zoom_link TEXT,
+        status TEXT DEFAULT 'scheduled',
+        notes TEXT,
+        summary TEXT,
+        follow_up_plan TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (lead_id) REFERENCES leads (id) ON DELETE CASCADE
+    )
+    """)
+
+    # 9. Page Views Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS page_views (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        page_path TEXT NOT NULL,
+        viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # 10. Assignment Rules Table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS assignment_rules (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        field_name TEXT NOT NULL,
+        field_value TEXT NOT NULL,
+        agent_id INTEGER NOT NULL,
+        is_active INTEGER DEFAULT 1,
+        priority INTEGER DEFAULT 0,
+        FOREIGN KEY (agent_id) REFERENCES collaborators (id) ON DELETE CASCADE
+    )
+    """)
+
     # Migrations: Add new columns if they do not exist
     cursor.execute("PRAGMA table_info(tasks)")
     tasks_cols = [row["name"] for row in cursor.fetchall()]
@@ -180,6 +237,41 @@ def init_db():
         cursor.execute("ALTER TABLE finances ADD COLUMN tax_amount REAL")
     if "iva_rate" not in finances_cols:
         cursor.execute("ALTER TABLE finances ADD COLUMN iva_rate REAL DEFAULT 0.13")
+    if "marketing_channel" not in finances_cols:
+        cursor.execute("ALTER TABLE finances ADD COLUMN marketing_channel TEXT")
+
+    # Leads table migrations
+    cursor.execute("PRAGMA table_info(leads)")
+    leads_cols = [row["name"] for row in cursor.fetchall()]
+    leads_new_cols = {
+        "assigned_agent_id": "INTEGER REFERENCES collaborators(id) ON DELETE SET NULL",
+        "language": "TEXT DEFAULT 'es'",
+        "lead_temperature": "TEXT DEFAULT 'frio'",
+        "deal_value": "REAL DEFAULT 0.0",
+        "origin_custom_label": "TEXT",
+        "contacted_at": "TEXT",
+        "meeting_at": "TEXT",
+        "visited_at": "TEXT",
+        "reserved_at": "TEXT",
+        "closed_at": "TEXT"
+    }
+    for col_name, col_type in leads_new_cols.items():
+        if col_name not in leads_cols:
+            cursor.execute(f"ALTER TABLE leads ADD COLUMN {col_name} {col_type}")
+
+    # Collaborators table migrations
+    cursor.execute("PRAGMA table_info(collaborators)")
+    collaborators_cols = [row["name"] for row in cursor.fetchall()]
+    collaborators_new_cols = {
+        "languages": "TEXT DEFAULT 'es,en'",
+        "is_active_round_robin": "INTEGER DEFAULT 1",
+        "last_assigned_at": "TEXT",
+        "commission_rate": "REAL DEFAULT 3.0",
+        "zoom_link": "TEXT DEFAULT 'https://zoom.us/j/laslomas'"
+    }
+    for col_name, col_type in collaborators_new_cols.items():
+        if col_name not in collaborators_cols:
+            cursor.execute(f"ALTER TABLE collaborators ADD COLUMN {col_name} {col_type}")
 
     # Pre-populate collaborators
     cursor.execute("SELECT COUNT(*) as count FROM collaborators")
@@ -197,6 +289,27 @@ def init_db():
             cursor.execute("INSERT INTO collaborators (name, role) VALUES (?, ?)", (name, role))
         conn.commit()
 
+    # Pre-populate default values for collaborators
+    cursor.execute("UPDATE collaborators SET languages = 'es,en', is_active_round_robin = 1, commission_rate = 3.0, zoom_link = 'https://zoom.us/j/favio-ventas' WHERE name = 'Favio'")
+    cursor.execute("UPDATE collaborators SET languages = 'es,en', is_active_round_robin = 1, commission_rate = 3.0, zoom_link = 'https://zoom.us/j/santiago-ventas' WHERE name = 'Santiago'")
+    cursor.execute("UPDATE collaborators SET languages = 'es,en', is_active_round_robin = 1, commission_rate = 3.0, zoom_link = 'https://zoom.us/j/alejandra-castro' WHERE name = 'Alejandra Castro'")
+    cursor.execute("UPDATE collaborators SET languages = 'es,en', is_active_round_robin = 1, commission_rate = 3.0, zoom_link = 'https://zoom.us/j/sebastian-rodriguez' WHERE name = 'Sebastián Rodríguez'")
+    cursor.execute("UPDATE collaborators SET is_active_round_robin = 0, commission_rate = 0.0 WHERE name IN ('Allan', 'Gonzalo', 'Daniela')")
+    conn.commit()
+
+    # Pre-populate assignment rules
+    cursor.execute("SELECT COUNT(*) as count FROM assignment_rules")
+    if cursor.fetchone()["count"] == 0:
+        cursor.execute("SELECT id FROM collaborators WHERE name = 'Alejandra Castro'")
+        row = cursor.fetchone()
+        if row:
+            alejandra_id = row["id"]
+            cursor.execute("""
+                INSERT INTO assignment_rules (field_name, field_value, agent_id, priority)
+                VALUES ('origin', 'F&F', ?, 1)
+            """, (alejandra_id,))
+            conn.commit()
+
     # Pre-populate decisions
     cursor.execute("SELECT COUNT(*) as count FROM decisions")
     if cursor.fetchone()["count"] == 0:
@@ -212,22 +325,23 @@ def init_db():
     cursor.execute("SELECT COUNT(*) as count FROM tasks")
     if cursor.fetchone()["count"] == 0:
         default_tasks = [
+            ("Compra del Lote", "Firma de Opción de Compra", "Firma de contrato de opción de compra-venta del terreno del proyecto.", "2026-05-01", "2026-05-30", "Completado", 100, None),
             ("Regulación y Permisos", "Viabilidad Ambiental SETENA D1", "Viabilidad ambiental D1 ya aprobada y en firme.", "2026-06-01", "2026-08-01", "Completado", 100, None),
             ("Regulación y Permisos", "Concesión de Agua y Pozos Aprobados", "Trámite e inscripción de pozos y concesiones hídricas.", "2026-07-01", "2026-08-20", "En Proceso", 90, None),
             ("Planificación y Diseño", "Diseño Conceptual del Masterplan (150 lotes)", "Plan maestro preliminar de distribución de lotes.", "2026-08-01", "2026-09-15", "En Proceso", 45, None),
-            ("Regulación y Permisos", "Planos de Catastro e Inscripción de Segregaciones", "Visado catastral de segregaciones de los lotes.", "2026-09-16", "2026-11-15", "Pendiente", 0, 3),
-            ("Planificación y Diseño", "Diseño Técnico de Vialidad e Hidráulica", "Ingeniería de escorrentías e infraestructura vial.", "2026-09-16", "2026-10-31", "Pendiente", 0, 3),
-            ("Planificación y Diseño", "Diseño de Áreas Comunes y Amenidades (Club del Río)", "Concepto de casa club y miradores de montaña.", "2026-10-01", "2026-11-30", "Pendiente", 0, 3),
-            ("Regulación y Permisos", "Permisos Municipales de Construcción", "Obtención de licencia municipal para movimiento de tierra y calles.", "2026-11-16", "2027-01-15", "Pendiente", 0, 4),
+            ("Regulación y Permisos", "Planos de Catastro e Inscripción de Segregaciones", "Visado catastral de segregaciones de los lotes.", "2026-09-16", "2026-11-15", "Pendiente", 0, 4),
+            ("Planificación y Diseño", "Diseño Técnico de Vialidad e Hidráulica", "Ingeniería de escorrentías e infraestructura vial.", "2026-09-16", "2026-10-31", "Pendiente", 0, 4),
+            ("Planificación y Diseño", "Diseño de Áreas Comunes y Amenidades (Club del Río)", "Concepto de casa club y miradores de montaña.", "2026-10-01", "2026-11-30", "Pendiente", 0, 4),
+            ("Regulación y Permisos", "Permisos Municipales de Construcción", "Obtención de licencia municipal para movimiento de tierra y calles.", "2026-11-16", "2027-01-15", "Pendiente", 0, 5),
             ("Mercadeo y Ventas", "Publicación de Landing Page & Brochure de Inversión", "Sitio web de aterrizaje y brochure de pre-venta digital.", "2026-08-10", "2026-08-25", "En Proceso", 80, None),
             ("Mercadeo y Ventas", "Configuración del CRM y Canales de Captación", "Integración de leads y control de prospectos sin contestar.", "2026-08-14", "2026-08-31", "En Proceso", 20, None),
-            ("Mercadeo y Ventas", "Lanzamiento Oficial de Pre-venta (Fase 1: 30 lotes)", "Inicio formal de colocación de lotes a clientes VIP.", "2026-09-01", "2026-12-31", "Pendiente", 0, 8),
-            ("Construcción e Infraestructura", "Movimiento de Tierras y Caminos Internos", "Excavación y conformación de calles internas.", "2027-01-20", "2027-04-30", "Pendiente", 0, 7),
-            ("Construcción e Infraestructura", "Red de Agua Potable y Conexiones", "Instalación de tuberías subterráneas y tomas.", "2027-03-01", "2027-05-31", "Pendiente", 0, 11),
-            ("Construcción e Infraestructura", "Canalización Eléctrica y Alumbrado", "Posteado y tendido de líneas eléctricas secundarias.", "2027-04-01", "2027-06-30", "Pendiente", 0, 11),
-            ("Construcción e Infraestructura", "Construcción de Amenidades (Club y Senderos)", "Edificación de la zona social y senderismo.", "2027-05-01", "2027-08-31", "Pendiente", 0, 11),
-            ("Entrega y Cierre", "Firma de Escrituras y Cierre de Ventas (Fase 1)", "Traspaso notarial oficial de los primeros lotes a compradores.", "2027-06-01", "2027-09-30", "Pendiente", 0, 12),
-            ("Entrega y Cierre", "Entrega Física de Lotes a Propietarios", "Handover de lotes listos para construir.", "2027-10-01", "2027-11-30", "Pendiente", 0, 15)
+            ("Mercadeo y Ventas", "Lanzamiento Oficial de Pre-venta (Fase 1: 30 lotes)", "Inicio formal de colocación de lotes a clientes VIP.", "2026-09-01", "2026-12-31", "Pendiente", 0, 9),
+            ("Construcción e Infraestructura", "Movimiento de Tierras y Caminos Internos", "Excavación y conformación de calles internas.", "2027-01-20", "2027-04-30", "Pendiente", 0, 8),
+            ("Construcción e Infraestructura", "Red de Agua Potable y Conexiones", "Instalación de tuberías subterráneas y tomas.", "2027-03-01", "2027-05-31", "Pendiente", 0, 12),
+            ("Construcción e Infraestructura", "Canalización Eléctrica y Alumbrado", "Posteado y tendido de líneas eléctricas secundarias.", "2027-04-01", "2027-06-30", "Pendiente", 0, 12),
+            ("Construcción e Infraestructura", "Construcción de Amenidades (Club y Senderos)", "Edificación de la zona social y senderismo.", "2027-05-01", "2027-08-31", "Pendiente", 0, 12),
+            ("Entrega y Cierre", "Firma de Escrituras y Cierre de Ventas (Fase 1)", "Traspaso notarial oficial de los primeros lotes a compradores.", "2027-06-01", "2027-09-30", "Pendiente", 0, 13),
+            ("Entrega y Cierre", "Entrega Física de Lotes a Propietarios", "Handover de lotes listos para construir.", "2027-10-01", "2027-11-30", "Pendiente", 0, 16)
         ]
         for phase, title, desc, start_date, due_date, status, progress, pred in default_tasks:
             cursor.execute("""
@@ -269,26 +383,42 @@ def get_exchange_rate():
         print("Failed to fetch exchange rate dynamically, using fallback:", e)
         return EXCHANGE_RATE_CACHE["rate"]
 
+# Helper to record page views
+def record_page_view(page_path: str):
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO page_views (page_path) VALUES (?)", (page_path,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Error recording page view: {e}")
+
 # ----------------- PUBLIC WEBSITE ROUTES -----------------
 
 @app.get("/")
 def read_root():
+    record_page_view("home")
     return FileResponse("website/index.html")
 
 @app.get("/residential")
 def read_residential():
+    record_page_view("residential")
     return FileResponse("website/residential.html")
 
 @app.get("/agrihood")
 def read_agrihood():
+    record_page_view("agrihood")
     return FileResponse("website/agrihood.html")
 
 @app.get("/zone")
 def read_zone():
+    record_page_view("zone")
     return FileResponse("website/zone.html")
 
 @app.get("/contact")
 def read_contact():
+    record_page_view("contact")
     return FileResponse("website/contact.html")
 
 @app.get("/styles.css")
@@ -416,14 +546,39 @@ def admin_crm(request: Request, filter: str = "all"):
     pending_leads_count = cursor.fetchone()["pending"]
     
     # Query leads
-    if filter == "pending":
-        cursor.execute("SELECT * FROM leads WHERE replied = 0 ORDER BY id DESC")
-    else:
-        cursor.execute("SELECT * FROM leads ORDER BY id DESC")
-        
+    cursor.execute("""
+        SELECT l.*, c.name as agent_name 
+        FROM leads l
+        LEFT JOIN collaborators c ON l.assigned_agent_id = c.id
+        ORDER BY l.id DESC
+    """)
     leads_rows = cursor.fetchall()
     leads_list = [dict(row) for row in leads_rows]
     leads_json = json.dumps(leads_list, default=str)
+    
+    # Query collaborators
+    cursor.execute("SELECT * FROM collaborators ORDER BY name ASC")
+    collaborators = [dict(row) for row in cursor.fetchall()]
+    
+    # Query assignment rules
+    cursor.execute("""
+        SELECT r.*, c.name as agent_name 
+        FROM assignment_rules r
+        LEFT JOIN collaborators c ON r.agent_id = c.id
+        ORDER BY r.priority ASC, r.id ASC
+    """)
+    rules = [dict(row) for row in cursor.fetchall()]
+    
+    # Query meetings
+    cursor.execute("""
+        SELECT m.*, l.name as lead_name, l.phone as lead_phone, l.email as lead_email, c.name as agent_name
+        FROM meetings m
+        JOIN leads l ON m.lead_id = l.id
+        LEFT JOIN collaborators c ON l.assigned_agent_id = c.id
+        ORDER BY m.scheduled_at DESC
+    """)
+    meetings = [dict(row) for row in cursor.fetchall()]
+    meetings_json = json.dumps(meetings, default=str)
     
     conn.close()
     
@@ -435,6 +590,10 @@ def admin_crm(request: Request, filter: str = "all"):
         "pending_leads_count": pending_leads_count,
         "leads": leads_list,
         "leads_json": leads_json,
+        "collaborators": collaborators,
+        "rules": rules,
+        "meetings": meetings,
+        "meetings_json": meetings_json,
         "exchange_rate": exchange_rate
     })
 
@@ -457,7 +616,9 @@ def generate_mermaid_gantt(tasks):
         lines.append(f"    section {phase}")
         for t in phase_tasks:
             # Clean title of forbidden Mermaid symbols
-            title = t["title"].replace(":", "-").replace(",", " ")
+            # Replace ":" with "-", "," with space, "&" with "y", and double quotes with single quotes
+            clean_title = t["title"].replace(":", "-").replace(",", " ").replace("&", "y").replace('"', "'")
+            
             status_tag = ""
             if t["status"] == "Completado":
                 status_tag = "done"
@@ -468,11 +629,13 @@ def generate_mermaid_gantt(tasks):
             start = t["start_date"] or "2026-08-14"
             due = t["due_date"] or "2026-09-14"
             
+            tag_section = f"{status_tag}, {tag}" if status_tag else tag
+            
             # Predecessors logic in Mermaid
             if t["predecessor"]:
-                line = f"        {title} :{status_tag}, {tag}, after t{t['predecessor']}, {due}"
+                line = f'        "{clean_title}" :{tag_section}, after t{t["predecessor"]}, {due}'
             else:
-                line = f"        {title} :{status_tag}, {tag}, {start}, {due}"
+                line = f'        "{clean_title}" :{tag_section}, {start}, {due}'
             lines.append(line)
             
     return "\n".join(lines)
@@ -606,23 +769,114 @@ def admin_finance(request: Request):
 
 # ----------------- API / POST ENDPOINTS -----------------
 
+# Helper to set transition timestamps based on lead status
+def set_transition_timestamp(cursor, lead_id, status):
+    if not status:
+        return
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    status_lower = status.strip().lower()
+    
+    if status_lower in ["contactado", "contacted"]:
+        cursor.execute("UPDATE leads SET contacted_at = COALESCE(contacted_at, ?) WHERE id = ?", (now_str, lead_id))
+    elif status_lower in ["meeting", "reunión", "reunion"]:
+        cursor.execute("UPDATE leads SET meeting_at = COALESCE(meeting_at, ?) WHERE id = ?", (now_str, lead_id))
+    elif status_lower in ["visita", "visit"]:
+        cursor.execute("UPDATE leads SET visited_at = COALESCE(visited_at, ?) WHERE id = ?", (now_str, lead_id))
+    elif status_lower in ["hot lead", "caliente", "reservado", "reserva"]:
+        cursor.execute("UPDATE leads SET reserved_at = COALESCE(reserved_at, ?) WHERE id = ?", (now_str, lead_id))
+    elif status_lower in ["ganado", "sold", "cierre", "cerrado"]:
+        cursor.execute("UPDATE leads SET closed_at = COALESCE(closed_at, ?) WHERE id = ?", (now_str, lead_id))
+
+# Assignment Rules & Round Robin Engine
+def run_lead_assignment(cursor, lead_id, origin, language, budget="DONT_KNOW"):
+    # 1. Custom assignment rules checking
+    # Check origin rule
+    cursor.execute("""
+        SELECT agent_id FROM assignment_rules 
+        WHERE is_active = 1 AND field_name = 'origin' AND LOWER(field_value) = LOWER(?)
+        ORDER BY priority ASC, id ASC
+    """, (origin,))
+    row = cursor.fetchone()
+    if row:
+        cursor.execute("UPDATE leads SET assigned_agent_id = ? WHERE id = ?", (row["agent_id"], lead_id))
+        return row["agent_id"]
+        
+    # Check language rule
+    cursor.execute("""
+        SELECT agent_id FROM assignment_rules 
+        WHERE is_active = 1 AND field_name = 'language' AND LOWER(field_value) = LOWER(?)
+        ORDER BY priority ASC, id ASC
+    """, (language,))
+    row = cursor.fetchone()
+    if row:
+        cursor.execute("UPDATE leads SET assigned_agent_id = ? WHERE id = ?", (row["agent_id"], lead_id))
+        return row["agent_id"]
+        
+    # Check budget rule
+    cursor.execute("""
+        SELECT agent_id FROM assignment_rules 
+        WHERE is_active = 1 AND field_name = 'budget' AND LOWER(field_value) = LOWER(?)
+        ORDER BY priority ASC, id ASC
+    """, (budget,))
+    row = cursor.fetchone()
+    if row:
+        cursor.execute("UPDATE leads SET assigned_agent_id = ? WHERE id = ?", (row["agent_id"], lead_id))
+        return row["agent_id"]
+
+    # 2. Fall back to Round-Robin by language
+    cursor.execute("""
+        SELECT id, name FROM collaborators
+        WHERE is_active_round_robin = 1 AND (languages LIKE ? OR languages LIKE ?)
+        ORDER BY last_assigned_at ASC, id ASC
+    """, (f"%{language}%", f"%{language}%"))
+    agents = cursor.fetchall()
+    
+    if not agents:
+        # Fallback to any active round-robin agent
+        cursor.execute("""
+            SELECT id, name FROM collaborators
+            WHERE is_active_round_robin = 1
+            ORDER BY last_assigned_at ASC, id ASC
+        """)
+        agents = cursor.fetchall()
+        
+    if agents:
+        selected_agent = agents[0]
+        agent_id = selected_agent["id"]
+        now_str = datetime.now().isoformat()
+        cursor.execute("UPDATE collaborators SET last_assigned_at = ? WHERE id = ?", (now_str, agent_id))
+        cursor.execute("UPDATE leads SET assigned_agent_id = ? WHERE id = ?", (agent_id, lead_id))
+        return agent_id
+        
+    return None
+
+# ----------------- API / POST ENDPOINTS -----------------
+
 class LeadPayload(BaseModel):
     name: str = "Interesado Web"
     email: str
     phone: str = ""
     origin: str = "Website Landing"
     details: str = ""
-    status: str = "New Lead"
+    status: str = "Nuevo"
+    language: str = "es"
+    origin_custom_label: str = ""
 
 @app.post("/api/leads")
 def api_create_lead(payload: LeadPayload):
     # This endpoint receives leads from the public landing page via Fetch
     conn = get_db()
     cursor = conn.cursor()
+    
     cursor.execute("""
-    INSERT INTO leads (name, email, phone, origin, details, status, replied)
-    VALUES (?, ?, ?, ?, ?, ?, 0)
-    """, (payload.name, payload.email, payload.phone, payload.origin, payload.details, payload.status))
+    INSERT INTO leads (name, email, phone, origin, details, status, replied, language, origin_custom_label)
+    VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)
+    """, (payload.name, payload.email, payload.phone, payload.origin, payload.details, payload.status, payload.language, payload.origin_custom_label))
+    
+    lead_id = cursor.lastrowid
+    run_lead_assignment(cursor, lead_id, payload.origin, payload.language)
+    set_transition_timestamp(cursor, lead_id, payload.status)
+    
     conn.commit()
     conn.close()
     return {"status": "success", "message": "Lead registrado en el CRM de Las Lomas."}
@@ -650,17 +904,35 @@ def crm_create_lead_manual(
     name: str = Form(...),
     email: str = Form(...),
     phone: str = Form(None),
-    origin: str = Form("Website Landing"),
-    status_val: str = Form("New Lead", alias="status"),
+    origin: str = Form("directo"),
+    origin_custom_label: str = Form(None),
+    status_val: str = Form("Nuevo", alias="status"),
     replied: int = Form(0),
+    assigned_agent_id: str = Form("auto"),
+    language: str = Form("es"),
+    lead_temperature: str = Form("frio"),
+    deal_value: float = Form(0.0),
     details: str = Form(None)
 ):
     conn = get_db()
     cursor = conn.cursor()
+    
+    agent_id = None
+    if assigned_agent_id != "auto" and assigned_agent_id:
+        agent_id = int(assigned_agent_id)
+        
     cursor.execute("""
-    INSERT INTO leads (name, email, phone, origin, status, replied, details)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (name, email, phone, origin, status_val, replied, details))
+    INSERT INTO leads (name, email, phone, origin, origin_custom_label, status, replied, assigned_agent_id, language, lead_temperature, deal_value, details)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (name, email, phone, origin, origin_custom_label, status_val, replied, agent_id, language, lead_temperature, deal_value, details))
+    
+    lead_id = cursor.lastrowid
+    
+    if assigned_agent_id == "auto":
+        run_lead_assignment(cursor, lead_id, origin, language)
+        
+    set_transition_timestamp(cursor, lead_id, status_val)
+    
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
@@ -672,20 +944,60 @@ def crm_edit_lead(
     email: str = Form(...),
     phone: str = Form(None),
     origin: str = Form(...),
+    origin_custom_label: str = Form(None),
     status_val: str = Form(..., alias="status"),
     replied: int = Form(0),
+    assigned_agent_id: str = Form("auto"),
+    language: str = Form("es"),
+    lead_temperature: str = Form("frio"),
+    deal_value: float = Form(0.0),
     details: str = Form(None)
 ):
     conn = get_db()
     cursor = conn.cursor()
+    
+    cursor.execute("SELECT status, assigned_agent_id FROM leads WHERE id = ?", (id,))
+    curr = cursor.fetchone()
+    old_status = curr["status"] if curr else None
+    
+    agent_id = None
+    if assigned_agent_id != "auto" and assigned_agent_id != "" and assigned_agent_id is not None:
+        agent_id = int(assigned_agent_id)
+    elif assigned_agent_id == "auto":
+        agent_id = run_lead_assignment(cursor, id, origin, language)
+    else:
+        agent_id = curr["assigned_agent_id"] if curr else None
+
     cursor.execute("""
     UPDATE leads 
-    SET name = ?, email = ?, phone = ?, origin = ?, status = ?, replied = ?, details = ?
+    SET name = ?, email = ?, phone = ?, origin = ?, origin_custom_label = ?, status = ?, replied = ?, 
+        assigned_agent_id = ?, language = ?, lead_temperature = ?, deal_value = ?, details = ?
     WHERE id = ?
-    """, (name, email, phone, origin, status_val, replied, details, id))
+    """, (name, email, phone, origin, origin_custom_label, status_val, replied, agent_id, language, lead_temperature, deal_value, details, id))
+    
+    if old_status != status_val:
+        set_transition_timestamp(cursor, id, status_val)
+        
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/leads/{id}/update-status")
+def api_update_lead_status(id: int, status_val: str = Form(...), deal_value: float = Form(0.0)):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT status FROM leads WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    old_status = row["status"] if row else None
+    
+    cursor.execute("UPDATE leads SET status = ?, deal_value = ? WHERE id = ?", (status_val, deal_value, id))
+    
+    if old_status != status_val:
+        set_transition_timestamp(cursor, id, status_val)
+        
+    conn.commit()
+    conn.close()
+    return {"status": "success", "message": f"Estado del lead {id} actualizado a {status_val}."}
 
 @app.post("/api/leads/{id}/delete")
 def delete_lead(id: int):
@@ -695,6 +1007,525 @@ def delete_lead(id: int):
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+# --- Meetings Booking & Management ---
+
+class BookMeetingPayload(BaseModel):
+    name: str
+    email: str
+    phone: str = ""
+    language: str = "es"
+    datetime: str
+    topic: str = ""
+    budget_prequalification: str
+    origin: str = "directo"
+
+@app.post("/api/meetings/book")
+def api_book_meeting(payload: BookMeetingPayload):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT id, status, details FROM leads WHERE email = ?", (payload.email,))
+    lead_row = cursor.fetchone()
+    
+    prequal_text = {
+        "YES": "SÍ (Lotes de $190k dentro del presupuesto)",
+        "FINANCING": "Necesitaré financiación",
+        "DONT_KNOW": "No lo sé / Por conversar"
+    }.get(payload.budget_prequalification, payload.budget_prequalification)
+    
+    details_str = f"Reunión agendada vía web.\n¿Qué quiere conversar?: {payload.topic}\nPrecalificación Presupuesto: {prequal_text}"
+    
+    if lead_row:
+        lead_id = lead_row["id"]
+        updated_details = (lead_row["details"] or "") + "\n\n" + details_str
+        cursor.execute("""
+            UPDATE leads 
+            SET name = ?, phone = ?, language = ?, details = ?, status = 'Meeting'
+            WHERE id = ?
+        """, (payload.name, payload.phone, payload.language, updated_details, lead_id))
+    else:
+        cursor.execute("""
+            INSERT INTO leads (name, email, phone, origin, status, language, details, lead_temperature)
+            VALUES (?, ?, ?, ?, 'Meeting', ?, ?, 'tibio')
+        """, (payload.name, payload.email, payload.phone, payload.origin, payload.language, details_str))
+        lead_id = cursor.lastrowid
+        
+    agent_id = run_lead_assignment(cursor, lead_id, payload.origin, payload.language, payload.budget_prequalification)
+    
+    zoom_link = "https://zoom.us/j/laslomas"
+    agent_name = "Ventas Las Lomas"
+    if agent_id:
+        cursor.execute("SELECT name, zoom_link FROM collaborators WHERE id = ?", (agent_id,))
+        agent_row = cursor.fetchone()
+        if agent_row:
+            agent_name = agent_row["name"]
+            zoom_link = agent_row["zoom_link"] or zoom_link
+            
+    cursor.execute("""
+        INSERT INTO meetings (lead_id, title, scheduled_at, language, zoom_link, status)
+        VALUES (?, ?, ?, ?, ?, 'scheduled')
+    """, (lead_id, f"Reunión Inicial con {payload.name}", payload.datetime, payload.language, zoom_link))
+    
+    set_transition_timestamp(cursor, lead_id, "Meeting")
+    
+    conn.commit()
+    conn.close()
+    
+    return {
+        "status": "success",
+        "message": "Reunión agendada exitosamente.",
+        "agent_name": agent_name,
+        "zoom_link": zoom_link,
+        "datetime": payload.datetime
+    }
+
+@app.post("/api/meetings/{meeting_id}/summarize")
+def api_summarize_meeting(meeting_id: int, notes: str = Form(...)):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    summary = ""
+    follow_up_plan = ""
+    
+    summary_fallback = f"Resumen generado a partir de las notas de la reunión:\n"
+    notes_lower = notes.lower()
+    budget_found = "No especificado"
+    if "presupuesto" in notes_lower or "budget" in notes_lower or "$" in notes_lower:
+        budget_found = "Mencionado en la nota"
+    lote_found = "No especificado"
+    if "lote" in notes_lower or "lot" in notes_lower:
+        lote_found = "Interesado en terrenos"
+        
+    summary_fallback += f"- Presupuesto: {budget_found}\n- Interés: {lote_found}\n- Notas crudas: {notes[:200]}..."
+    follow_up_plan_fallback = "- Contactar al cliente en 3 días para dar seguimiento.\n- Compartir los planos de segregación."
+
+    if gemini_key:
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
+            prompt = (
+                f"Analiza la siguiente nota de reunión de un cliente de bienes raíces (Las Lomas) y genera dos campos en formato JSON:\n"
+                f"1. 'summary': Un resumen de 2-3 oraciones que contenga qué quiere el cliente, presupuesto y lote de interés.\n"
+                f"2. 'follow_up': Un plan de seguimiento con 2-3 puntos accionables.\n\n"
+                f"Notas de la reunión:\n{notes}\n\n"
+                f"Devuelve SOLO el JSON sin etiquetas de markdown."
+            )
+            req_data = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode("utf-8")
+            req = urllib.request.Request(url, data=req_data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=8) as response:
+                res_body = json.loads(response.read().decode())
+                text_out = res_body["candidates"][0]["content"]["parts"][0]["text"].strip()
+                if text_out.startswith("```json"):
+                    text_out = text_out.replace("```json", "").replace("```", "").strip()
+                parsed = json.loads(text_out)
+                summary = parsed.get("summary", summary_fallback)
+                follow_up_plan = parsed.get("follow_up", follow_up_plan_fallback)
+                if isinstance(follow_up_plan, list):
+                    follow_up_plan = "\n".join([f"- {item}" for item in follow_up_plan])
+        except Exception as e:
+            print(f"Failed to use Gemini API for meeting summary: {e}")
+            summary = summary_fallback
+            follow_up_plan = follow_up_plan_fallback
+    else:
+        summary = summary_fallback
+        follow_up_plan = follow_up_plan_fallback
+
+    cursor.execute("""
+        UPDATE meetings 
+        SET notes = ?, summary = ?, follow_up_plan = ?, status = 'completed'
+        WHERE id = ?
+    """, (notes, summary, follow_up_plan, meeting_id))
+    
+    cursor.execute("SELECT lead_id FROM meetings WHERE id = ?", (meeting_id,))
+    m_row = cursor.fetchone()
+    lead_id = m_row["lead_id"] if m_row else None
+    
+    conn.commit()
+    conn.close()
+    
+    return {
+        "status": "success",
+        "summary": summary,
+        "follow_up_plan": follow_up_plan,
+        "lead_id": lead_id
+    }
+
+@app.post("/api/meetings/new")
+def api_create_meeting_manual(
+    lead_id: int = Form(...),
+    title: str = Form(...),
+    scheduled_at: str = Form(...),
+    language: str = Form("es"),
+    zoom_link: str = Form(None)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    if not zoom_link:
+        cursor.execute("SELECT zoom_link FROM collaborators WHERE id = (SELECT assigned_agent_id FROM leads WHERE id = ?)", (lead_id,))
+        row = cursor.fetchone()
+        zoom_link = row["zoom_link"] if row else "https://zoom.us/j/laslomas"
+        
+    cursor.execute("""
+        INSERT INTO meetings (lead_id, title, scheduled_at, language, zoom_link, status)
+        VALUES (?, ?, ?, ?, ?, 'scheduled')
+    """, (lead_id, title, scheduled_at, language, zoom_link))
+    
+    set_transition_timestamp(cursor, lead_id, "Meeting")
+    
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/meetings/{id}/edit")
+def api_edit_meeting(
+    id: int,
+    title: str = Form(...),
+    scheduled_at: str = Form(...),
+    status_val: str = Form(..., alias="status"),
+    zoom_link: str = Form(...),
+    notes: str = Form(None),
+    summary: str = Form(None),
+    follow_up_plan: str = Form(None)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE meetings
+        SET title = ?, scheduled_at = ?, status = ?, zoom_link = ?, notes = ?, summary = ?, follow_up_plan = ?
+        WHERE id = ?
+    """, (title, scheduled_at, status_val, zoom_link, notes, summary, follow_up_plan, id))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/meetings/{id}/delete")
+def api_delete_meeting(id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM meetings WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+# --- Assignment Rules & Agents Config API ---
+
+@app.post("/api/assignment-rules/new")
+def create_assignment_rule(
+    field_name: str = Form(...),
+    field_value: str = Form(...),
+    agent_id: int = Form(...),
+    priority: int = Form(0)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO assignment_rules (field_name, field_value, agent_id, priority, is_active)
+        VALUES (?, ?, ?, ?, 1)
+    """, (field_name, field_value, agent_id, priority))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/assignment-rules/{id}/delete")
+def delete_assignment_rule(id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM assignment_rules WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/crm/collaborators/new")
+def create_collaborator_crm(
+    name: str = Form(...),
+    role: str = Form(...),
+    languages: str = Form("es,en"),
+    is_active_round_robin: int = Form(1),
+    commission_rate: float = Form(3.0),
+    zoom_link: str = Form(None)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO collaborators (name, role, languages, is_active_round_robin, commission_rate, zoom_link)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (name, role, languages, is_active_round_robin, commission_rate, zoom_link))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/collaborators/{id}/edit")
+def edit_collaborator_crm(
+    id: int,
+    name: str = Form(...),
+    role: str = Form(...),
+    languages: str = Form("es,en"),
+    is_active_round_robin: int = Form(1),
+    commission_rate: float = Form(3.0),
+    zoom_link: str = Form(None)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE collaborators
+        SET name = ?, role = ?, languages = ?, is_active_round_robin = ?, commission_rate = ?, zoom_link = ?
+        WHERE id = ?
+    """, (name, role, languages, is_active_round_robin, commission_rate, zoom_link, id))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/crm", status_code=status.HTTP_303_SEE_OTHER)
+
+# --- CRM Stats API ---
+
+@app.get("/api/crm/stats")
+def api_crm_stats():
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    now = datetime.now()
+    
+    start_of_week = now - timedelta(days=now.weekday())
+    start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    start_of_year = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    start_of_annual = now - timedelta(days=365)
+    
+    periods = {
+        "week": start_of_week,
+        "month": start_of_month,
+        "ytd": start_of_year,
+        "annual": start_of_annual
+    }
+    
+    stats = {}
+    
+    for period_name, start_date in periods.items():
+        date_str = start_date.strftime("%Y-%m-%d %H:%M:%S")
+        
+        cursor.execute("SELECT COUNT(*) as count FROM page_views WHERE viewed_at >= ?", (date_str,))
+        views = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE created_at >= ?", (date_str,))
+        leads = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM meetings WHERE scheduled_at >= ? AND status = 'completed'", (date_str,))
+        meetings_realizadas = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM meetings WHERE scheduled_at >= ? AND status = 'cancelled'", (date_str,))
+        meetings_canceladas = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE visited_at >= ? AND visited_at IS NOT NULL", (date_str,))
+        visitas = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE reserved_at >= ? AND reserved_at IS NOT NULL", (date_str,))
+        reservas = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count, SUM(deal_value) as total_value FROM leads WHERE closed_at >= ? AND closed_at IS NOT NULL AND status = 'Ganado'", (date_str,))
+        closure_row = cursor.fetchone()
+        cierres_count = closure_row["count"] or 0
+        cierres_value = closure_row["total_value"] or 0.0
+        
+        stats[period_name] = {
+            "views": views,
+            "leads": leads,
+            "meetings_realizadas": meetings_realizadas,
+            "meetings_canceladas": meetings_canceladas,
+            "visitas": visitas,
+            "reservas": reservas,
+            "cierres_count": cierres_count,
+            "cierres_value": cierres_value
+        }
+        
+    cursor.execute("""
+        SELECT created_at, contacted_at, meeting_at, visited_at, reserved_at, closed_at 
+        FROM leads
+    """)
+    leads_rows = cursor.fetchall()
+    
+    velocity = {
+        "to_contacted": 0.0,
+        "to_meeting": 0.0,
+        "to_visited": 0.0,
+        "to_reserved": 0.0,
+        "to_closed": 0.0
+    }
+    
+    counts = {k: 0 for k in velocity.keys()}
+    sums = {k: 0.0 for k in velocity.keys()}
+    
+    for row in leads_rows:
+        try:
+            created = datetime.strptime(row["created_at"].split(".")[0], "%Y-%m-%d %H:%M:%S")
+        except:
+            continue
+            
+        for stage, col in [("to_contacted", "contacted_at"), ("to_meeting", "meeting_at"), 
+                           ("to_visited", "visited_at"), ("to_reserved", "reserved_at"), ("to_closed", "closed_at")]:
+            val = row[col]
+            if val:
+                try:
+                    ts = datetime.strptime(val.split(".")[0], "%Y-%m-%d %H:%M:%S")
+                    diff_days = (ts - created).total_seconds() / 86400.0
+                    if diff_days >= 0:
+                        sums[stage] += diff_days
+                        counts[stage] += 1
+                except:
+                    pass
+                    
+    for k in velocity.keys():
+        if counts[k] > 0:
+            velocity[k] = round(sums[k] / counts[k], 2)
+            
+    current_year = now.year
+    monthly_funnel = []
+    month_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    
+    for m in range(1, 13):
+        m_start = datetime(current_year, m, 1)
+        if m == 12:
+            m_end = datetime(current_year + 1, 1, 1)
+        else:
+            m_end = datetime(current_year, m + 1, 1)
+            
+        start_str = m_start.strftime("%Y-%m-%d 00:00:00")
+        end_str = m_end.strftime("%Y-%m-%d 00:00:00")
+        
+        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE created_at >= ? AND created_at < ?", (start_str, end_str))
+        leads_created = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE contacted_at >= ? AND contacted_at < ?", (start_str, end_str))
+        leads_contacted = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM meetings WHERE scheduled_at >= ? AND scheduled_at < ?", (start_str, end_str))
+        meetings_count = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE visited_at >= ? AND visited_at < ?", (start_str, end_str))
+        visits_count = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE reserved_at >= ? AND reserved_at < ?", (start_str, end_str))
+        reservations_count = cursor.fetchone()["count"]
+        
+        cursor.execute("SELECT COUNT(*) as count, SUM(deal_value) as value FROM leads WHERE closed_at >= ? AND closed_at < ?", (start_str, end_str))
+        closed_row = cursor.fetchone()
+        closures_count = closed_row["count"] or 0
+        closures_value = closed_row["value"] or 0.0
+        
+        monthly_funnel.append({
+            "month_num": m,
+            "month_name": month_names[m - 1],
+            "created": leads_created,
+            "contacted": leads_contacted,
+            "meetings": meetings_count,
+            "visits": visits_count,
+            "reservas": reservations_count,
+            "closures_count": closures_count,
+            "closures_value": closures_value
+        })
+
+    cursor.execute("""
+        SELECT marketing_channel, SUM(amount_usd) as total_spend
+        FROM finances
+        WHERE type = 'Gasto' AND category = 'Marketing' AND marketing_channel IS NOT NULL
+        GROUP BY marketing_channel
+    """)
+    spend_rows = cursor.fetchall()
+    channel_spends = {r["marketing_channel"]: r["total_spend"] for r in spend_rows}
+    
+    standard_origins = [
+        "Meta organico", "Meta Pago",
+        "Google organico", "Google pago",
+        "Youtube organico", "Youtube pago",
+        "Motores de IA", "Base de datos",
+        "F&F", "directo", "Otros"
+    ]
+    
+    cursor.execute("""
+        SELECT origin, COUNT(*) as count,
+               SUM(CASE WHEN status = 'Ganado' THEN 1 ELSE 0 END) as closures
+        FROM leads
+        GROUP BY origin
+    """)
+    origin_rows = cursor.fetchall()
+    
+    marketing_report = []
+    processed_origins = set()
+    
+    for row in origin_rows:
+        orig = row["origin"] or "Otros"
+        count = row["count"]
+        closures = row["closures"] or 0
+        spend = channel_spends.get(orig, 0.0)
+        
+        cpl = spend / count if count > 0 else 0.0
+        cac = spend / closures if closures > 0 else 0.0
+        conv_rate = (closures / count * 100) if count > 0 else 0.0
+        
+        marketing_report.append({
+            "origin": orig,
+            "leads": count,
+            "closures": closures,
+            "conversion_rate": round(conv_rate, 2),
+            "spend": round(spend, 2),
+            "cpl": round(cpl, 2),
+            "cac": round(cac, 2)
+        })
+        processed_origins.add(orig)
+        
+    for orig in standard_origins:
+        if orig not in processed_origins:
+            spend = channel_spends.get(orig, 0.0)
+            marketing_report.append({
+                "origin": orig,
+                "leads": 0,
+                "closures": 0,
+                "conversion_rate": 0.0,
+                "spend": round(spend, 2),
+                "cpl": 0.0,
+                "cac": 0.0
+            })
+
+    cursor.execute("""
+        SELECT c.id as agent_id, c.name as agent_name, c.commission_rate,
+               COUNT(l.id) as deals_count, SUM(l.deal_value) as total_value
+        FROM collaborators c
+        LEFT JOIN leads l ON l.assigned_agent_id = c.id AND l.status = 'Ganado'
+        GROUP BY c.id
+    """)
+    agent_rows = cursor.fetchall()
+    agent_payouts = []
+    
+    for row in agent_rows:
+        rate = row["commission_rate"] or 0.0
+        val = row["total_value"] or 0.0
+        payout = val * (rate / 100.0)
+        agent_payouts.append({
+            "agent_id": row["agent_id"],
+            "agent_name": row["agent_name"],
+            "commission_rate": rate,
+            "deals_count": row["deals_count"],
+            "total_value": round(val, 2),
+            "payout": round(payout, 2)
+        })
+        
+    conn.close()
+    
+    return JSONResponse(content={
+        "stats": stats,
+        "velocity": velocity,
+        "monthly_funnel": monthly_funnel,
+        "marketing_report": marketing_report,
+        "agent_payouts": agent_payouts
+    })
+
+# Add website public meeting booking page
+@app.get("/book")
+def read_book():
+    record_page_view("book")
+    return FileResponse("website/book.html")
 
 # --- Tasks API ---
 
@@ -816,6 +1647,32 @@ def assign_task(id: int, assigned_to: int = Form(...)):
     conn.commit()
     conn.close()
     return {"status": "success", "message": f"Tarea {id} asignada."}
+
+@app.post("/api/collaborators/new")
+def api_create_collaborator(name: str = Form(...), role: str = Form(None)):
+    name = name.strip()
+    if not name:
+        return RedirectResponse(url="/admin/gantt?error=name_empty", status_code=status.HTTP_303_SEE_OTHER)
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO collaborators (name, role) VALUES (?, ?)", (name, role))
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return RedirectResponse(url="/admin/gantt?error=name_exists", status_code=status.HTTP_303_SEE_OTHER)
+    conn.close()
+    return RedirectResponse(url="/admin/gantt", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/api/collaborators/{id}/delete")
+def api_delete_collaborator(id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM collaborators WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return RedirectResponse(url="/admin/gantt", status_code=status.HTTP_303_SEE_OTHER)
 
 # --- Subtasks API ---
 

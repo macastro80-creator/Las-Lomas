@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      let savedLang = localStorage.getItem('preferred-lang');
+      if (!savedLang) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        savedLang = (browserLang && browserLang.startsWith('es')) ? 'es' : 'en';
+      }
+      document.documentElement.setAttribute('lang', savedLang);
+    })();
+  </script>
+  <title>Book a Meeting · Las Lomas</title>
+  <meta name="description" content="Schedule a call or Zoom meeting with one of our sales agents to discuss lot segregations, pricing, and project details.">
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Add simple custom styles for the slots calendar -->
+  <style>
+    .booking-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (min-width: 768px) {
+      .booking-grid {
+        grid-template-columns: 1.2fr 1fr;
+      }
+    }
+    .slot-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--white);
+      padding: 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+    }
+    .slot-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .slot-btn.active {
+      background: var(--natural) !important;
+      border-color: var(--natural) !important;
+      color: #fff !important;
+      font-weight: 600;
+    }
+    .slots-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .success-box {
+      background: rgba(45, 90, 63, 0.1);
+      border: 1.5px solid #2D5A3F;
+      padding: 30px;
+      border-radius: 4px;
+      text-align: center;
+      color: var(--white);
+    }
+    .success-box h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: #8bb395;
+    }
+    .zoom-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2D5A3F;
+      color: #fff;
+      padding: 12px 24px;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+      margin-top: 15px;
+      transition: opacity 0.2s;
+    }
+    .zoom-btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Navigation ═══ -->
+  <nav class="nav" id="main-nav">
+    <a href="/" class="nav-logo"><img src="images/logo-altitud.png" alt="RE/MAX Altitud" class="nav-logo-img"></a>
+    <ul class="nav-links">
+      <li><a href="/">
+        <span class="lang-en">Home</span>
+        <span class="lang-es">Inicio</span>
+      </a></li>
+      <li><a href="/residential">
+        <span class="lang-en">Residential</span>
+        <span class="lang-es">Residencial</span>
+      </a></li>
+      <li><a href="/agrihood">
+        <span class="lang-en">Agrihood</span>
+        <span class="lang-es">Agrihood</span>
+      </a></li>
+      <li><a href="/zone">
+        <span class="lang-en">The Area</span>
+        <span class="lang-es">La Zona</span>
+      </a></li>
+      <li><a href="/contact">
+        <span class="lang-en">Contact</span>
+        <span class="lang-es">Contacto</span>
+      </a></li>
+    </ul>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="lang-selector">
+        <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <span class="lang-divider">|</span>
+        <button class="lang-btn" data-lang="es" onclick="setLanguage('es')">ES</button>
+      </div>
+      <a href="/book" class="nav-cta active">
+        <span class="lang-en">Book Call</span>
+        <span class="lang-es">Agendar</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero" id="hero" style="background-image: linear-gradient(rgba(26,23,20,0.3), rgba(26,23,20,0.6));">
+    <div class="hero-overlay" style="background: linear-gradient(to bottom, rgba(26,23,20,0.2) 0%, rgba(26,23,20,0.4) 40%, rgba(26,23,20,0.8) 100%);"></div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span></span>
+        <span class="lang-en">Direct Sales Support</span>
+        <span class="lang-es">Soporte Directo de Ventas</span>
+        <span></span>
+      </div>
+      <h1 class="hero-title">
+        <span class="lang-en">Schedule a Call.</span>
+        <span class="lang-es">Agenda tu Llamada.</span>
+      </h1>
+      <p class="hero-subtitle">
+        <span class="lang-en">Select a date and time slot below to coordinate a Zoom meeting with one of our specialized agents.</span>
+        <span class="lang-es">Selecciona una fecha y hora a continuación para coordinar una reunión de Zoom con uno de nuestros asesores especializados.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══ Booking Form Section ═══ -->
+  <section style="background: var(--white); padding: 80px 24px;">
+    <div style="background: var(--warm-gray-900); border-radius: 4px; padding: 60px 40px; max-width: 900px; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+      
+      <div id="booking-form-container">
+        <div class="section-tag" style="text-align: center;">
+          <span class="lang-en">Interactive Calendar</span>
+          <span class="lang-es">Calendario Interactivo</span>
+        </div>
+        <h2 class="section-title" style="text-align: center; color: var(--white); margin-bottom: 40px;">
+          <span class="lang-en">Book a Free Zoom Meeting</span>
+          <span class="lang-es">Reserva una Reunión por Zoom</span>
+        </h2>
+        
+        <form onsubmit="handleBookMeeting(event)" style="text-align: left; display: flex; flex-direction: column; gap: 24px;">
+          <div class="booking-grid">
+            <!-- Left Side: User fields -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <!-- Full Name -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Full Name</span>
+                  <span class="lang-es">Nombre Completo</span>
+                </label>
+                <input type="text" id="book-name" required placeholder="Your name" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+              </div>
+              
+              <!-- Email -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Email Address</span>
+                  <span class="lang-es">Correo Electrónico</span>
+                </label>
+                <input type="email" id="book-email" required placeholder="email@example.com" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+              </div>
+
+              <!-- Phone -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Phone Number</span>
+                  <span class="lang-es">Teléfono</span>
+                </label>
+                <input type="text" id="book-phone" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+              </div>
+
+              <!-- Language Selection -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Preferred Language for Meeting</span>
+                  <span class="lang-es">Idioma Preferido para la Reunión</span>
+                </label>
+                <select id="book-language" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                  <option value="es" style="background: var(--warm-gray-900);">Español</option>
+                  <option value="en" style="background: var(--warm-gray-900);">English</option>
+                </select>
+              </div>
+
+              <!-- Prequalification Question -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Lots start at $190k, is this within your budget?</span>
+                  <span class="lang-es">Los lotes comienzan en $190k, ¿está dentro de su presupuesto?</span>
+                </label>
+                <select id="book-budget" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                  <option value="YES" style="background: var(--warm-gray-900);">
+                    EN: YES / ES: SÍ
+                  </option>
+                  <option value="FINANCING" style="background: var(--warm-gray-900);">
+                    EN: I will need financing / ES: Necesitaré financiación
+                  </option>
+                  <option value="DONT_KNOW" style="background: var(--warm-gray-900);">
+                    EN: I am not sure / ES: No lo sé
+                  </option>
+                </select>
+              </div>
+
+              <!-- Message/Topic -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">What would you like to discuss?</span>
+                  <span class="lang-es">¿De qué te gustaría conversar?</span>
+                </label>
+                <textarea id="book-topic" rows="3" placeholder="Tell us what you want to know..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+              </div>
+            </div>
+
+            <!-- Right Side: Date and Time slots picker -->
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">1. Select Date</span>
+                  <span class="lang-es">1. Selecciona la Fecha</span>
+                </label>
+                <!-- Minimum date set dynamically to today -->
+                <input type="date" id="book-date" required onchange="generateTimeSlots()" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
+              </div>
+
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">2. Select Time (Local Costa Rica Time)</span>
+                  <span class="lang-es">2. Selecciona la Hora (Hora de Costa Rica)</span>
+                </label>
+                <div id="slots-container" class="slots-container">
+                  <!-- Slots generated dynamically -->
+                  <div style="color: rgba(255,255,255,0.4); font-size: 0.85rem; grid-column: 1 / -1;">
+                    <span class="lang-en">Please select a date first</span>
+                    <span class="lang-es">Por favor selecciona una fecha primero</span>
+                  </div>
+                </div>
+                <input type="hidden" id="book-time" required>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 15px; cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+            <span class="lang-en">Schedule Zoom Call</span>
+            <span class="lang-es">Agendar Reunión de Zoom</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Success Screen -->
+      <div id="booking-success-container" class="success-box" style="display: none;">
+        <svg viewBox="0 0 24 24" width="48" height="48" style="stroke: #8bb395; fill: none; stroke-width: 2; margin: 0 auto 15px auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        
+        <h3>
+          <span class="lang-en">Meeting Confirmed!</span>
+          <span class="lang-es">¡Reunión Confirmada!</span>
+        </h3>
+        
+        <p style="margin-bottom: 12px; font-size: 1.05rem;">
+          <span class="lang-en">Your initial consultation is scheduled for:</span>
+          <span class="lang-es">Tu consulta inicial está programada para:</span>
+          <br>
+          <strong id="confirm-datetime" style="color: #fff; font-size: 1.2rem;"></strong>
+        </p>
+
+        <p style="margin-bottom: 20px; color: rgba(255,255,255,0.7); font-size: 0.95rem;">
+          <span class="lang-en">Agent Assigned:</span>
+          <span class="lang-es">Asesor Asignado:</span>
+          <strong id="confirm-agent" style="color: #fff;"></strong>
+        </p>
+
+        <p style="margin-bottom: 10px; font-size: 0.9rem;">
+          <span class="lang-en">Please use the link below to join the Zoom meeting at the scheduled time:</span>
+          <span class="lang-es">Por favor ingresa al siguiente enlace para unirte a la reunión en la fecha indicada:</span>
+        </p>
+
+        <a id="confirm-zoom" href="" target="_blank" class="zoom-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" style="fill: none; stroke: currentColor; stroke-width: 2;"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          <span class="lang-en">Open Zoom Link</span>
+          <span class="lang-es">Abrir Sala de Zoom</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="footer-brand">LAS LOMAS</div>
+    <p>Santa Elena de El General, Pérez Zeledón, Costa Rica</p>
+    <ul class="footer-links">
+      <li><a href="/">
+        <span class="lang-en">Home</span>
+        <span class="lang-es">Inicio</span>
+      </a></li>
+      <li><a href="/residential">
+        <span class="lang-en">Residential</span>
+        <span class="lang-es">Residencial</span>
+      </a></li>
+      <li><a href="/agrihood">
+        <span class="lang-en">Agrihood</span>
+        <span class="lang-es">Agrihood</span>
+      </a></li>
+      <li><a href="/zone">
+        <span class="lang-en">The Area</span>
+        <span class="lang-es">La Zona</span>
+      </a></li>
+      <li><a href="/contact">
+        <span class="lang-en">Contact</span>
+        <span class="lang-es">Contacto</span>
+      </a></li>
+    </ul>
+  </footer>
+
+  <script>
+    // Navigation transparent on scroll
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
+
+    // Limit date picker to today and future
+    const dateInput = document.getElementById('book-date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+
+    // Generate timeslots hourly from 9 AM to 5 PM
+    function generateTimeSlots() {
+      const container = document.getElementById('slots-container');
+      const hiddenTimeInput = document.getElementById('book-time');
+      const selectedDate = new Date(dateInput.value);
+      
+      // Clear previous slots
+      container.innerHTML = '';
+      hiddenTimeInput.value = '';
+
+      // Check if selected date is weekend
+      const day = selectedDate.getUTCDay();
+      if (day === 0 || day === 6) { // 0 = Sunday, 6 = Saturday
+        container.innerHTML = `
+          <div style="color: #ff8888; font-size: 0.85rem; grid-column: 1 / -1;">
+            <span class="lang-en">Please select a weekday. We operate Monday to Friday.</span>
+            <span class="lang-es">Por favor selecciona un día de semana. Atendemos de lunes a viernes.</span>
+          </div>
+        `;
+        return;
+      }
+
+      // We operate 9:00 to 17:00
+      const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+      
+      hours.forEach(time => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'slot-btn';
+        btn.textContent = time;
+        btn.onclick = () => {
+          document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          hiddenTimeInput.value = time;
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // Handle AJAX booking form submission
+    function handleBookMeeting(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('book-name').value;
+      const email = document.getElementById('book-email').value;
+      const phone = document.getElementById('book-phone').value;
+      const langValue = document.getElementById('book-language').value;
+      const budget = document.getElementById('book-budget').value;
+      const topic = document.getElementById('book-topic').value;
+      
+      const date = document.getElementById('book-date').value;
+      const timeSlot = document.getElementById('book-time').value;
+
+      if (!timeSlot) {
+        alert(document.documentElement.getAttribute('lang') === 'en' 
+          ? 'Please select a time slot!' 
+          : 'Por favor selecciona un horario!');
+        return;
+      }
+
+      const btn = e.target.querySelector('button');
+      const activeLang = document.documentElement.getAttribute('lang') || 'en';
+      btn.textContent = activeLang === 'en' ? 'SCHEDULING...' : 'AGENDANDO...';
+      btn.disabled = true;
+
+      // Extract search params to keep track of traffic origin if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmSource = urlParams.get('utm_source') || urlParams.get('source') || 'directo';
+
+      // Map values
+      const payload = {
+        name: name,
+        email: email,
+        phone: phone,
+        language: langValue,
+        datetime: `${date} ${timeSlot}`,
+        topic: topic,
+        budget_prequalification: budget,
+        origin: utmSource
+      };
+
+      fetch('/api/meetings/book', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('API Error');
+        return res.json();
+      })
+      .then(data => {
+        // Show success screen
+        document.getElementById('booking-form-container').style.display = 'none';
+        
+        // Format datetime nicely
+        document.getElementById('confirm-datetime').textContent = data.datetime;
+        document.getElementById('confirm-agent').textContent = data.agent_name;
+        
+        const zoomBtn = document.getElementById('confirm-zoom');
+        zoomBtn.href = data.zoom_link;
+        
+        document.getElementById('booking-success-container').style.display = 'block';
+      })
+      .catch(err => {
+        console.error('Error booking meeting:', err);
+        alert(activeLang === 'en' 
+          ? 'An error occurred while booking. Please try again.' 
+          : 'Ocurrió un error al agendar. Por favor intenta de nuevo.');
+        btn.textContent = activeLang === 'en' ? 'Schedule Zoom Call' : 'Agendar Reunión de Zoom';
+        btn.disabled = false;
+      });
+    }
+
+    // Language Selector Mechanism
+    function setLanguage(lang) {
+      document.documentElement.setAttribute('lang', lang);
+      localStorage.setItem('preferred-lang', lang);
+      
+      const pageTitles = {
+        en: "Book a Meeting · Las Lomas",
+        es: "Agendar Reunión · Las Lomas"
+      };
+      document.title = pageTitles[lang];
+
+      // Toggle active classes on language buttons
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+      });
+      
+      // Toggle visibility of translation strings
+      document.querySelectorAll('.lang-en').forEach(el => {
+        el.style.display = lang === 'en' ? 'inline-block' : 'none';
+      });
+      document.querySelectorAll('.lang-es').forEach(el => {
+        el.style.display = lang === 'es' ? 'inline-block' : 'none';
+      });
+    }
+
+    // Initialize bilinguality
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentLang = document.documentElement.getAttribute('lang') || 'en';
+      setLanguage(currentLang);
+    });
+  </script>
+</body>
+</html>

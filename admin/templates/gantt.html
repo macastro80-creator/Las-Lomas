@@ -32,18 +32,24 @@
 <div class="space-y-6">
 
   <!-- Collaborators Filter Bar -->
-  <div class="bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-wrap items-center gap-3">
-    <span class="text-xs font-bold text-natural uppercase tracking-wider">Filtrar por Responsable:</span>
-    <div class="flex flex-wrap gap-2">
-      {% for c in collaborators %}
-      <button onclick="filterByCollaborator({{ c.id }})" data-id="{{ c.id }}" class="collab-avatar px-3 py-1.5 bg-[#FAF8F5] border border-[#EDE9E3] rounded-full text-xs font-semibold text-gray-700 hover:bg-[#EDE9E3] transition flex items-center gap-1.5 opacity-70">
-        <span class="w-5.5 h-5.5 rounded-full bg-natural text-white font-bold flex items-center justify-center text-[10px]">
-          {{ c.name[0] | upper }}{{ c.name.split(' ')[1][0] | upper if c.name.split(' ') | length > 1 else '' }}
-        </span>
-        <span>{{ c.name }}</span>
-      </button>
-      {% endfor %}
+  <div class="bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="text-xs font-bold text-natural uppercase tracking-wider">Filtrar por Responsable:</span>
+      <div class="flex flex-wrap gap-2">
+        {% for c in collaborators %}
+        <button onclick="filterByCollaborator({{ c.id }})" data-id="{{ c.id }}" class="collab-avatar px-3 py-1.5 bg-[#FAF8F5] border border-[#EDE9E3] rounded-full text-xs font-semibold text-gray-700 hover:bg-[#EDE9E3] transition flex items-center gap-1.5 opacity-70">
+          <span class="w-5.5 h-5.5 rounded-full bg-natural text-white font-bold flex items-center justify-center text-[10px]">
+            {{ c.name[0] | upper }}{{ c.name.split(' ')[1][0] | upper if c.name.split(' ') | length > 1 else '' }}
+          </span>
+          <span>{{ c.name }}</span>
+        </button>
+        {% endfor %}
+      </div>
     </div>
+    <button onclick="openCollaboratorsModal()" class="px-3 py-1.5 border border-[#EDE9E3] rounded bg-white hover:bg-gray-50 text-xs font-semibold text-natural transition flex items-center gap-1.5">
+      <i data-lucide="users" class="w-3.5 h-3.5"></i>
+      <span>Gestionar Equipo</span>
+    </button>
   </div>
 
   <!-- Gantt Chart Card -->
@@ -61,7 +67,7 @@
     <!-- Mermaid Render -->
     <div class="overflow-x-auto border border-[#EDE9E3] rounded-lg p-4 bg-[#FAF8F5]">
       <div class="mermaid min-w-[700px] flex justify-center">
-{{ mermaid_code }}
+{{ mermaid_code | safe }}
       </div>
     </div>
   </div>
@@ -172,6 +178,7 @@
         <div>
           <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Fase del Desarrollo</label>
           <select id="taskPhase" name="phase" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="Compra del Lote">Compra del Lote</option>
             <option value="Regulación y Permisos">Regulación y Permisos</option>
             <option value="Planificación y Diseño">Planificación y Diseño</option>
             <option value="Mercadeo y Ventas">Mercadeo y Ventas</option>
@@ -264,6 +271,69 @@
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Collaborators Management Modal -->
+<div id="collaboratorsModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-md w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+        <i data-lucide="users" class="text-natural w-5 h-5"></i>
+        Gestionar Equipo
+      </h3>
+      <button onclick="closeCollaboratorsModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <div class="p-6 space-y-6 overflow-y-auto flex-1 text-sm">
+      <!-- Add Collaborator Form -->
+      <form method="POST" action="/api/collaborators/new" class="space-y-3 bg-[#FAF8F5] p-4 rounded-lg border border-[#EDE9E3]">
+        <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider">Agregar Integrante</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Nombre</label>
+            <input type="text" name="name" required placeholder="Ej: Juan Pérez" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Rol</label>
+            <input type="text" name="role" placeholder="Ej: Ingeniero Civil" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white text-xs">
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-natural hover:bg-opacity-90 text-white py-1.5 rounded text-xs font-semibold transition flex items-center justify-center gap-1.5">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          Agregar al Equipo
+        </button>
+      </form>
+
+      <!-- Collaborators List -->
+      <div class="space-y-3">
+        <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider">Integrantes del Equipo</h4>
+        <div class="divide-y divide-[#EDE9E3] max-h-[300px] overflow-y-auto border border-[#EDE9E3] rounded bg-white">
+          {% for c in collaborators %}
+          <div class="flex items-center justify-between p-3">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-full bg-natural text-white font-bold flex items-center justify-center text-[10px]">
+                {{ c.name[0] | upper }}{{ c.name.split(' ')[1][0] | upper if c.name.split(' ') | length > 1 else '' }}
+              </span>
+              <div>
+                <div class="font-semibold text-gray-800 text-xs">{{ c.name }}</div>
+                <div class="text-[10px] text-[#948A7C]">{{ c.role if c.role else 'Sin rol especificado' }}</div>
+              </div>
+            </div>
+            <form action="/api/collaborators/{{ c.id }}/delete" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar a este integrante? Su asignación en las tareas se quitará (quedarán sin asignar).');" class="inline">
+              <button type="submit" class="p-1.5 text-red-600 hover:bg-red-50 rounded transition" title="Eliminar Integrante">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </form>
+          </div>
+          {% else %}
+          <div class="p-4 text-center text-xs text-[#948A7C] italic">No hay integrantes en el equipo.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -437,7 +507,7 @@
     document.getElementById('taskModalTitle').textContent = 'Agregar Nueva Tarea';
     document.getElementById('taskForm').action = '/api/tasks/new';
     document.getElementById('taskId').value = '';
-    document.getElementById('taskPhase').value = 'Regulación y Permisos';
+    document.getElementById('taskPhase').value = 'Compra del Lote';
     document.getElementById('taskTitle').value = '';
     document.getElementById('taskDescription').value = '';
     // Set default dates around current local time
@@ -461,7 +531,7 @@
     document.getElementById('taskModalTitle').textContent = 'Editar Tarea: ' + task.title;
     document.getElementById('taskForm').action = '/api/tasks/' + task.id + '/edit';
     document.getElementById('taskId').value = task.id;
-    document.getElementById('taskPhase').value = task.phase || 'Regulación y Permisos';
+    document.getElementById('taskPhase').value = task.phase || 'Compra del Lote';
     document.getElementById('taskTitle').value = task.title || '';
     document.getElementById('taskDescription').value = task.description || '';
     document.getElementById('taskStartDate').value = task.start_date || '';
@@ -752,10 +822,26 @@
     }
   }
 
+  function openCollaboratorsModal() {
+    document.getElementById('collaboratorsModal').classList.remove('hidden');
+    lucide.createIcons();
+  }
+
+  function closeCollaboratorsModal() {
+    document.getElementById('collaboratorsModal').classList.add('hidden');
+  }
+
   window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('show_modal') === 'true') {
       openNewTaskModal();
+    }
+
+    const errorParam = urlParams.get('error');
+    if (errorParam === 'name_exists') {
+      alert('Error: Ya existe un colaborador con este nombre.');
+    } else if (errorParam === 'name_empty') {
+      alert('Error: El nombre del colaborador no puede estar vacío.');
     }
     
     // Add event listener to delegate clicks on the Mermaid SVG nodes to open the drawer

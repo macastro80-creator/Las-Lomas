@@ -1,122 +1,643 @@
 {% extends "base.html" %}
 
-{% block title %}CRM Prospectos - Las Lomas{% endblock %}
-{% block header_title %}CRM Prospectos (Leads){% endblock %}
+{% block title %}CRM Comercial - Las Lomas{% endblock %}
+{% block header_title %}CRM Comercial & Seguimiento{% endblock %}
+
+{% block head %}
+<style>
+  .kanban-col {
+    background-color: #FAF8F5;
+    border: 1px solid #EDE9E3;
+    border-radius: 6px;
+    min-height: 500px;
+    transition: background-color 0.2s ease;
+  }
+  .kanban-col.drag-over {
+    background-color: #F1ECE4;
+    border-color: #2D5A3F;
+  }
+  .lead-card {
+    background-color: #FFFFFF;
+    border: 1px solid #EDE9E3;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    cursor: grab;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .lead-card:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
+  }
+  .lead-card:active {
+    cursor: grabbing;
+  }
+  .tab-btn.active {
+    border-color: #2D5A3F;
+    color: #2D5A3F;
+    font-weight: 600;
+  }
+  .temp-frio {
+    border-left: 4px solid #3B82F6;
+  }
+  .temp-tibio {
+    border-left: 4px solid #F59E0B;
+  }
+  .temp-caliente {
+    border-left: 4px solid #EF4444;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
 
-  <!-- Header Actions -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm">
-    <!-- Filters -->
-    <div class="flex items-center gap-2">
-      <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider mr-2">Filtrar por:</span>
-      <a href="/admin/crm?filter=all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition {% if filter_mode == 'all' %}bg-natural text-white{% else %}bg-gray-100 text-[#574F45] hover:bg-gray-200{% endif %}">
-        Todos
-      </a>
-      <a href="/admin/crm?filter=pending" class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 {% if filter_mode == 'pending' %}bg-red-500 text-white{% else %}bg-red-50 text-red-700 hover:bg-red-100{% endif %}">
-        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-        Sin Responder
-      </a>
-    </div>
-
-    <!-- Create Lead Trigger -->
-    <button onclick="openNewLeadModal()" class="bg-natural hover:bg-opacity-90 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2 self-stretch sm:self-auto justify-center">
-      <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Nuevo Prospecto
+  <!-- Navigation Tabs -->
+  <div class="border-b border-[#EDE9E3] flex flex-wrap gap-4">
+    <button onclick="switchTab('kanban')" id="tab-kanban" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#574F45] hover:text-[#2D5A3F] transition text-sm font-medium">
+      Tablero Kanban
+    </button>
+    <button onclick="switchTab('leads')" id="tab-leads" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#574F45] hover:text-[#2D5A3F] transition text-sm font-medium">
+      Listado de Leads
+    </button>
+    <button onclick="switchTab('meetings')" id="tab-meetings" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#574F45] hover:text-[#2D5A3F] transition text-sm font-medium">
+      Reuniones & Zoom
+    </button>
+    <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#574F45] hover:text-[#2D5A3F] transition text-sm font-medium">
+      Estadísticas & Mercadeo
+    </button>
+    <button onclick="switchTab('config')" id="tab-config" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#574F45] hover:text-[#2D5A3F] transition text-sm font-medium">
+      Reglas & Agentes
     </button>
   </div>
 
-  <!-- Leads List / Table -->
-  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
-    <div class="p-6 border-b border-[#EDE9E3]">
-      <h3 class="font-bold text-gray-800">Listado de Prospectos</h3>
-    </div>
-    
-    <div class="overflow-x-auto">
-      {% if leads %}
-      <table class="w-full text-left text-sm whitespace-nowrap">
-        <thead>
-          <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3] bg-[#FAF8F5]">
-            <th class="py-3 px-6">Nombre</th>
-            <th class="py-3 px-6">Email / Teléfono</th>
-            <th class="py-3 px-6">Origen</th>
-            <th class="py-3 px-6">Fecha Registro</th>
-            <th class="py-3 px-6">Estado</th>
-            <th class="py-3 px-6">Respuesta</th>
-            <th class="py-3 px-6 text-center">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-[#EDE9E3]">
-          {% for lead in leads %}
-          <tr class="hover:bg-gray-50 transition cursor-pointer" onclick="viewLeadDetail({{ lead.id }})">
-            <!-- Name -->
-            <td class="py-4 px-6 font-medium text-gray-800">
-              {{ lead.name }}
-            </td>
-            <!-- Contact info -->
-            <td class="py-4 px-6" onclick="event.stopPropagation();">
-              <div class="text-[#3D372F]">{{ lead.email }}</div>
-              <div class="text-xs text-[#948A7C]">{{ lead.phone if lead.phone else 'Sin teléfono' }}</div>
-            </td>
-            <!-- Origin -->
-            <td class="py-4 px-6 text-xs text-[#574F45]">
-              {{ lead.origin }}
-            </td>
-            <!-- Created date -->
-            <td class="py-4 px-6 text-xs text-[#948A7C]">
-              {{ lead.created_at }}
-            </td>
-            <!-- Status -->
-            <td class="py-4 px-6">
-              <span class="text-xs px-2.5 py-1 rounded font-semibold 
-                {% if lead.status == 'New Lead' %}bg-blue-50 text-blue-700
-                {% elif lead.status == 'Contacted' %}bg-yellow-50 text-yellow-700
-                {% elif lead.status == 'Hot lead' %}bg-orange-50 text-orange-700
-                {% elif lead.status == 'SOLD' %}bg-green-50 text-green-700
-                {% elif lead.status == 'LOST' %}bg-gray-100 text-gray-700
-                {% else %}bg-gray-50 text-gray-700{% endif %}">
-                {{ lead.status }}
-              </span>
-            </td>
-            <!-- Replied Toggle (Stops propagation to prevent opening details modal) -->
-            <td class="py-4 px-6" onclick="event.stopPropagation();">
-              <form action="/api/leads/{{ lead.id }}/toggle-replied?redirect_to=crm&filter={{ filter_mode }}" method="POST">
-                {% if lead.replied == 1 %}
-                <button type="submit" class="bg-green-100 hover:bg-green-200 text-green-800 text-xs px-2.5 py-1 rounded font-semibold transition flex items-center gap-1">
-                  <i data-lucide="check" class="w-3.5 h-3.5"></i> Contestado
-                </button>
-                {% else %}
-                <button type="submit" class="bg-red-100 hover:bg-red-200 text-red-800 text-xs px-2.5 py-1 rounded font-semibold transition flex items-center gap-1 animate-pulse">
-                  <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Pendiente
-                </button>
-                {% endif %}
-              </form>
-            </td>
-            <!-- Actions -->
-            <td class="py-4 px-6 text-center" onclick="event.stopPropagation();">
-              <div class="flex items-center justify-center gap-2">
-                <button onclick="viewLeadDetail({{ lead.id }})" class="p-1 text-natural hover:bg-gray-100 rounded transition" title="Ver Detalle">
-                  <i data-lucide="eye" class="w-4.5 h-4.5"></i>
-                </button>
-                <form action="/api/leads/{{ lead.id }}/delete" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este prospecto?');" class="inline">
-                  <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded transition" title="Eliminar">
-                    <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <div class="text-center py-16 text-[#948A7C]">
-        <i data-lucide="users-2" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
-        <p class="text-sm font-semibold">No se encontraron prospectos.</p>
-        <p class="text-xs text-gray-400 mt-1">Registra un lead manualmente o envía un formulario desde la página web.</p>
+  <!-- Pestaña 1: Tablero Kanban -->
+  <div id="section-kanban" class="tab-section hidden">
+    <!-- Header Actions inside Kanban -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm mb-4">
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg">Embudo de Ventas</h3>
+        <p class="text-xs text-gray-500">Arrastra los leads para cambiar su estado. La velocidad de conversión se calcula automáticamente.</p>
       </div>
-      {% endif %}
+      <button onclick="openNewLeadModal()" class="bg-natural hover:bg-opacity-90 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
+        <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Lead Manual
+      </button>
     </div>
+
+    <!-- Kanban columns container -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 overflow-x-auto pb-6">
+      
+      <!-- Stage 1: Nuevo -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-blue-50 border border-blue-200 rounded-t-md font-semibold text-xs text-blue-800">
+          <span>NUEVO</span>
+          <span class="bg-blue-200 px-2 py-0.5 rounded-full" id="count-nuevo">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-Nuevo" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Nuevo')">
+          <!-- Cards injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Stage 2: Contactado -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-yellow-50 border border-yellow-200 rounded-t-md font-semibold text-xs text-yellow-800">
+          <span>CONTACTADO</span>
+          <span class="bg-yellow-200 px-2 py-0.5 rounded-full" id="count-contactado">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-Contactado" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Contactado')">
+        </div>
+      </div>
+
+      <!-- Stage 3: Meeting -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-purple-50 border border-purple-200 rounded-t-md font-semibold text-xs text-purple-800">
+          <span>MEETING</span>
+          <span class="bg-purple-200 px-2 py-0.5 rounded-full" id="count-meeting">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-Meeting" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Meeting')">
+        </div>
+      </div>
+
+      <!-- Stage 4: Visita -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-teal-50 border border-teal-200 rounded-t-md font-semibold text-xs text-teal-800">
+          <span>VISITA</span>
+          <span class="bg-teal-200 px-2 py-0.5 rounded-full" id="count-visita">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-Visita" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Visita')">
+        </div>
+      </div>
+
+      <!-- Stage 5: Hot lead -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-orange-50 border border-orange-200 rounded-t-md font-semibold text-xs text-orange-800">
+          <span>HOT LEAD</span>
+          <span class="bg-orange-200 px-2 py-0.5 rounded-full" id="count-hotlead">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-Hot-lead" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Hot lead')">
+        </div>
+      </div>
+
+      <!-- Stage 6: Ganado -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-green-50 border border-green-200 rounded-t-md font-semibold text-xs text-green-800">
+          <span>GANADO</span>
+          <span class="bg-green-200 px-2 py-0.5 rounded-full" id="count-ganado">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-Ganado" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Ganado')">
+        </div>
+      </div>
+
+      <!-- Stage 7: Perdido -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-red-50 border border-red-200 rounded-t-md font-semibold text-xs text-red-800">
+          <span>PERDIDO</span>
+          <span class="bg-red-200 px-2 py-0.5 rounded-full" id="count-perdido">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-Perdido" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'Perdido')">
+        </div>
+      </div>
+
+      <!-- Stage 8: No ahora -->
+      <div class="flex flex-col min-w-[200px]">
+        <div class="flex items-center justify-between p-2.5 bg-gray-100 border border-gray-300 rounded-t-md font-semibold text-xs text-gray-700">
+          <span>NO AHORA</span>
+          <span class="bg-gray-200 px-2 py-0.5 rounded-full" id="count-noahora">0</span>
+        </div>
+        <div class="kanban-col p-2 space-y-2 flex-1" id="col-No-ahora" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'No ahora')">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pestaña 2: Listado de Leads -->
+  <div id="section-leads" class="tab-section hidden">
+    <!-- Filter bar -->
+    <div class="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm mb-4 text-sm justify-between items-end">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 flex-1 w-full">
+        <!-- Search -->
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Buscar</label>
+          <input type="text" id="search-input" onkeyup="filterLeadsTable()" placeholder="Nombre o email..." class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+        <!-- Origin -->
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Origen</label>
+          <select id="filter-origin" onchange="filterLeadsTable()" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="all">Todos</option>
+            <option value="Meta organico">Meta Orgánico</option>
+            <option value="Meta Pago">Meta Pago</option>
+            <option value="Google organico">Google Orgánico</option>
+            <option value="Google pago">Google Pago</option>
+            <option value="Youtube organico">Youtube Orgánico</option>
+            <option value="Youtube pago">Youtube Pago</option>
+            <option value="Motores de IA">Motores de IA</option>
+            <option value="Base de datos">Base de datos</option>
+            <option value="F&F">F&F</option>
+            <option value="directo">Directo</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+        <!-- Temperature -->
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Temperatura</label>
+          <select id="filter-temp" onchange="filterLeadsTable()" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="all">Todas</option>
+            <option value="frio">Frío</option>
+            <option value="tibio">Tibio</option>
+            <option value="caliente">Caliente</option>
+          </select>
+        </div>
+        <!-- Agent -->
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Agente</label>
+          <select id="filter-agent" onchange="filterLeadsTable()" class="w-full px-3 py-1.5 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="all">Todos</option>
+            {% for agent in collaborators %}
+              {% if agent.is_active_round_robin == 1 or agent.role == 'Ventas' or 'Ventas' in agent.role %}
+              <option value="{{ agent.name }}">{{ agent.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <button onclick="openNewLeadModal()" class="bg-natural hover:bg-opacity-90 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2 self-stretch sm:self-auto justify-center">
+        <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar Lead
+      </button>
+    </div>
+
+    <!-- Leads table -->
+    <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm whitespace-nowrap" id="leads-table-elem">
+          <thead>
+            <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3] bg-[#FAF8F5]">
+              <th class="py-3 px-6">Nombre</th>
+              <th class="py-3 px-6">Email / Teléfono</th>
+              <th class="py-3 px-6">Origen</th>
+              <th class="py-3 px-6">Agente Asignado</th>
+              <th class="py-3 px-6">Temp</th>
+              <th class="py-3 px-6">Idioma</th>
+              <th class="py-3 px-6">Estado</th>
+              <th class="py-3 px-6 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#EDE9E3]" id="leads-table-body">
+            {% for lead in leads %}
+            <tr class="hover:bg-gray-50 transition cursor-pointer table-row-item" data-name="{{ lead.name | lower }}" data-email="{{ lead.email | lower }}" data-origin="{{ lead.origin }}" data-temp="{{ lead.lead_temperature }}" data-agent="{{ lead.agent_name or '' }}" onclick="viewLeadDetail({{ lead.id }})">
+              <td class="py-4 px-6 font-medium text-gray-800">{{ lead.name }}</td>
+              <td class="py-4 px-6" onclick="event.stopPropagation();">
+                <div>{{ lead.email }}</div>
+                <div class="text-xs text-[#948A7C]">{{ lead.phone if lead.phone else 'Sin teléfono' }}</div>
+              </td>
+              <td class="py-4 px-6 text-xs">
+                {% if lead.origin == 'Otros' %}
+                  {{ lead.origin_custom_label or 'Otros' }}
+                {% else %}
+                  {{ lead.origin }}
+                {% endif %}
+              </td>
+              <td class="py-4 px-6 text-xs font-semibold text-natural">{{ lead.agent_name or 'Sin asignar' }}</td>
+              <td class="py-4 px-6">
+                <span class="text-[10px] px-2 py-0.5 rounded font-bold uppercase
+                  {% if lead.lead_temperature == 'caliente' %}bg-red-100 text-red-700
+                  {% elif lead.lead_temperature == 'tibio' %}bg-orange-100 text-orange-700
+                  {% else %}bg-blue-100 text-blue-700{% endif %}">
+                  {{ lead.lead_temperature }}
+                </span>
+              </td>
+              <td class="py-4 px-6 text-xs uppercase">{{ lead.language }}</td>
+              <td class="py-4 px-6">
+                <span class="text-xs px-2.5 py-1 rounded font-semibold bg-gray-100 text-gray-800">
+                  {{ lead.status }}
+                </span>
+              </td>
+              <td class="py-4 px-6 text-center" onclick="event.stopPropagation();">
+                <div class="flex items-center justify-center gap-2">
+                  <button onclick="viewLeadDetail({{ lead.id }})" class="p-1 text-natural hover:bg-gray-100 rounded transition">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                  </button>
+                  <form action="/api/leads/{{ lead.id }}/delete" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este prospecto?');" class="inline">
+                    <button type="submit" class="p-1 text-red-600 hover:bg-red-50 rounded transition">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pestaña 3: Reuniones y Zoom -->
+  <div id="section-meetings" class="tab-section hidden space-y-6">
+    <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden p-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="font-bold text-gray-800 text-lg">Reuniones Programadas</h3>
+          <p class="text-xs text-gray-500">Listado de videollamadas. Haz clic en una reunión para subir minutas de Zoom, generar resúmenes con IA y calificar prospectos.</p>
+        </div>
+        <button onclick="openNewMeetingModal()" class="bg-natural hover:bg-opacity-90 text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4"></i> Programar Reunión
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        {% if meetings %}
+          {% for meeting in meetings %}
+          <div class="border border-[#EDE9E3] rounded p-4 hover:shadow-md transition flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs uppercase bg-[#EDE9E3] px-2 py-0.5 rounded font-semibold tracking-wider text-[#574F45]">
+                  {{ meeting.language }}
+                </span>
+                <span class="text-xs px-2 py-0.5 rounded font-bold uppercase
+                  {% if meeting.status == 'scheduled' %}bg-blue-100 text-blue-700
+                  {% elif meeting.status == 'completed' %}bg-green-100 text-green-700
+                  {% else %}bg-red-100 text-red-700{% endif %}">
+                  {{ meeting.status }}
+                </span>
+                <h4 class="font-bold text-gray-800">{{ meeting.title }}</h4>
+              </div>
+              <p class="text-sm text-gray-600">Cliente: <strong>{{ meeting.lead_name }}</strong> ({{ meeting.lead_email }} / {{ meeting.lead_phone }})</p>
+              <div class="flex items-center gap-4 text-xs text-[#948A7C] pt-1">
+                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> {{ meeting.scheduled_at }}</span>
+                <span class="flex items-center gap-1"><i data-lucide="user" class="w-3.5 h-3.5"></i> Agente: {{ meeting.agent_name or 'Sin asignar' }}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 self-stretch md:self-auto justify-end">
+              {% if meeting.zoom_link %}
+              <a href="{{ meeting.zoom_link }}" target="_blank" class="px-3.5 py-1.5 bg-[#3B82F6] hover:bg-opacity-90 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                <i data-lucide="video" class="w-3.5 h-3.5"></i> Zoom Link
+              </a>
+              {% endif %}
+              <button onclick="openSummarizeModal({{ meeting.id }})" class="px-3.5 py-1.5 bg-[#2D5A3F] hover:bg-opacity-90 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Minuta / IA
+              </button>
+              <form action="/api/meetings/{{ meeting.id }}/delete" method="POST" onsubmit="return confirm('¿Eliminar reunión?');" class="inline">
+                <button type="submit" class="p-1.5 text-red-600 hover:bg-red-50 rounded transition">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-16 text-[#948A7C]">
+            <i data-lucide="calendar-range" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+            <p class="text-sm font-semibold">No hay reuniones programadas.</p>
+            <p class="text-xs text-gray-400 mt-1">Los clientes pueden reservar franjas desde la sección pública `/book` de la web.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Pestaña 4: Estadísticas & Marketing -->
+  <div id="section-stats" class="tab-section hidden space-y-6">
+    <!-- Filter Period selector -->
+    <div class="flex justify-between items-center bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm">
+      <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Período de Análisis:</span>
+      <div class="flex gap-1.5">
+        <button onclick="loadCrmStats('week')" id="period-week" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">Semana</button>
+        <button onclick="loadCrmStats('month')" id="period-month" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">Mes</button>
+        <button onclick="loadCrmStats('ytd')" id="period-ytd" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">YTD</button>
+        <button onclick="loadCrmStats('annual')" id="period-annual" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">Anual</button>
+      </div>
+    </div>
+
+    <!-- Stats Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+      <!-- Web Views -->
+      <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Vistas Web</span>
+        <div class="flex items-baseline gap-2 pt-2">
+          <span class="text-2xl font-bold text-gray-800" id="stat-views">0</span>
+          <span class="text-xs text-gray-400">clicks</span>
+        </div>
+      </div>
+      <!-- Leads -->
+      <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Leads Nuevos</span>
+        <div class="flex items-baseline gap-2 pt-2">
+          <span class="text-2xl font-bold text-gray-800" id="stat-leads">0</span>
+          <span class="text-xs text-gray-400">leads</span>
+        </div>
+      </div>
+      <!-- Meetings -->
+      <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Meetings</span>
+        <div class="pt-2">
+          <span class="text-2xl font-bold text-gray-800" id="stat-meetings-realizadas">0</span>
+          <span class="text-xs text-gray-500"> / <span id="stat-meetings-canceladas">0</span> can.</span>
+        </div>
+      </div>
+      <!-- Visitas -->
+      <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Visitas</span>
+        <div class="flex items-baseline gap-2 pt-2">
+          <span class="text-2xl font-bold text-gray-800" id="stat-visitas">0</span>
+          <span class="text-xs text-gray-400">en propiedad</span>
+        </div>
+      </div>
+      <!-- Reservas -->
+      <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Reservas</span>
+        <div class="flex items-baseline gap-2 pt-2">
+          <span class="text-2xl font-bold text-gray-800" id="stat-reservas">0</span>
+          <span class="text-xs text-gray-400">lotes</span>
+        </div>
+      </div>
+      <!-- Cierres -->
+      <div class="bg-white p-5 rounded-lg border border-[#EDE9E3] shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Cierres</span>
+        <div class="pt-2">
+          <span class="text-xl font-bold text-green-700" id="stat-cierres-value">$0</span>
+          <div class="text-xs text-gray-400 font-semibold" id="stat-cierres-count">0 ventas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales & Conversions Velocity -->
+    <div class="bg-white p-6 rounded-lg border border-[#EDE9E3] shadow-sm">
+      <h3 class="font-bold text-gray-800 text-md mb-4 flex items-center gap-1.5"><i data-lucide="gauge" class="w-4 h-4 text-natural"></i> Velocidad de Conversión Comercial</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 text-center">
+        <div class="p-3 bg-gray-50 border border-[#EDE9E3] rounded">
+          <div class="text-xs text-[#948A7C] font-semibold uppercase">Creado &rarr; Contactado</div>
+          <div class="text-lg font-bold text-gray-800 pt-1" id="vel-contacted">- días</div>
+        </div>
+        <div class="p-3 bg-gray-50 border border-[#EDE9E3] rounded">
+          <div class="text-xs text-[#948A7C] font-semibold uppercase">Creado &rarr; Meeting</div>
+          <div class="text-lg font-bold text-gray-800 pt-1" id="vel-meeting">- días</div>
+        </div>
+        <div class="p-3 bg-gray-50 border border-[#EDE9E3] rounded">
+          <div class="text-xs text-[#948A7C] font-semibold uppercase">Creado &rarr; Visita</div>
+          <div class="text-lg font-bold text-gray-800 pt-1" id="vel-visited">- días</div>
+        </div>
+        <div class="p-3 bg-gray-50 border border-[#EDE9E3] rounded">
+          <div class="text-xs text-[#948A7C] font-semibold uppercase">Creado &rarr; Reserva</div>
+          <div class="text-lg font-bold text-gray-800 pt-1" id="vel-reserved">- días</div>
+        </div>
+        <div class="p-3 bg-gray-50 border border-[#EDE9E3] rounded">
+          <div class="text-xs text-[#948A7C] font-semibold uppercase">Creado &rarr; Cierre</div>
+          <div class="text-lg font-bold text-gray-800 pt-1" id="vel-closed">- días</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Comparative Funnel (RISE Style) -->
+    <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-[#EDE9E3] bg-[#FAF8F5]">
+        <h3 class="font-bold text-gray-800 text-md">Comparativo Mensual del Embudo (Año en Curso)</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs whitespace-nowrap">
+          <thead>
+            <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3] bg-gray-50">
+              <th class="py-3 px-6">Mes</th>
+              <th class="py-3 px-6 text-center">Leads Creados</th>
+              <th class="py-3 px-6 text-center">Contactados</th>
+              <th class="py-3 px-6 text-center">Meetings</th>
+              <th class="py-3 px-6 text-center">Visitas</th>
+              <th class="py-3 px-6 text-center">Reservas</th>
+              <th class="py-3 px-6 text-center">Cierres</th>
+              <th class="py-3 px-6 text-right">Volumen Cierres ($)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#EDE9E3]" id="monthly-funnel-body">
+            <!-- Loaded dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Marketing Channel & CAC Report -->
+    <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-[#EDE9E3] bg-[#FAF8F5]">
+        <h3 class="font-bold text-gray-800 text-md">Rendimiento de Marketing & Costo de Adquisición (CAC)</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs whitespace-nowrap">
+          <thead>
+            <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3] bg-gray-50">
+              <th class="py-3 px-6">Canal / Origen</th>
+              <th class="py-3 px-6 text-center">Leads Captados</th>
+              <th class="py-3 px-6 text-center">Ventas Cerradas</th>
+              <th class="py-3 px-6 text-center">Tasa de Conversión</th>
+              <th class="py-3 px-6 text-right">Gasto Ad Spend ($)</th>
+              <th class="py-3 px-6 text-right">Costo por Lead (CPL)</th>
+              <th class="py-3 px-6 text-right font-bold text-natural">Costo por Venta (CAC)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#EDE9E3]" id="marketing-report-body">
+            <!-- Loaded dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payouts & Commissions Calculations -->
+    <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-[#EDE9E3] bg-[#FAF8F5]">
+        <h3 class="font-bold text-gray-800 text-md">Cálculo de Pagos a Agentes (Comisiones de Venta)</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs whitespace-nowrap">
+          <thead>
+            <tr class="text-xs uppercase text-[#948A7C] font-semibold border-b border-[#EDE9E3] bg-gray-50">
+              <th class="py-3 px-6">Agente</th>
+              <th class="py-3 px-6 text-center">Cierres Realizados</th>
+              <th class="py-3 px-6 text-right">Volumen Ventas Cerradas ($)</th>
+              <th class="py-3 px-6 text-center">Tasa Comisión (%)</th>
+              <th class="py-3 px-6 text-right font-bold text-green-700">Comisión a Pagar ($)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#EDE9E3]" id="agent-payouts-body">
+            <!-- Loaded dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pestaña 5: Reglas & Agentes -->
+  <div id="section-config" class="tab-section hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+    
+    <!-- Left column: Collaborators / Sales Agents Config -->
+    <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm p-6 space-y-6">
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg">Perfil de Agentes & Comisiones</h3>
+        <p class="text-xs text-gray-500">Configura los idiomas del agente, comisiones y enlaces de salas de Zoom personales.</p>
+      </div>
+
+      <div class="space-y-4">
+        {% for agent in collaborators %}
+        <div class="border border-[#EDE9E3] rounded p-4 space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-bold text-gray-800">{{ agent.name }}</h4>
+              <p class="text-xs text-gray-500">{{ agent.role }}</p>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded font-bold uppercase
+              {% if agent.is_active_round_robin == 1 %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+              {% if agent.is_active_round_robin == 1 %}Round Robin: Activo{% else %}Round Robin: Off{% endif %}
+            </span>
+          </div>
+
+          <div class="text-xs text-gray-600 space-y-1 bg-gray-50 p-2 rounded">
+            <div>Idiomas: <strong class="uppercase text-natural">{{ agent.languages }}</strong></div>
+            <div>Comisión: <strong>{{ agent.commission_rate }}%</strong></div>
+            <div class="truncate">Sala Zoom: <a href="{{ agent.zoom_link }}" target="_blank" class="text-blue-600 underline font-semibold">{{ agent.zoom_link }}</a></div>
+          </div>
+
+          <div class="flex justify-end">
+            <button onclick='openEditAgentModal({{ agent | tojson | safe }})' class="px-2.5 py-1.5 border border-[#EDE9E3] hover:bg-gray-50 rounded text-xs font-semibold flex items-center gap-1 transition">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Editar Perfil
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right column: Rules Builder -->
+    <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-sm p-6 space-y-6">
+      <div>
+        <h3 class="font-bold text-gray-800 text-lg">Reglas de Asignación Automática</h3>
+        <p class="text-xs text-gray-500">Crea reglas específicas para asignar leads basados en origen, idioma o calificación antes del Round-Robin.</p>
+      </div>
+
+      <!-- New Rule Form -->
+      <form action="/api/assignment-rules/new" method="POST" class="border border-[#EDE9E3] rounded p-4 space-y-4 text-xs">
+        <h4 class="font-semibold text-gray-800 uppercase tracking-wider">Crear Nueva Regla</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-bold text-[#948A7C] uppercase tracking-wider mb-1">Si el campo</label>
+            <select name="field_name" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+              <option value="origin">Canal de Origen</option>
+              <option value="language">Idioma</option>
+              <option value="budget">Presupuesto (Prequal)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-[#948A7C] uppercase tracking-wider mb-1">Sea igual a</label>
+            <input type="text" name="field_value" required placeholder="ej. F&F o en o YES" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-[#948A7C] uppercase tracking-wider mb-1">Asignar automáticamente a</label>
+          <select name="agent_id" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            {% for agent in collaborators %}
+            <option value="{{ agent.id }}">{{ agent.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-bold text-[#948A7C] uppercase tracking-wider mb-1">Prioridad (menor primero)</label>
+            <input type="number" name="priority" value="0" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+          </div>
+          <div class="flex items-end">
+            <button type="submit" class="bg-natural hover:bg-opacity-90 text-white w-full py-2 rounded font-semibold transition">
+              Activar Regla
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Rules List -->
+      <div class="space-y-3">
+        <h4 class="font-bold text-gray-800 text-xs uppercase tracking-widest border-b border-[#EDE9E3] pb-2">Reglas Activas</h4>
+        {% if rules %}
+          {% for rule in rules %}
+          <div class="flex justify-between items-center p-3 bg-gray-50 border border-[#EDE9E3] rounded text-xs">
+            <div>
+              Si <strong>
+                {% if rule.field_name == 'origin' %}Origen
+                {% elif rule.field_name == 'language' %}Idioma
+                {% else %}Presupuesto{% endif %}
+              </strong> es igual a <strong class="text-natural">"{{ rule.field_value }}"</strong> &rarr; asignar a <strong>{{ rule.agent_name }}</strong>
+              <div class="text-[10px] text-gray-400">Prioridad: {{ rule.priority }}</div>
+            </div>
+            <form action="/api/assignment-rules/{{ rule.id }}/delete" method="POST" onsubmit="return confirm('¿Eliminar regla?');">
+              <button type="submit" class="text-red-500 hover:text-red-700 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </form>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-8 text-gray-400 text-xs">
+            No hay reglas personalizadas activas. Todos los leads aplican Round-Robin.
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+
   </div>
 
 </div>
@@ -152,7 +673,7 @@
         </div>
       </div>
 
-      <!-- Origin & Status -->
+      <!-- Origin & Custom Label -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Canal de Origen</label>
@@ -189,32 +710,207 @@
           </select>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Estado del Embudo</label>
-          <select id="leadStatus" name="status" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
-            <option value="New Lead">Nuevo Prospecto</option>
-            <option value="Contacted">Contactado</option>
-            <option value="Hot lead">Caliente / Muy Interesado</option>
-            <option value="SOLD">VENDIDO</option>
-            <option value="LOST">Perdido</option>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Idioma del Lead</label>
+          <select id="leadLanguage" name="language" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="es">Español (ES)</option>
+            <option value="en">Inglés (EN)</option>
           </select>
         </div>
       </div>
 
-      <!-- Replied Checkbox -->
-      <div class="flex items-center gap-2 py-1">
-        <input type="checkbox" id="leadReplied" name="replied" value="1" class="w-4 h-4 rounded text-natural border-[#EDE9E3] focus:ring-natural">
-        <label for="leadReplied" class="text-xs font-semibold text-[#574F45] uppercase tracking-wider">Marcar como Contestado (Respuesta enviada)</label>
+      <!-- Temperature & Deal Value -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Calificación Temperatura</label>
+          <select id="leadTemperature" name="lead_temperature" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="frio">Frío (Cold)</option>
+            <option value="tibio">Tibio (Warm)</option>
+            <option value="caliente">Caliente (Hot)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Valor Venta (USD)</label>
+          <input type="number" step="0.01" id="leadDealValue" name="deal_value" value="0.00" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
       </div>
 
-      <!-- Details / Notes -->
+      <!-- Embudo Status -->
       <div>
-        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Detalles / Notas de Seguimiento</label>
-        <textarea id="leadDetails" name="details" rows="4" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural" placeholder="Notas sobre el cliente, qué lote busca, presupuesto, etc."></textarea>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Fase del Proceso</label>
+        <select id="leadStatus" name="status" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+          <option value="Nuevo">Nuevo</option>
+          <option value="Contactado">Contactado</option>
+          <option value="Meeting">Meeting</option>
+          <option value="Visita">Visita</option>
+          <option value="Hot lead">Hot lead</option>
+          <option value="Ganado">Ganado</option>
+          <option value="Perdido">Perdido</option>
+          <option value="No ahora">No ahora</option>
+        </select>
+      </div>
+
+      <!-- Replied Switch -->
+      <div class="flex items-center gap-2 py-1">
+        <input type="checkbox" id="leadReplied" name="replied" value="1" class="w-4 h-4 rounded text-natural border-[#EDE9E3] focus:ring-natural">
+        <label for="leadReplied" class="text-xs font-semibold text-[#574F45] uppercase tracking-wider">Marcar como Contestado (Mensaje respondido)</label>
+      </div>
+
+      <!-- Details -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Notas / Bitácora de Seguimiento</label>
+        <textarea id="leadDetails" name="details" rows="3" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural" placeholder="Notas sobre presupuesto, citas, lote de interés..."></textarea>
       </div>
 
       <!-- Actions -->
       <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
         <button type="button" onclick="closeLeadModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Guardar Lead
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Meeting Summarize / Zoom Minuta Modal -->
+<div id="summarizeModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 class="font-bold text-gray-800 text-lg">Resumen de Reunión por IA</h3>
+      <button onclick="closeSummarizeModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <div class="p-6 space-y-4 overflow-y-auto flex-1 text-sm">
+      <input type="hidden" id="sumMeetingId">
+      
+      <!-- Input: Notes -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Subir Notas / Transcripción de Zoom</label>
+        <textarea id="sumNotes" rows="5" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural" placeholder="Pega aquí la minuta de Zoom, notas tomadas o la transcripción de audio..."></textarea>
+      </div>
+
+      <div class="flex justify-end">
+        <button type="button" onclick="generateAiSummary()" id="btn-run-summary" class="bg-natural hover:bg-opacity-90 text-white px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Procesar con IA
+        </button>
+      </div>
+
+      <!-- Output Summary & Follow Up Plan -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 p-4 rounded border border-[#EDE9E3]">
+        <div class="space-y-1">
+          <h4 class="font-bold text-xs uppercase text-[#948A7C] tracking-wider">Resumen Comercial</h4>
+          <p id="sumOutputText" class="text-xs text-gray-600 italic">Presiona 'Procesar con IA' para generar el resumen.</p>
+        </div>
+        <div class="space-y-1">
+          <h4 class="font-bold text-xs uppercase text-[#948A7C] tracking-wider">Plan de Seguimiento</h4>
+          <p id="sumOutputPlan" class="text-xs text-gray-600 italic">Tareas sugeridas.</p>
+        </div>
+      </div>
+
+      <hr class="border-[#EDE9E3]">
+
+      <!-- Action items for lead scoring -->
+      <h4 class="font-bold text-gray-800 text-xs uppercase tracking-wider">Calificación de Lead Posterior a la Reunión</h4>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Next Stage -->
+        <div>
+          <label class="block text-[10px] font-bold text-[#948A7C] uppercase tracking-wider mb-1">Mover a Fase</label>
+          <select id="sumNextStatus" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="Meeting">Meeting (Permanecer)</option>
+            <option value="Visita">Visita programada</option>
+            <option value="Hot lead">Hot lead (Reservando)</option>
+            <option value="Ganado">Ganado (Cierre)</option>
+            <option value="Perdido">Perdido</option>
+            <option value="No ahora">No ahora</option>
+          </select>
+        </div>
+        <!-- Temperature -->
+        <div>
+          <label class="block text-[10px] font-bold text-[#948A7C] uppercase tracking-wider mb-1">Temperatura del Lead</label>
+          <select id="sumTemperature" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="frio">Frío</option>
+            <option value="tibio">Tibio</option>
+            <option value="caliente">Caliente</option>
+          </select>
+        </div>
+        <!-- Closing value -->
+        <div>
+          <label class="block text-[10px] font-bold text-[#948A7C] uppercase tracking-wider mb-1">Monto de Cierre ($)</label>
+          <input type="number" id="sumDealValue" value="0" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeSummarizeModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition">
+          Cerrar sin guardar
+        </button>
+        <button type="button" onclick="saveSummarizeModalChanges()" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Aplicar Calificación & Resumen
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Collaborator Agent Modal -->
+<div id="agentModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-md w-full overflow-hidden">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 class="font-bold text-gray-800 text-lg">Editar Perfil de Agente</h3>
+      <button onclick="closeEditAgentModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <form id="agentForm" method="POST" action="" class="p-6 space-y-4 text-sm">
+      <input type="hidden" id="agentId" name="agent_id">
+      
+      <!-- Name (Read-only for safety since it maps Gantt) -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Nombre Agente</label>
+        <input type="text" id="agentName" name="name" readonly class="w-full px-3 py-2 border border-[#EDE9E3] rounded bg-gray-100 focus:outline-none cursor-not-allowed">
+      </div>
+
+      <!-- Role -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Rol / Cargo</label>
+        <input type="text" id="agentRole" name="role" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+      </div>
+
+      <!-- Languages & Round Robin toggler -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Idiomas (separados por coma)</label>
+          <input type="text" id="agentLanguages" name="languages" required placeholder="es,en" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">¿Participa en Round Robin?</label>
+          <select id="agentRoundRobin" name="is_active_round_robin" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="1">Sí (Activo)</option>
+            <option value="0">No (Inactivo)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Commission & Zoom link -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Comisión de Cierre (%)</label>
+          <input type="number" step="0.1" id="agentCommission" name="commission_rate" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Sala Zoom Personal</label>
+          <input type="text" id="agentZoom" name="zoom_link" required placeholder="https://zoom.us/j/..." class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeEditAgentModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition">
           Cancelar
         </button>
         <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
@@ -225,13 +921,277 @@
   </div>
 </div>
 
+<!-- Manual Schedule Meeting Modal -->
+<div id="meetingModal" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg border border-[#EDE9E3] shadow-lg max-w-md w-full overflow-hidden">
+    <div class="p-6 border-b border-[#EDE9E3] flex justify-between items-center bg-[#FAF8F5]">
+      <h3 class="font-bold text-gray-800 text-lg">Programar Nueva Reunión</h3>
+      <button onclick="closeNewMeetingModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    
+    <form method="POST" action="/api/meetings/new" class="p-6 space-y-4 text-sm">
+      <!-- Select Lead -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Seleccionar Prospecto (Lead)</label>
+        <select name="lead_id" required class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+          {% for lead in leads %}
+          <option value="{{ lead.id }}">{{ lead.name }} ({{ lead.email }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Title -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Título de Reunión</label>
+        <input type="text" name="title" required value="Consulta de Inversión Las Lomas" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+      </div>
+
+      <!-- Datetime -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Fecha y Hora</label>
+          <input type="text" name="scheduled_at" required placeholder="YYYY-MM-DD HH:MM" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Idioma</label>
+          <select name="language" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural bg-white">
+            <option value="es">Español (ES)</option>
+            <option value="en">Inglés (EN)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Zoom Link (Optional, will auto fallback) -->
+      <div>
+        <label class="block text-xs font-semibold text-[#948A7C] uppercase tracking-wider mb-1">Enlace de Zoom (Opcional)</label>
+        <input type="text" name="zoom_link" placeholder="Dejar vacío para usar link del agente asignado" class="w-full px-3 py-2 border border-[#EDE9E3] rounded focus:outline-none focus:border-natural">
+      </div>
+
+      <div class="pt-4 border-t border-[#EDE9E3] flex justify-end gap-3">
+        <button type="button" onclick="closeNewMeetingModal()" class="px-4 py-2 border border-[#EDE9E3] rounded hover:bg-gray-50 text-sm font-semibold transition">
+          Cancelar
+        </button>
+        <button type="submit" class="bg-natural hover:bg-opacity-90 text-white px-5 py-2 rounded text-sm font-semibold transition">
+          Programar Reunión
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Parse leads database items safely to a JSON array for client side indexing
+  // Parse SQLite data safely
   const leads = {{ leads_json | safe }};
+  const meetings = {{ meetings_json | safe }};
 
+  // --- Tab Management ---
+  function switchTab(tabId) {
+    // Hide all sections
+    document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    // Show selected section
+    const targetSection = document.getElementById('section-' + tabId);
+    const targetButton = document.getElementById('tab-' + tabId);
+    
+    if (targetSection && targetButton) {
+      targetSection.classList.remove('hidden');
+      targetButton.classList.add('active');
+    }
+
+    // Set item in storage
+    localStorage.setItem('active-crm-tab', tabId);
+
+    // Specific logic per tab loading
+    if (tabId === 'kanban') {
+      renderKanbanBoard();
+    } else if (tabId === 'stats') {
+      loadCrmStats(localStorage.getItem('active-crm-period') || 'month');
+    }
+  }
+
+  // Set default tab on load
+  window.onload = function() {
+    const savedTab = localStorage.getItem('active-crm-tab') || 'kanban';
+    switchTab(savedTab);
+    
+    // Check if query params specify showing modal
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('show_modal') === 'true') {
+      openNewLeadModal();
+    }
+  };
+
+  // --- 1. Kanban Drag & Drop ---
+  function renderKanbanBoard() {
+    const columns = ['Nuevo', 'Contactado', 'Meeting', 'Visita', 'Hot lead', 'Ganado', 'Perdido', 'No ahora'];
+    
+    // Clear all columns
+    columns.forEach(col => {
+      const colElem = document.getElementById('col-' + col.replace(' ', '-'));
+      if (colElem) {
+        colElem.innerHTML = '';
+      }
+    });
+
+    const counters = {
+      'Nuevo': 0, 'Contactado': 0, 'Meeting': 0, 'Visita': 0, 'Hot lead': 0, 'Ganado': 0, 'Perdido': 0, 'No ahora': 0
+    };
+
+    leads.forEach(lead => {
+      const status = lead.status || 'Nuevo';
+      const colElem = document.getElementById('col-' + status.replace(' ', '-'));
+      
+      if (colElem) {
+        counters[status]++;
+        
+        // Build card element
+        const card = document.createElement('div');
+        card.className = `lead-card p-3 space-y-2 text-xs temp-${lead.lead_temperature || 'frio'}`;
+        card.draggable = true;
+        card.id = 'lead-card-' + lead.id;
+        card.ondragstart = (e) => dragStart(e, lead.id);
+        card.onclick = () => viewLeadDetail(lead.id);
+
+        let originStr = lead.origin;
+        if (lead.origin === 'Otros') {
+          originStr = lead.origin_custom_label || 'Otros';
+        }
+
+        let valueStr = '';
+        if (lead.deal_value > 0) {
+          valueStr = `<div class="font-bold text-green-700">$${lead.deal_value}</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <h5 class="font-bold text-gray-800 text-sm truncate w-32">${lead.name}</h5>
+            <span class="text-[9px] px-1 rounded uppercase bg-[#EDE9E3]">${lead.language}</span>
+          </div>
+          <div class="text-[#574F45] truncate">${lead.email}</div>
+          <div class="text-[10px] text-gray-400">Origen: <strong>${originStr}</strong></div>
+          <div class="flex justify-between items-center pt-1 border-t border-gray-100">
+            <span class="text-[#2D5A3F] font-semibold">${lead.agent_name || 'Sin asignar'}</span>
+            ${valueStr}
+          </div>
+        `;
+        colElem.appendChild(card);
+      }
+    });
+
+    // Update column counters
+    document.getElementById('count-nuevo').textContent = counters['Nuevo'];
+    document.getElementById('count-contactado').textContent = counters['Contactado'];
+    document.getElementById('count-meeting').textContent = counters['Meeting'];
+    document.getElementById('count-visita').textContent = counters['Visita'];
+    document.getElementById('count-hotlead').textContent = counters['Hot lead'];
+    document.getElementById('count-ganado').textContent = counters['Ganado'];
+    document.getElementById('count-perdido').textContent = counters['Perdido'];
+    document.getElementById('count-noahora').textContent = counters['No ahora'];
+  }
+
+  function dragStart(e, leadId) {
+    e.dataTransfer.setData('text/plain', leadId);
+  }
+
+  function allowDrop(e) {
+    e.preventDefault();
+    const col = e.currentTarget;
+    col.classList.add('drag-over');
+  }
+
+  function dragLeave(e) {
+    const col = e.currentTarget;
+    col.classList.remove('drag-over');
+  }
+
+  function handleDrop(e, targetStatus) {
+    e.preventDefault();
+    const col = e.currentTarget;
+    col.classList.remove('drag-over');
+    
+    const leadId = e.dataTransfer.getData('text/plain');
+    const lead = leads.find(l => l.id == leadId);
+    
+    if (lead) {
+      if (lead.status === targetStatus) return; // No change
+
+      // If moving to Ganado, prompt for deal value!
+      if (targetStatus === 'Ganado') {
+        const val = prompt('¡Felicidades por el Cierre! Ingresa el monto total de la venta (USD):', lead.deal_value || '190000');
+        if (val !== null) {
+          const numVal = parseFloat(val) || 0.0;
+          updateLeadStatusOnServer(lead.id, targetStatus, numVal);
+        }
+      } else {
+        updateLeadStatusOnServer(lead.id, targetStatus, lead.deal_value || 0.0);
+      }
+    }
+  }
+
+  function updateLeadStatusOnServer(leadId, newStatus, dealValue) {
+    const formData = new FormData();
+    formData.append('status_val', newStatus);
+    formData.append('deal_value', dealValue);
+
+    fetch(`/api/leads/${leadId}/update-status`, {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      // Update local state
+      const lead = leads.find(l => l.id == leadId);
+      if (lead) {
+        lead.status = newStatus;
+        lead.deal_value = dealValue;
+      }
+      renderKanbanBoard();
+      
+      // Update leads list row status
+      window.location.reload(); // Quick refresh to update tables & lists instantly
+    })
+    .catch(err => {
+      console.error('Error updating status:', err);
+      alert('No se pudo actualizar el estado del prospecto.');
+    });
+  }
+
+  // --- 2. Lead Filter (List view) ---
+  function filterLeadsTable() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const origin = document.getElementById('filter-origin').value;
+    const temp = document.getElementById('filter-temp').value;
+    const agent = document.getElementById('filter-agent').value;
+
+    const rows = document.querySelectorAll('.table-row-item');
+
+    rows.forEach(row => {
+      const rowName = row.getAttribute('data-name');
+      const rowEmail = row.getAttribute('data-email');
+      const rowOrigin = row.getAttribute('data-origin');
+      const rowTemp = row.getAttribute('data-temp');
+      const rowAgent = row.getAttribute('data-agent');
+
+      const matchesSearch = rowName.includes(query) || rowEmail.includes(query);
+      const matchesOrigin = (origin === 'all') || (rowOrigin === origin);
+      const matchesTemp = (temp === 'all') || (rowTemp === temp);
+      const matchesAgent = (agent === 'all') || (rowAgent === agent);
+
+      if (matchesSearch && matchesOrigin && matchesTemp && matchesAgent) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+  }
+
+  // --- 3. Lead details modal ---
   function openNewLeadModal() {
     document.getElementById('modalTitle').textContent = 'Registrar Nuevo Prospecto';
     document.getElementById('leadForm').action = '/api/leads/new';
@@ -239,13 +1199,17 @@
     document.getElementById('leadName').value = '';
     document.getElementById('leadEmail').value = '';
     document.getElementById('leadPhone').value = '';
-    document.getElementById('leadOrigin').value = 'Website Landing';
-    document.getElementById('leadStatus').value = 'New Lead';
+    document.getElementById('leadOrigin').value = 'directo';
+    document.getElementById('leadCustomOrigin').value = '';
+    document.getElementById('leadAgent').value = 'auto';
+    document.getElementById('leadLanguage').value = 'es';
+    document.getElementById('leadTemperature').value = 'frio';
+    document.getElementById('leadDealValue').value = '0.00';
     document.getElementById('leadReplied').checked = false;
     document.getElementById('leadDetails').value = '';
     
+    toggleCustomOriginInput();
     document.getElementById('leadModal').classList.remove('hidden');
-    lucide.createIcons();
   }
 
   function viewLeadDetail(id) {
@@ -258,25 +1222,275 @@
     document.getElementById('leadName').value = lead.name || '';
     document.getElementById('leadEmail').value = lead.email || '';
     document.getElementById('leadPhone').value = lead.phone || '';
-    document.getElementById('leadOrigin').value = lead.origin || 'Website Landing';
-    document.getElementById('leadStatus').value = lead.status || 'New Lead';
+    document.getElementById('leadOrigin').value = lead.origin || 'directo';
+    document.getElementById('leadCustomOrigin').value = lead.origin_custom_label || '';
+    document.getElementById('leadAgent').value = lead.assigned_agent_id || '';
+    document.getElementById('leadLanguage').value = lead.language || 'es';
+    document.getElementById('leadTemperature').value = lead.lead_temperature || 'frio';
+    document.getElementById('leadDealValue').value = lead.deal_value || '0.00';
     document.getElementById('leadReplied').checked = (lead.replied === 1);
     document.getElementById('leadDetails').value = lead.details || '';
+    document.getElementById('leadStatus').value = lead.status || 'Nuevo';
 
+    toggleCustomOriginInput();
     document.getElementById('leadModal').classList.remove('hidden');
-    lucide.createIcons();
   }
 
   function closeLeadModal() {
     document.getElementById('leadModal').classList.add('hidden');
   }
 
-  // Handle opening modal if URL query specifies it
-  window.onload = function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('show_modal') === 'true') {
-      openNewLeadModal();
+  function toggleCustomOriginInput() {
+    const originSel = document.getElementById('leadOrigin').value;
+    const container = document.getElementById('custom-origin-container');
+    if (originSel === 'Otros') {
+      container.classList.remove('hidden');
+    } else {
+      container.classList.add('hidden');
     }
   }
+
+  // --- 4. Meeting Summarizer ---
+  function openSummarizeModal(meetingId) {
+    const meeting = meetings.find(m => m.id === meetingId);
+    if (!meeting) return;
+
+    document.getElementById('sumMeetingId').value = meetingId;
+    document.getElementById('sumNotes').value = meeting.notes || '';
+    document.getElementById('sumOutputText').innerHTML = meeting.summary ? meeting.summary.replace(/\n/g, '<br>') : 'Presiona "Procesar con IA" para generar el resumen.';
+    document.getElementById('sumOutputPlan').innerHTML = meeting.follow_up_plan ? meeting.follow_up_plan.replace(/\n/g, '<br>') : 'Tareas sugeridas.';
+    
+    // Find the lead associated with this meeting to get temperature and deal_value
+    const lead = leads.find(l => l.id === meeting.lead_id);
+    if (lead) {
+      document.getElementById('sumNextStatus').value = lead.status || 'Meeting';
+      document.getElementById('sumTemperature').value = lead.lead_temperature || 'frio';
+      document.getElementById('sumDealValue').value = lead.deal_value || 0;
+    }
+
+    document.getElementById('summarizeModal').classList.remove('hidden');
+  }
+
+  function closeSummarizeModal() {
+    document.getElementById('summarizeModal').classList.add('hidden');
+  }
+
+  function generateAiSummary() {
+    const meetingId = document.getElementById('sumMeetingId').value;
+    const notes = document.getElementById('sumNotes').value;
+    
+    if (!notes.trim()) {
+      alert('Por favor ingresa o sube notas antes de procesar.');
+      return;
+    }
+
+    const btn = document.getElementById('btn-run-summary');
+    btn.textContent = 'Procesando...';
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('notes', notes);
+
+    fetch(`/api/meetings/${meetingId}/summarize`, {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('sumOutputText').innerHTML = data.summary.replace(/\n/g, '<br>');
+      document.getElementById('sumOutputPlan').innerHTML = data.follow_up_plan.replace(/\n/g, '<br>');
+      
+      // Update local meeting object
+      const meeting = meetings.find(m => m.id == meetingId);
+      if (meeting) {
+        meeting.notes = notes;
+        meeting.summary = data.summary;
+        meeting.follow_up_plan = data.follow_up_plan;
+      }
+      
+      btn.innerHTML = '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Procesar con IA';
+      btn.disabled = false;
+      lucide.createIcons();
+    })
+    .catch(err => {
+      console.error('Error generating summary:', err);
+      alert('Error al generar resumen.');
+      btn.innerHTML = '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Procesar con IA';
+      btn.disabled = false;
+      lucide.createIcons();
+    });
+  }
+
+  function saveSummarizeModalChanges() {
+    const meetingId = document.getElementById('sumMeetingId').value;
+    const notes = document.getElementById('sumNotes').value;
+    const nextStatus = document.getElementById('sumNextStatus').value;
+    const temp = document.getElementById('sumTemperature').value;
+    const dealValue = parseFloat(document.getElementById('sumDealValue').value) || 0.0;
+
+    const meeting = meetings.find(m => m.id == meetingId);
+    if (!meeting) return;
+
+    // First save the meeting notes/status (calling the edit endpoint)
+    const formMeeting = new FormData();
+    formMeeting.append('title', meeting.title);
+    formMeeting.append('scheduled_at', meeting.scheduled_at);
+    formMeeting.append('status', 'completed');
+    formMeeting.append('zoom_link', meeting.zoom_link || '');
+    formMeeting.append('notes', notes);
+    formMeeting.append('summary', document.getElementById('sumOutputText').innerHTML.replace(/<br>/g, '\n'));
+    formMeeting.append('follow_up_plan', document.getElementById('sumOutputPlan').innerHTML.replace(/<br>/g, '\n'));
+
+    // Edit lead details
+    const lead = leads.find(l => l.id == meeting.lead_id);
+    if (lead) {
+      const formLead = new FormData();
+      formLead.append('name', lead.name);
+      formLead.append('email', lead.email);
+      formLead.append('phone', lead.phone || '');
+      formLead.append('origin', lead.origin);
+      formLead.append('origin_custom_label', lead.origin_custom_label || '');
+      formLead.append('status', nextStatus);
+      formLead.append('replied', lead.replied || 0);
+      formLead.append('assigned_agent_id', lead.assigned_agent_id || '');
+      formLead.append('language', lead.language || 'es');
+      formLead.append('lead_temperature', temp);
+      formLead.append('deal_value', dealValue);
+      formLead.append('details', (lead.details || '') + '\n[Reunión Procesada]: ' + document.getElementById('sumOutputText').innerHTML.substring(0, 100) + '...');
+
+      // Run sequential saves
+      fetch(`/api/meetings/${meetingId}/edit`, { method: 'POST', body: formMeeting })
+      .then(() => {
+        return fetch(`/api/leads/${lead.id}/edit`, { method: 'POST', body: formLead });
+      })
+      .then(() => {
+        closeSummarizeModal();
+        window.location.reload();
+      })
+      .catch(err => {
+        console.error('Error saving qualifications:', err);
+        alert('Ocurrió un error al guardar la calificación.');
+      });
+    }
+  }
+
+  function openNewMeetingModal() {
+    document.getElementById('meetingModal').classList.remove('hidden');
+  }
+  function closeNewMeetingModal() {
+    document.getElementById('meetingModal').classList.add('hidden');
+  }
+
+  // --- 5. CRM Stats Loader ---
+  function loadCrmStats(period) {
+    localStorage.setItem('active-crm-period', period);
+    
+    // Toggle active class on button
+    document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('bg-natural', 'text-white'));
+    document.getElementById('period-' + period).classList.add('bg-natural', 'text-white');
+
+    fetch('/api/crm/stats')
+    .then(res => res.json())
+    .then(data => {
+      const pData = data.stats[period];
+      
+      // Update basic cards
+      document.getElementById('stat-views').textContent = pData.views;
+      document.getElementById('stat-leads').textContent = pData.leads;
+      document.getElementById('stat-meetings-realizadas').textContent = pData.meetings_realizadas;
+      document.getElementById('stat-meetings-canceladas').textContent = pData.meetings_canceladas;
+      document.getElementById('stat-visitas').textContent = pData.visitas;
+      document.getElementById('stat-reservas').textContent = pData.reservas;
+      document.getElementById('stat-cierres-count').textContent = pData.cierres_count + ' cierres';
+      document.getElementById('stat-cierres-value').textContent = '$' + pData.cierres_value.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+      // Update velocity indicators
+      document.getElementById('vel-contacted').textContent = data.velocity.to_contacted > 0 ? data.velocity.to_contacted + ' días' : 'Inmediato';
+      document.getElementById('vel-meeting').textContent = data.velocity.to_meeting > 0 ? data.velocity.to_meeting + ' días' : 'Inmediato';
+      document.getElementById('vel-visited').textContent = data.velocity.to_visited > 0 ? data.velocity.to_visited + ' días' : 'Inmediato';
+      document.getElementById('vel-reserved').textContent = data.velocity.to_reserved > 0 ? data.velocity.to_reserved + ' días' : 'Inmediato';
+      document.getElementById('vel-closed').textContent = data.velocity.to_closed > 0 ? data.velocity.to_closed + ' días' : 'Inmediato';
+
+      // Render monthly funnel list
+      const monthlyBody = document.getElementById('monthly-funnel-body');
+      monthlyBody.innerHTML = '';
+      data.monthly_funnel.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+        tr.innerHTML = `
+          <td class="py-3 px-6 font-bold text-gray-700">${m.month_name}</td>
+          <td class="py-3 px-6 text-center">${m.created}</td>
+          <td class="py-3 px-6 text-center text-[#948A7C]">${m.contacted}</td>
+          <td class="py-3 px-6 text-center text-blue-700 font-semibold">${m.meetings}</td>
+          <td class="py-3 px-6 text-center text-teal-700 font-semibold">${m.visits}</td>
+          <td class="py-3 px-6 text-center text-orange-700 font-bold">${m.reservas}</td>
+          <td class="py-3 px-6 text-center text-green-700 font-bold">${m.closures_count}</td>
+          <td class="py-3 px-6 text-right font-semibold text-gray-800">$${m.closures_value.toLocaleString('en-US')}</td>
+        `;
+        monthlyBody.appendChild(tr);
+      });
+
+      // Render Marketing Report
+      const mktBody = document.getElementById('marketing-report-body');
+      mktBody.innerHTML = '';
+      data.marketing_report.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+        
+        let cplStr = r.cpl > 0 ? '$' + r.cpl : '-';
+        let cacStr = r.cac > 0 ? '$' + r.cac : '-';
+        
+        tr.innerHTML = `
+          <td class="py-3 px-6 font-bold text-gray-700">${r.origin}</td>
+          <td class="py-3 px-6 text-center font-medium">${r.leads}</td>
+          <td class="py-3 px-6 text-center font-medium text-green-700">${r.closures}</td>
+          <td class="py-3 px-6 text-center font-bold text-gray-600">${r.conversion_rate}%</td>
+          <td class="py-3 px-6 text-right font-medium text-gray-800">$${r.spend.toLocaleString('en-US')}</td>
+          <td class="py-3 px-6 text-right text-gray-500">${cplStr}</td>
+          <td class="py-3 px-6 text-right font-bold text-natural">${cacStr}</td>
+        `;
+        mktBody.appendChild(tr);
+      });
+
+      // Render Agent payouts
+      const payBody = document.getElementById('agent-payouts-body');
+      payBody.innerHTML = '';
+      data.agent_payouts.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50';
+        tr.innerHTML = `
+          <td class="py-3 px-6 font-bold text-gray-700">${a.agent_name}</td>
+          <td class="py-3 px-6 text-center font-semibold">${a.deals_count}</td>
+          <td class="py-3 px-6 text-right font-semibold text-gray-800">$${a.total_value.toLocaleString('en-US')}</td>
+          <td class="py-3 px-6 text-center text-gray-500 font-medium">${a.commission_rate}%</td>
+          <td class="py-3 px-6 text-right font-bold text-green-700">$${a.payout.toLocaleString('en-US')}</td>
+        `;
+        payBody.appendChild(tr);
+      });
+
+    })
+    .catch(err => {
+      console.error('Error fetching statistics:', err);
+    });
+  }
+
+  // --- 6. Collaborator Management ---
+  function openEditAgentModal(agent) {
+    document.getElementById('agentForm').action = `/api/collaborators/${agent.id}/edit`;
+    document.getElementById('agentId').value = agent.id;
+    document.getElementById('agentName').value = agent.name;
+    document.getElementById('agentRole').value = agent.role || '';
+    document.getElementById('agentLanguages').value = agent.languages || 'es,en';
+    document.getElementById('agentRoundRobin').value = agent.is_active_round_robin || 0;
+    document.getElementById('agentCommission').value = agent.commission_rate || 3.0;
+    document.getElementById('agentZoom').value = agent.zoom_link || '';
+
+    document.getElementById('agentModal').classList.remove('hidden');
+  }
+
+  function closeEditAgentModal() {
+    document.getElementById('agentModal').classList.add('hidden');
+  }
+
 </script>
 {% endblock %}
