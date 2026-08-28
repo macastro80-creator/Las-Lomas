@@ -1082,6 +1082,7 @@ def api_create_lead(payload: LeadPayload):
     
     conn.commit()
     conn.close()
+    print(f"[MOCK EMAIL] Confirmation email successfully sent to {payload.email} for Send Message")
     return {"status": "success", "message": "Lead registrado en el CRM de Las Lomas."}
 
 @app.post("/api/leads/{id}/toggle-replied")
@@ -1274,6 +1275,7 @@ def api_book_meeting(payload: BookMeetingPayload):
     
     conn.commit()
     conn.close()
+    print(f"[MOCK EMAIL] Confirmation email successfully sent to {payload.email} for Meeting Booking on {payload.datetime}")
     
     return {
         "status": "success",
@@ -1488,51 +1490,139 @@ def api_crm_stats():
     
     now = datetime.now()
     
-    start_of_week = now - timedelta(days=now.weekday())
-    start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+    # Esta semana (Lunes 00:00:00 a hoy)
+    start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
     
+    # Semana anterior (Lunes anterior 00:00:00 al Lunes actual 00:00:00)
+    start_of_prev_week = start_of_week - timedelta(days=7)
+    end_of_prev_week = start_of_week
+    end_day_prev_week = start_of_week - timedelta(days=1)
+    
+    # Este mes (1° del mes actual 00:00:00 a hoy)
     start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     
+    # Mes anterior (1° del mes pasado al 1° del mes actual)
+    last_day_prev_month = start_of_month - timedelta(days=1)
+    start_of_prev_month = last_day_prev_month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    end_of_prev_month = start_of_month
+    
+    # Este año / YTD (1 de Enero 00:00:00 a hoy)
     start_of_year = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
     
+    # Año anterior (1 Ene año anterior al 1 Ene año actual)
+    start_of_prev_year = datetime(now.year - 1, 1, 1, 0, 0, 0, 0)
+    end_of_prev_year = start_of_year
+    
+    # Últimos 12 meses (móvil)
     start_of_annual = now - timedelta(days=365)
     
+    month_names = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    month_short = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    
     periods = {
-        "week": start_of_week,
-        "month": start_of_month,
-        "ytd": start_of_year,
-        "annual": start_of_annual
+        "week": {
+            "label": "Esta Semana",
+            "date_range": f"{start_of_week.strftime('%d')} {month_short[start_of_week.month-1]} - {now.strftime('%d')} {month_short[now.month-1]} {now.year}",
+            "start": start_of_week,
+            "end": None
+        },
+        "prev_week": {
+            "label": "Semana Anterior",
+            "date_range": f"{start_of_prev_week.strftime('%d')} {month_short[start_of_prev_week.month-1]} - {end_day_prev_week.strftime('%d')} {month_short[end_day_prev_week.month-1]} {end_day_prev_week.year}",
+            "start": start_of_prev_week,
+            "end": end_of_prev_week
+        },
+        "month": {
+            "label": "Este Mes",
+            "date_range": f"{month_names[now.month-1]} {now.year}",
+            "start": start_of_month,
+            "end": None
+        },
+        "prev_month": {
+            "label": "Mes Anterior",
+            "date_range": f"{month_names[start_of_prev_month.month-1]} {start_of_prev_month.year}",
+            "start": start_of_prev_month,
+            "end": end_of_prev_month
+        },
+        "ytd": {
+            "label": "Este Año (YTD)",
+            "date_range": f"1 Ene - {now.strftime('%d')} {month_short[now.month-1]} {now.year}",
+            "start": start_of_year,
+            "end": None
+        },
+        "prev_year": {
+            "label": "Año Anterior",
+            "date_range": f"Año {now.year - 1}",
+            "start": start_of_prev_year,
+            "end": end_of_prev_year
+        },
+        "annual": {
+            "label": "Últimos 12 Meses",
+            "date_range": f"{start_of_annual.strftime('%d/%m/%Y')} - {now.strftime('%d/%m/%Y')}",
+            "start": start_of_annual,
+            "end": None
+        },
+        "all": {
+            "label": "Histórico Total",
+            "date_range": "Todo el registro",
+            "start": None,
+            "end": None
+        }
     }
     
     stats = {}
     
-    for period_name, start_date in periods.items():
-        date_str = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    for period_name, p_info in periods.items():
+        start_date = p_info["start"]
+        end_date = p_info["end"]
         
-        cursor.execute("SELECT COUNT(*) as count FROM page_views WHERE viewed_at >= ?", (date_str,))
+        def build_clause(col, extra=""):
+            clauses = []
+            params = []
+            if start_date:
+                clauses.append(f"{col} >= ?")
+                params.append(start_date.strftime("%Y-%m-%d %H:%M:%S"))
+            if end_date:
+                clauses.append(f"{col} < ?")
+                params.append(end_date.strftime("%Y-%m-%d %H:%M:%S"))
+            if extra:
+                clauses.append(extra)
+            where = " WHERE " + " AND ".join(clauses) if clauses else ""
+            return where, params
+        
+        w_views, p_views = build_clause("viewed_at")
+        cursor.execute(f"SELECT COUNT(*) as count FROM page_views{w_views}", p_views)
         views = cursor.fetchone()["count"]
         
-        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE created_at >= ?", (date_str,))
+        w_leads, p_leads = build_clause("created_at")
+        cursor.execute(f"SELECT COUNT(*) as count FROM leads{w_leads}", p_leads)
         leads = cursor.fetchone()["count"]
         
-        cursor.execute("SELECT COUNT(*) as count FROM meetings WHERE scheduled_at >= ? AND status = 'completed'", (date_str,))
+        w_m_comp, p_m_comp = build_clause("scheduled_at", "status = 'completed'")
+        cursor.execute(f"SELECT COUNT(*) as count FROM meetings{w_m_comp}", p_m_comp)
         meetings_realizadas = cursor.fetchone()["count"]
         
-        cursor.execute("SELECT COUNT(*) as count FROM meetings WHERE scheduled_at >= ? AND status = 'cancelled'", (date_str,))
+        w_m_canc, p_m_canc = build_clause("scheduled_at", "status = 'cancelled'")
+        cursor.execute(f"SELECT COUNT(*) as count FROM meetings{w_m_canc}", p_m_canc)
         meetings_canceladas = cursor.fetchone()["count"]
         
-        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE visited_at >= ? AND visited_at IS NOT NULL", (date_str,))
+        w_vis, p_vis = build_clause("visited_at", "visited_at IS NOT NULL")
+        cursor.execute(f"SELECT COUNT(*) as count FROM leads{w_vis}", p_vis)
         visitas = cursor.fetchone()["count"]
         
-        cursor.execute("SELECT COUNT(*) as count FROM leads WHERE reserved_at >= ? AND reserved_at IS NOT NULL", (date_str,))
+        w_res, p_res = build_clause("reserved_at", "reserved_at IS NOT NULL")
+        cursor.execute(f"SELECT COUNT(*) as count FROM leads{w_res}", p_res)
         reservas = cursor.fetchone()["count"]
         
-        cursor.execute("SELECT COUNT(*) as count, SUM(deal_value) as total_value FROM leads WHERE closed_at >= ? AND closed_at IS NOT NULL AND status = 'Ganado'", (date_str,))
+        w_cls, p_cls = build_clause("closed_at", "closed_at IS NOT NULL AND status = 'Ganado'")
+        cursor.execute(f"SELECT COUNT(*) as count, SUM(deal_value) as total_value FROM leads{w_cls}", p_cls)
         closure_row = cursor.fetchone()
         cierres_count = closure_row["count"] or 0
         cierres_value = closure_row["total_value"] or 0.0
         
         stats[period_name] = {
+            "label": p_info["label"],
+            "date_range": p_info["date_range"],
             "views": views,
             "leads": leads,
             "meetings_realizadas": meetings_realizadas,

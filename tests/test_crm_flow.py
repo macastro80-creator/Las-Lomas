@@ -241,3 +241,60 @@ def test_marketing_reports_and_cac():
     assert meta_pago_stat["cpl"] == 500.0  # Spend $1000 / 2 leads
     assert meta_pago_stat["cac"] == 1000.0 # Spend $1000 / 1 closure
     assert meta_pago_stat["conversion_rate"] == 50.0
+
+def test_crm_stats_periods_filtering():
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    
+    start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    start_of_prev_week = start_of_week - timedelta(days=7)
+    
+    start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_day_prev_month = start_of_month - timedelta(days=1)
+    start_of_prev_month = last_day_prev_month.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    start_of_year = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+    start_of_prev_year = datetime(now.year - 1, 1, 1, 0, 0, 0)
+    
+    conn = sqlite3.connect(TEST_DB)
+    cursor = conn.cursor()
+    
+    # 1. Lead in current week
+    dt_this_week = (start_of_week + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("INSERT INTO leads (name, email, created_at) VALUES ('Lead Week', 'w@test.com', ?)", (dt_this_week,))
+    
+    # 2. Lead in previous week
+    dt_prev_week = (start_of_prev_week + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("INSERT INTO leads (name, email, created_at) VALUES ('Lead Prev Week', 'pw@test.com', ?)", (dt_prev_week,))
+    
+    # 3. Lead in previous month
+    dt_prev_month = (start_of_prev_month + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("INSERT INTO leads (name, email, created_at) VALUES ('Lead Prev Month', 'pm@test.com', ?)", (dt_prev_month,))
+    
+    # 4. Lead in previous year
+    dt_prev_year = (start_of_prev_year + timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("INSERT INTO leads (name, email, created_at) VALUES ('Lead Prev Year', 'py@test.com', ?)", (dt_prev_year,))
+    
+    conn.commit()
+    conn.close()
+    
+    response = client.get("/api/crm/stats")
+    assert response.status_code == 200
+    data = response.json()
+    
+    stats = data["stats"]
+    assert "week" in stats
+    assert "prev_week" in stats
+    assert "month" in stats
+    assert "prev_month" in stats
+    assert "ytd" in stats
+    assert "prev_year" in stats
+    assert "all" in stats
+    
+    # Check that prev_week contains at least Lead Prev Week
+    assert stats["prev_week"]["leads"] >= 1
+    # Check that prev_year contains at least Lead Prev Year
+    assert stats["prev_year"]["leads"] >= 1
+    # Check all contains all 4
+    assert stats["all"]["leads"] >= 4
+
