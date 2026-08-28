@@ -359,13 +359,29 @@
   <!-- Pestaña 4: Estadísticas & Marketing -->
   <div id="section-stats" class="tab-section hidden space-y-6">
     <!-- Filter Period selector -->
-    <div class="flex justify-between items-center bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm">
-      <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Período de Análisis:</span>
-      <div class="flex gap-1.5">
-        <button onclick="loadCrmStats('week')" id="period-week" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">Semana</button>
-        <button onclick="loadCrmStats('month')" id="period-month" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">Mes</button>
-        <button onclick="loadCrmStats('ytd')" id="period-ytd" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">YTD</button>
-        <button onclick="loadCrmStats('annual')" id="period-annual" class="period-btn px-3 py-1.5 rounded text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 transition">Anual</button>
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 bg-white p-4 rounded-lg border border-[#EDE9E3] shadow-sm">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-xs font-bold text-[#948A7C] uppercase tracking-wider">Período de Análisis:</span>
+        <span id="period-current-label" class="text-xs font-semibold text-natural bg-[#F4EFEA] px-2.5 py-0.5 rounded border border-[#EDE9E3]">Este Mes</span>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center">
+        <!-- Grupo Semana -->
+        <div class="inline-flex rounded-md border border-[#EDE9E3] p-0.5 bg-gray-50">
+          <button onclick="loadCrmStats('week')" id="period-week" class="period-btn px-2.5 py-1 rounded text-xs font-medium text-gray-700 hover:bg-gray-200 transition">Esta Semana</button>
+          <button onclick="loadCrmStats('prev_week')" id="period-prev_week" class="period-btn px-2.5 py-1 rounded text-xs font-medium text-gray-700 hover:bg-gray-200 transition">Semana Anterior</button>
+        </div>
+        <!-- Grupo Mes -->
+        <div class="inline-flex rounded-md border border-[#EDE9E3] p-0.5 bg-gray-50">
+          <button onclick="loadCrmStats('month')" id="period-month" class="period-btn px-2.5 py-1 rounded text-xs font-medium text-gray-700 hover:bg-gray-200 transition">Este Mes</button>
+          <button onclick="loadCrmStats('prev_month')" id="period-prev_month" class="period-btn px-2.5 py-1 rounded text-xs font-medium text-gray-700 hover:bg-gray-200 transition">Mes Anterior</button>
+        </div>
+        <!-- Grupo Año -->
+        <div class="inline-flex rounded-md border border-[#EDE9E3] p-0.5 bg-gray-50">
+          <button onclick="loadCrmStats('ytd')" id="period-ytd" class="period-btn px-2.5 py-1 rounded text-xs font-medium text-gray-700 hover:bg-gray-200 transition">Este Año (YTD)</button>
+          <button onclick="loadCrmStats('prev_year')" id="period-prev_year" class="period-btn px-2.5 py-1 rounded text-xs font-medium text-gray-700 hover:bg-gray-200 transition">Año Anterior</button>
+        </div>
+        <!-- Total / Histórico -->
+        <button onclick="loadCrmStats('all')" id="period-all" class="period-btn px-3 py-1.5 rounded text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition">Todo</button>
       </div>
     </div>
 
@@ -1383,26 +1399,41 @@
 
   // --- 5. CRM Stats Loader ---
   function loadCrmStats(period) {
+    if (!period || !document.getElementById('period-' + period)) {
+      period = 'month';
+    }
     localStorage.setItem('active-crm-period', period);
     
     // Toggle active class on button
-    document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('bg-natural', 'text-white'));
-    document.getElementById('period-' + period).classList.add('bg-natural', 'text-white');
+    document.querySelectorAll('.period-btn').forEach(btn => {
+      btn.classList.remove('bg-natural', 'text-white', 'shadow-xs');
+      btn.classList.add('text-gray-700');
+    });
+    const activeBtn = document.getElementById('period-' + period);
+    if (activeBtn) {
+      activeBtn.classList.remove('text-gray-700', 'bg-gray-100');
+      activeBtn.classList.add('bg-natural', 'text-white', 'shadow-xs');
+    }
 
     fetch('/api/crm/stats')
     .then(res => res.json())
     .then(data => {
-      const pData = data.stats[period];
+      const pData = (data.stats && data.stats[period]) ? data.stats[period] : (data.stats && data.stats['month'] ? data.stats['month'] : {});
+      
+      const labelBadge = document.getElementById('period-current-label');
+      if (labelBadge && pData.label) {
+        labelBadge.textContent = pData.date_range ? `${pData.label} (${pData.date_range})` : pData.label;
+      }
       
       // Update basic cards
-      document.getElementById('stat-views').textContent = pData.views;
-      document.getElementById('stat-leads').textContent = pData.leads;
-      document.getElementById('stat-meetings-realizadas').textContent = pData.meetings_realizadas;
-      document.getElementById('stat-meetings-canceladas').textContent = pData.meetings_canceladas;
-      document.getElementById('stat-visitas').textContent = pData.visitas;
-      document.getElementById('stat-reservas').textContent = pData.reservas;
-      document.getElementById('stat-cierres-count').textContent = pData.cierres_count + ' cierres';
-      document.getElementById('stat-cierres-value').textContent = '$' + pData.cierres_value.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+      document.getElementById('stat-views').textContent = (pData.views || 0).toLocaleString('en-US');
+      document.getElementById('stat-leads').textContent = (pData.leads || 0).toLocaleString('en-US');
+      document.getElementById('stat-meetings-realizadas').textContent = (pData.meetings_realizadas || 0).toLocaleString('en-US');
+      document.getElementById('stat-meetings-canceladas').textContent = (pData.meetings_canceladas || 0).toLocaleString('en-US');
+      document.getElementById('stat-visitas').textContent = (pData.visitas || 0).toLocaleString('en-US');
+      document.getElementById('stat-reservas').textContent = (pData.reservas || 0).toLocaleString('en-US');
+      document.getElementById('stat-cierres-count').textContent = (pData.cierres_count || 0) + ((pData.cierres_count === 1) ? ' venta' : ' ventas');
+      document.getElementById('stat-cierres-value').textContent = '$' + (pData.cierres_value || 0).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
 
       // Update velocity indicators
       document.getElementById('vel-contacted').textContent = data.velocity.to_contacted > 0 ? data.velocity.to_contacted + ' días' : 'Inmediato';

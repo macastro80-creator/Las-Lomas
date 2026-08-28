@@ -17,17 +17,51 @@
   <meta name="description" content="Schedule a call or Zoom meeting with one of our sales agents to discuss lot segregations, pricing, and project details.">
   <link rel="stylesheet" href="styles.css">
   
-  <!-- Add simple custom styles for the slots calendar -->
   <style>
-    .booking-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
+    .contact-form-container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.02);
+      padding: 40px 30px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
     }
-    @media (min-width: 768px) {
-      .booking-grid {
-        grid-template-columns: 1.2fr 1fr;
-      }
+    .form-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      padding: 4px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .form-tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 12px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+      text-align: center;
+    }
+    .form-tab-btn:hover {
+      color: var(--white);
+    }
+    .form-tab-btn.active {
+      background: var(--emerald);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(27, 63, 42, 0.2);
+    }
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
     .slot-btn {
       background: rgba(255, 255, 255, 0.05);
@@ -45,8 +79,8 @@
       border-color: rgba(255, 255, 255, 0.3);
     }
     .slot-btn.active {
-      background: var(--natural) !important;
-      border-color: var(--natural) !important;
+      background: var(--emerald) !important;
+      border-color: var(--emerald) !important;
       color: #fff !important;
       font-weight: 600;
     }
@@ -85,6 +119,24 @@
     }
     .zoom-btn:hover {
       opacity: 0.9;
+    }
+    @media (max-width: 900px) {
+      .cta-inner {
+        padding: 40px 24px !important;
+      }
+    }
+    @media (max-width: 600px) {
+      .contact-form-container {
+        padding: 30px 20px;
+      }
+      .form-tab-btn {
+        font-size: 0.72rem;
+        padding: 10px 8px;
+        letter-spacing: 0.5px;
+      }
+      .form-grid-2 {
+        grid-template-columns: 1fr !important;
+      }
     }
   </style>
 </head>
@@ -143,46 +195,66 @@
         <span class="lang-es">Agenda tu Llamada.</span>
       </h1>
       <p class="hero-subtitle">
-        <span class="lang-en">Select a date and time slot below to coordinate a Zoom meeting with one of our specialized agents.</span>
-        <span class="lang-es">Selecciona una fecha y hora a continuación para coordinar una reunión de Zoom con uno de nuestros asesores especializados.</span>
+        <span class="lang-en">Coordinate a meeting or an in-person visit with our sales agents to review lot pricing and plans.</span>
+        <span class="lang-es">Coordina una reunión o una visita presencial con nuestros asesores para revisar precios y planos de los lotes.</span>
       </p>
     </div>
   </section>
 
   <!-- ═══ Booking Form Section ═══ -->
   <section style="background: var(--white); padding: 80px 24px;">
-    <div style="background: var(--warm-gray-900); border-radius: 4px; padding: 60px 40px; max-width: 900px; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+    <div class="contact-form-container reveal">
       
+      <!-- Segmented 3-Tabs Selector -->
+      <div class="form-tabs">
+        <button id="tab-message" class="form-tab-btn" onclick="switchTab('message')" data-tab="message" type="button">
+          <span class="lang-en">Send Message</span>
+          <span class="lang-es">Enviar Mensaje</span>
+        </button>
+        <button id="tab-video" class="form-tab-btn active" onclick="switchTab('video')" data-tab="video" type="button">
+          <span class="lang-en">Video Call</span>
+          <span class="lang-es">Reunión Virtual</span>
+        </button>
+        <button id="tab-visit" class="form-tab-btn" onclick="switchTab('visit')" data-tab="visit" type="button">
+          <span class="lang-en">Property Visit</span>
+          <span class="lang-es">Visita Presencial</span>
+        </button>
+      </div>
+
       <div id="booking-form-container">
-        <div class="section-tag" style="text-align: center;">
-          <span class="lang-en">Interactive Calendar</span>
-          <span class="lang-es">Calendario Interactivo</span>
+        <!-- Olive/Green Step Header -->
+        <div id="step-progress-header" style="background: var(--emerald-light); padding: 12px 20px; border-radius: 2px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center;">
+          <span id="step-header-text" style="color: var(--white); font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;">
+            Step 1 of 3: Your Information
+          </span>
+          <div id="step-dots" style="display: flex; gap: 6px;">
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          </div>
         </div>
-        <h2 class="section-title" style="text-align: center; color: var(--white); margin-bottom: 40px;">
-          <span class="lang-en">Book a Free Zoom Meeting</span>
-          <span class="lang-es">Reserva una Reunión por Zoom</span>
-        </h2>
         
-        <form onsubmit="handleBookMeeting(event)" style="text-align: left; display: flex; flex-direction: column; gap: 24px;">
-          <div class="booking-grid">
-            <!-- Left Side: User fields -->
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-              <!-- Full Name -->
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Full Name</span>
-                  <span class="lang-es">Nombre Completo</span>
-                </label>
-                <input type="text" id="book-name" required placeholder="Your name" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-              </div>
-              
+        <form onsubmit="handleFormSubmit(event)" style="text-align: left; display: flex; flex-direction: column; gap: 20px;">
+          
+          <!-- STEP 1 fields: Common Contact Fields -->
+          <div id="fields-common-contact" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Full Name -->
+            <div>
+              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                <span class="lang-en">Full Name</span>
+                <span class="lang-es">Nombre Completo</span>
+              </label>
+              <input type="text" id="book-name" required data-placeholder-en="Your name" data-placeholder-es="Tu nombre" placeholder="Your name" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+            </div>
+            
+            <div class="form-grid-2">
               <!-- Email -->
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
                   <span class="lang-en">Email Address</span>
                   <span class="lang-es">Correo Electrónico</span>
                 </label>
-                <input type="email" id="book-email" required placeholder="email@example.com" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+                <input type="email" id="book-email" required data-placeholder-en="email@example.com" data-placeholder-es="correo@ejemplo.com" placeholder="email@example.com" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
               </div>
 
               <!-- Phone -->
@@ -191,86 +263,135 @@
                   <span class="lang-en">Phone Number</span>
                   <span class="lang-es">Teléfono</span>
                 </label>
-                <input type="text" id="book-phone" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-              </div>
-
-              <!-- Language Selection -->
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Preferred Language for Meeting</span>
-                  <span class="lang-es">Idioma Preferido para la Reunión</span>
-                </label>
-                <select id="book-language" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
-                  <option value="es" style="background: var(--warm-gray-900);">Español</option>
-                  <option value="en" style="background: var(--warm-gray-900);">English</option>
-                </select>
-              </div>
-
-              <!-- Prequalification Question -->
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Lots start at $190k, is this within your budget?</span>
-                  <span class="lang-es">Los lotes comienzan en $190k, ¿está dentro de su presupuesto?</span>
-                </label>
-                <select id="book-budget" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
-                  <option value="YES" style="background: var(--warm-gray-900);">
-                    EN: YES / ES: SÍ
-                  </option>
-                  <option value="FINANCING" style="background: var(--warm-gray-900);">
-                    EN: I will need financing / ES: Necesitaré financiación
-                  </option>
-                  <option value="DONT_KNOW" style="background: var(--warm-gray-900);">
-                    EN: I am not sure / ES: No lo sé
-                  </option>
-                </select>
-              </div>
-
-              <!-- Message/Topic -->
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">What would you like to discuss?</span>
-                  <span class="lang-es">¿De qué te gustaría conversar?</span>
-                </label>
-                <textarea id="book-topic" rows="3" placeholder="Tell us what you want to know..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+                <input type="text" id="book-phone" required data-placeholder-en="+506 8888 8888" data-placeholder-es="+506 8888 8888" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
               </div>
             </div>
+          </div>
 
-            <!-- Right Side: Date and Time slots picker -->
-            <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- STEP 1 fields: Send a Message Fields (Tab 1 specific) -->
+          <div id="fields-message-only" style="display: none;">
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Project of Interest -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Project of Interest</span>
+                  <span class="lang-es">Proyecto de Interés</span>
+                </label>
+                <select id="book-project" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                  <option value="Las Lomas Eco-Residencial (Lote 1 ha - $190,000)" data-text-en="Las Lomas Eco-Residential (1 Hectare - $190K)" data-text-es="Las Lomas Eco-Residencial (1 Hectárea - $190K)" style="background: var(--warm-gray-900);">Las Lomas Eco-Residential (1 Hectare - $190K)</option>
+                  <option value="Las Lomas Agrihood (Lote 5-20 ha - Coming Soon)" data-text-en="Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)" data-text-es="Las Lomas Agrihood (5 a 20 Hectáreas - Coming Soon)" style="background: var(--warm-gray-900);">Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)</option>
+                  <option value="Informacion General" data-text-en="General Information" data-text-es="Quiero información general" style="background: var(--warm-gray-900);">General Information</option>
+                </select>
+              </div>
+
+              <!-- Message -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Message (Optional)</span>
+                  <span class="lang-es">Mensaje (Opcional)</span>
+                </label>
+                <textarea id="book-message" rows="4" data-placeholder-en="Tell us more about what you are looking for..." data-placeholder-es="Cuéntanos más sobre lo que buscas..." placeholder="Tell us more about what you are looking for..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 1 fields: Booking Prequalification & Topic (Tabs 2 & 3 specific) -->
+          <div id="fields-booking-prequal" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Prequalification Question -->
+            <div>
+              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                <span class="lang-en">Lots start at $190k, is this within your budget?</span>
+                <span class="lang-es">Los lotes comienzan en $190k, ¿está dentro de su presupuesto?</span>
+              </label>
+              <select id="book-budget" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                <option value="YES" style="background: var(--warm-gray-900);">
+                  EN: YES / ES: SÍ
+                </option>
+                <option value="FINANCING" style="background: var(--warm-gray-900);">
+                  EN: I will need financing / ES: Necesitaré financiación
+                </option>
+                <option value="DONT_KNOW" style="background: var(--warm-gray-900);">
+                  EN: I am not sure / ES: No lo sé
+                </option>
+              </select>
+            </div>
+
+            <!-- Message/Topic -->
+            <div>
+              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                <span class="lang-en">What would you like to discuss? (Optional)</span>
+                <span class="lang-es">¿De qué te gustaría conversar? (Opcional)</span>
+              </label>
+              <textarea id="book-topic" rows="3" data-placeholder-en="Tell us what you want to know..." data-placeholder-es="Cuéntanos qué deseas saber..." placeholder="Tell us what you want to know..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 2 fields: Date and Time slots picker (Tabs 2 & 3 specific) -->
+          <div id="fields-booking-datetime" style="display: none;">
+            <div class="form-grid-2" style="margin-bottom: 20px;">
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
                   <span class="lang-en">1. Select Date</span>
                   <span class="lang-es">1. Selecciona la Fecha</span>
                 </label>
-                <!-- Minimum date set dynamically to today -->
-                <input type="date" id="book-date" required onchange="generateTimeSlots()" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
+                <input type="date" id="book-date" onchange="generateTimeSlots()" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
               </div>
 
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">2. Select Time (Local Costa Rica Time)</span>
-                  <span class="lang-es">2. Selecciona la Hora (Hora de Costa Rica)</span>
+                  <span class="lang-en">2. Select Time (Costa Rica Time)</span>
+                  <span class="lang-es">2. Selecciona la Hora (Hora de C.R.)</span>
                 </label>
                 <div id="slots-container" class="slots-container">
-                  <!-- Slots generated dynamically -->
-                  <div style="color: rgba(255,255,255,0.4); font-size: 0.85rem; grid-column: 1 / -1;">
+                  <div style="color: rgba(255,255,255,0.4); font-size: 0.85rem; grid-column: 1 / -1; padding-top: 6px;">
                     <span class="lang-en">Please select a date first</span>
                     <span class="lang-es">Por favor selecciona una fecha primero</span>
                   </div>
                 </div>
-                <input type="hidden" id="book-time" required>
+                <input type="hidden" id="book-time">
               </div>
             </div>
           </div>
 
-          <button type="submit" class="btn-primary" style="margin-top: 15px; cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
-            <span class="lang-en">Schedule Zoom Call</span>
-            <span class="lang-es">Agendar Reunión de Zoom</span>
-          </button>
+          <!-- Navigation controls -->
+          <div style="display: flex; gap: 15px; align-items: center; justify-content: flex-end; margin-top: 10px;">
+            <button id="btn-back-action" onclick="goToStep(1)" class="slot-btn" type="button" style="display: none; padding: 12px 24px;">
+              <span class="lang-en">Back</span>
+              <span class="lang-es">Atrás</span>
+            </button>
+            
+            <div id="btn-next-container" style="flex: 1;">
+              <button onclick="handleNextStep()" class="btn-primary" type="button" style="cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+                <span class="lang-en">Next Step</span>
+                <span class="lang-es">Siguiente Paso</span>
+              </button>
+            </div>
+            
+            <div id="btn-submit-container" style="display: none; flex: 1;">
+              <button type="submit" id="booking-submit-btn" class="btn-primary" style="cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+                <span class="lang-en">Confirm</span>
+                <span class="lang-es">Confirmar</span>
+              </button>
+            </div>
+          </div>
+
         </form>
       </div>
 
-      <!-- Success Screen -->
+      <!-- Message Success Screen -->
+      <div id="msg-success-container" class="success-box" style="display: none;">
+        <svg viewBox="0 0 24 24" width="48" height="48" style="stroke: #8bb395; fill: none; stroke-width: 2; margin: 0 auto 15px auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <h3>
+          <span class="lang-en">Message Sent!</span>
+          <span class="lang-es">¡Mensaje Enviado!</span>
+        </h3>
+        <p style="margin-bottom: 10px; font-size: 1.05rem;">
+          <span class="lang-en">Thank you for contacting us. One of our sales agents will respond to you shortly.</span>
+          <span class="lang-es">Gracias por contactarnos. Uno de nuestros asesores te responderá a la brevedad.</span>
+        </p>
+      </div>
+
+      <!-- Booking Success Screen -->
       <div id="booking-success-container" class="success-box" style="display: none;">
         <svg viewBox="0 0 24 24" width="48" height="48" style="stroke: #8bb395; fill: none; stroke-width: 2; margin: 0 auto 15px auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         
@@ -280,8 +401,8 @@
         </h3>
         
         <p style="margin-bottom: 12px; font-size: 1.05rem;">
-          <span class="lang-en">Your initial consultation is scheduled for:</span>
-          <span class="lang-es">Tu consulta inicial está programada para:</span>
+          <span class="lang-en">Your consultation is scheduled for:</span>
+          <span class="lang-es">Tu consulta está programada para:</span>
           <br>
           <strong id="confirm-datetime" style="color: #fff; font-size: 1.2rem;"></strong>
         </p>
@@ -292,16 +413,31 @@
           <strong id="confirm-agent" style="color: #fff;"></strong>
         </p>
 
-        <p style="margin-bottom: 10px; font-size: 0.9rem;">
-          <span class="lang-en">Please use the link below to join the Zoom meeting at the scheduled time:</span>
-          <span class="lang-es">Por favor ingresa al siguiente enlace para unirte a la reunión en la fecha indicada:</span>
-        </p>
+        <!-- Video Call Success block -->
+        <div id="confirm-zoom-box" style="display: none;">
+          <p style="margin-bottom: 10px; font-size: 0.9rem;">
+            <span class="lang-en">Please use the link below to join the Zoom meeting at the scheduled time:</span>
+            <span class="lang-es">Por favor ingresa al siguiente enlace para unirte a la reunión en la fecha indicada:</span>
+          </p>
+          <a id="confirm-zoom" href="" target="_blank" class="zoom-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="fill: none; stroke: currentColor; stroke-width: 2;"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            <span class="lang-en">Open Zoom Link</span>
+            <span class="lang-es">Abrir Sala de Zoom</span>
+          </a>
+        </div>
 
-        <a id="confirm-zoom" href="" target="_blank" class="zoom-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" style="fill: none; stroke: currentColor; stroke-width: 2;"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-          <span class="lang-en">Open Zoom Link</span>
-          <span class="lang-es">Abrir Sala de Zoom</span>
-        </a>
+        <!-- Property Visit Success block -->
+        <div id="confirm-visit-box" style="display: none;">
+          <p style="margin-bottom: 10px; font-size: 0.9rem;">
+            <span class="lang-en">Our sales agent will contact you shortly to coordinate the meeting point at Las Lomas. Here are the Google Maps directions to the property:</span>
+            <span class="lang-es">Nuestro asesor se comunicará contigo a la brevedad para coordinar el punto de encuentro en Las Lomas. Aquí están las indicaciones de Google Maps para llegar a la propiedad:</span>
+          </p>
+          <a href="https://maps.google.com/?q=Las+Lomas+Perez+Zeledon" target="_blank" class="zoom-btn" style="background: var(--gold);">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="fill: none; stroke: currentColor; stroke-width: 2;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span class="lang-en">View Directions on Maps</span>
+            <span class="lang-es">Ver Mapa y Direcciones</span>
+          </a>
+        </div>
       </div>
 
     </div>
@@ -359,7 +495,7 @@
       const day = selectedDate.getUTCDay();
       if (day === 0 || day === 6) { // 0 = Sunday, 6 = Saturday
         container.innerHTML = `
-          <div style="color: #ff8888; font-size: 0.85rem; grid-column: 1 / -1;">
+          <div style="color: #ff8888; font-size: 0.85rem; grid-column: 1 / -1; padding-top: 6px;">
             <span class="lang-en">Please select a weekday. We operate Monday to Friday.</span>
             <span class="lang-es">Por favor selecciona un día de semana. Atendemos de lunes a viernes.</span>
           </div>
@@ -384,80 +520,258 @@
       });
     }
 
-    // Handle AJAX booking form submission
-    function handleBookMeeting(e) {
+    let activeBookingTab = 'video'; // 'message', 'video', 'visit'
+    let currentStep = 1;
+
+    function switchTab(tab) {
+      if (tab === activeBookingTab) return;
+      activeBookingTab = tab;
+      
+      // Update active classes on tab buttons
+      document.querySelectorAll('.form-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+      });
+
+      // Reset step to 1 when changing tabs
+      goToStep(1);
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+      
+      const stepHeader = document.getElementById('step-header-text');
+      const stepDots = document.getElementById('step-dots');
+      
+      const fieldsCommon = document.getElementById('fields-common-contact');
+      const fieldsMsg = document.getElementById('fields-message-only');
+      const fieldsPrequal = document.getElementById('fields-booking-prequal');
+      const fieldsDateTime = document.getElementById('fields-booking-datetime');
+      
+      const btnSubmit = document.getElementById('btn-submit-container');
+      const btnNext = document.getElementById('btn-next-container');
+      const btnBack = document.getElementById('btn-back-action');
+      
+      const activeLang = document.documentElement.getAttribute('lang') || 'en';
+      
+      // Hide all dynamic section wrappers
+      fieldsCommon.style.display = 'none';
+      fieldsMsg.style.display = 'none';
+      fieldsPrequal.style.display = 'none';
+      fieldsDateTime.style.display = 'none';
+      
+      btnSubmit.style.display = 'none';
+      btnNext.style.display = 'none';
+      if (btnBack) btnBack.style.display = 'none';
+      
+      if (activeBookingTab === 'message') {
+        // 2 Steps for Message tab: Step 1 (Form) -> Step 2 (Success)
+        if (step === 1) {
+          fieldsCommon.style.display = 'flex';
+          fieldsMsg.style.display = 'block';
+          btnSubmit.style.display = 'block';
+          
+          // Update button text for direct submission
+          const submitBtn = document.getElementById('booking-submit-btn');
+          submitBtn.querySelector('.submit-msg-text').style.display = 'inline';
+          submitBtn.querySelector('.submit-booking-text').style.display = 'none';
+          
+          // Update step header
+          stepHeader.textContent = activeLang === 'en' ? 'Step 1 of 2: Your Message' : 'Paso 1 de 2: Tu Mensaje';
+          stepDots.innerHTML = `
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          `;
+          
+          // Inputs validation rules
+          document.getElementById('book-phone').required = false;
+          document.getElementById('book-date').required = false;
+          document.getElementById('book-time').required = false;
+        }
+      } else {
+        // 3 Steps for Booking tabs (Video Call / Property Visit): Step 1 (Info) -> Step 2 (Date/Time) -> Step 3 (Success)
+        if (step === 1) {
+          fieldsCommon.style.display = 'flex';
+          fieldsPrequal.style.display = 'block';
+          btnNext.style.display = 'block';
+          
+          // Update step header
+          stepHeader.textContent = activeLang === 'en' ? 'Step 1 of 3: Your Information' : 'Paso 1 de 3: Tu Información';
+          stepDots.innerHTML = `
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          `;
+          
+          // Phone is required for booking meetings
+          document.getElementById('book-phone').required = true;
+          document.getElementById('book-date').required = false;
+          document.getElementById('book-time').required = false;
+        } else if (step === 2) {
+          fieldsDateTime.style.display = 'block';
+          btnSubmit.style.display = 'block';
+          if (btnBack) btnBack.style.display = 'inline-block';
+          
+          // Update button text for booking
+          const submitBtn = document.getElementById('booking-submit-btn');
+          submitBtn.querySelector('.submit-msg-text').style.display = 'none';
+          submitBtn.querySelector('.submit-booking-text').style.display = 'inline';
+          
+          // Update step header
+          stepHeader.textContent = activeLang === 'en' ? 'Step 2 of 3: Date & Time' : 'Paso 2 de 3: Fecha y Hora';
+          stepDots.innerHTML = `
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          `;
+          
+          // Date & Time are now required in Step 2
+          document.getElementById('book-date').required = true;
+          document.getElementById('book-time').required = true;
+        }
+      }
+    }
+
+    function handleNextStep() {
+      const name = document.getElementById('book-name');
+      const email = document.getElementById('book-email');
+      const phone = document.getElementById('book-phone');
+      
+      // Trigger HTML5 validation checks
+      if (!name.reportValidity() || !email.reportValidity() || !phone.reportValidity()) {
+        return;
+      }
+      
+      // All valid! Move to Step 2
+      goToStep(2);
+    }
+
+    // Handle unified AJAX contact and booking submission to local CRM API
+    function handleFormSubmit(e) {
       e.preventDefault();
       
       const name = document.getElementById('book-name').value;
       const email = document.getElementById('book-email').value;
       const phone = document.getElementById('book-phone').value;
-      const langValue = document.getElementById('book-language').value;
-      const budget = document.getElementById('book-budget').value;
-      const topic = document.getElementById('book-topic').value;
       
-      const date = document.getElementById('book-date').value;
-      const timeSlot = document.getElementById('book-time').value;
-
-      if (!timeSlot) {
-        alert(document.documentElement.getAttribute('lang') === 'en' 
-          ? 'Please select a time slot!' 
-          : 'Por favor selecciona un horario!');
-        return;
-      }
-
-      const btn = e.target.querySelector('button');
+      const btn = document.getElementById('booking-submit-btn');
       const activeLang = document.documentElement.getAttribute('lang') || 'en';
-      btn.textContent = activeLang === 'en' ? 'SCHEDULING...' : 'AGENDANDO...';
-      btn.disabled = true;
-
-      // Extract search params to keep track of traffic origin if present
+      
       const urlParams = new URLSearchParams(window.location.search);
       const utmSource = urlParams.get('utm_source') || urlParams.get('source') || 'directo';
-
-      // Map values
-      const payload = {
-        name: name,
-        email: email,
-        phone: phone,
-        language: langValue,
-        datetime: `${date} ${timeSlot}`,
-        topic: topic,
-        budget_prequalification: budget,
-        origin: utmSource
-      };
-
-      fetch('/api/meetings/book', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('API Error');
-        return res.json();
-      })
-      .then(data => {
-        // Show success screen
-        document.getElementById('booking-form-container').style.display = 'none';
+      
+      if (activeBookingTab === 'message') {
+        // SENDING MESSAGE ROUTE
+        const project = document.getElementById('book-project').value;
+        const msgText = document.getElementById('book-message').value;
         
-        // Format datetime nicely
-        document.getElementById('confirm-datetime').textContent = data.datetime;
-        document.getElementById('confirm-agent').textContent = data.agent_name;
+        btn.disabled = true;
+        btn.textContent = activeLang === 'en' ? 'SENDING...' : 'ENVIANDO...';
         
-        const zoomBtn = document.getElementById('confirm-zoom');
-        zoomBtn.href = data.zoom_link;
+        const details = `Proyecto Seleccionado: ${project}.\nMensaje del cliente: ${msgText ? msgText : 'Sin mensaje adicional.'}`;
         
-        document.getElementById('booking-success-container').style.display = 'block';
-      })
-      .catch(err => {
-        console.error('Error booking meeting:', err);
-        alert(activeLang === 'en' 
-          ? 'An error occurred while booking. Please try again.' 
-          : 'Ocurrió un error al agendar. Por favor intenta de nuevo.');
-        btn.textContent = activeLang === 'en' ? 'Schedule Zoom Call' : 'Agendar Reunión de Zoom';
-        btn.disabled = false;
-      });
+        fetch('/api/leads', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            phone: phone,
+            origin: 'Website Landing',
+            details: details,
+            status: 'Nuevo',
+            language: activeLang
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('API Error');
+          return res.json();
+        })
+        .then(data => {
+          // Success! Go to Success screen (Step 3)
+          document.getElementById('booking-form-container').style.display = 'none';
+          
+          // Show Message Success Screen
+          document.getElementById('msg-success-container').style.display = 'block';
+          document.getElementById('booking-success-container').style.display = 'none';
+        })
+        .catch(err => {
+          console.error(err);
+          alert(activeLang === 'en' ? 'An error occurred. Please try again.' : 'Ocurrió un error. Intenta de nuevo.');
+          btn.disabled = false;
+          btn.innerHTML = `<span class="submit-msg-text"><span class="lang-en">Send Message</span><span class="lang-es">Enviar Mensaje</span></span>`;
+          setLanguage(activeLang);
+        });
+        
+      } else {
+        // BOOKING MEETING ROUTE
+        const date = document.getElementById('book-date').value;
+        const timeSlot = document.getElementById('book-time').value;
+        const budget = document.getElementById('book-budget').value;
+        const topic = document.getElementById('book-topic').value;
+        
+        if (!timeSlot) {
+          alert(activeLang === 'en' ? 'Please select a time slot!' : 'Por favor selecciona un horario!');
+          return;
+        }
+        
+        btn.disabled = true;
+        btn.textContent = activeLang === 'en' ? 'SCHEDULING...' : 'AGENDANDO...';
+        
+        const typeLabel = activeBookingTab === 'video' ? '[Video Call]' : '[Property Visit]';
+        const payload = {
+          name: name,
+          email: email,
+          phone: phone,
+          language: activeLang,
+          datetime: `${date} ${timeSlot}`,
+          topic: `${typeLabel} ${topic}`,
+          budget_prequalification: budget,
+          origin: utmSource
+        };
+        
+        fetch('/api/meetings/book', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('API Error');
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('booking-form-container').style.display = 'none';
+          
+          // Setup Booking Success Screen fields
+          document.getElementById('confirm-datetime').textContent = data.datetime;
+          document.getElementById('confirm-agent').textContent = data.agent_name;
+          
+          const zoomBox = document.getElementById('confirm-zoom-box');
+          const visitBox = document.getElementById('confirm-visit-box');
+          
+          if (activeBookingTab === 'video') {
+            zoomBox.style.display = 'block';
+            visitBox.style.display = 'none';
+            document.getElementById('confirm-zoom').href = data.zoom_link;
+          } else {
+            zoomBox.style.display = 'none';
+            visitBox.style.display = 'block';
+          }
+          
+          document.getElementById('msg-success-container').style.display = 'none';
+          document.getElementById('booking-success-container').style.display = 'block';
+        })
+        .catch(err => {
+          console.error(err);
+          alert(activeLang === 'en' ? 'An error occurred. Please try again.' : 'Ocurrió un error. Intenta de nuevo.');
+          btn.disabled = false;
+          btn.innerHTML = `<span class="submit-booking-text"><span class="lang-en">Confirm Booking</span><span class="lang-es">Confirmar Agendamiento</span></span>`;
+          setLanguage(activeLang);
+        });
+      }
     }
 
     // Language Selector Mechanism
@@ -476,6 +790,11 @@
         btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
       });
       
+      // Update placeholders
+      document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+        el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
+      });
+
       // Toggle visibility of translation strings
       document.querySelectorAll('.lang-en').forEach(el => {
         el.style.display = lang === 'en' ? 'inline-block' : 'none';
@@ -483,12 +802,18 @@
       document.querySelectorAll('.lang-es').forEach(el => {
         el.style.display = lang === 'es' ? 'inline-block' : 'none';
       });
+
+      // Force header update
+      goToStep(currentStep);
     }
 
-    // Initialize bilinguality
+    // Initialize bilinguality & setup default active tab
     document.addEventListener('DOMContentLoaded', () => {
       const currentLang = document.documentElement.getAttribute('lang') || 'en';
       setLanguage(currentLang);
+      
+      // Default book.html page to video tab
+      switchTab('video');
     });
   </script>
 </body>
