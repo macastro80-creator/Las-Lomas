@@ -17,6 +17,7 @@
   <meta name="description" content="Get in touch to receive segregation plans, project maps, and coordinate private visits to Las Lomas Residential and Agrihoods.">
   <link rel="stylesheet" href="styles.css">
   <link rel="canonical" href="https://laslomas.cr/contact">
+  
   <style>
     .contact-form-container {
       max-width: 650px;
@@ -63,6 +64,63 @@
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
+    .slot-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--white);
+      padding: 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+    }
+    .slot-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .slot-btn.active {
+      background: var(--emerald) !important;
+      border-color: var(--emerald) !important;
+      color: #fff !important;
+      font-weight: 600;
+    }
+    .slots-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .success-box {
+      background: rgba(45, 90, 63, 0.1);
+      border: 1.5px solid #2D5A3F;
+      padding: 30px;
+      border-radius: 4px;
+      text-align: center;
+      color: var(--white);
+    }
+    .success-box h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: #8bb395;
+    }
+    .zoom-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #2D5A3F;
+      color: #fff;
+      padding: 12px 24px;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+      margin-top: 15px;
+      transition: opacity 0.2s;
+    }
+    .zoom-btn:hover {
+      opacity: 0.9;
+    }
     @media (max-width: 900px) {
       .cta-inner {
         padding: 40px 24px !important;
@@ -82,46 +140,6 @@
       }
     }
   </style>
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://laslomas.cr/contact">
-  <meta property="og:title" content="Contact Us · Las Lomas">
-  <meta property="og:description" content="Get in touch to receive segregation plans, project maps, and coordinate private visits to Las Lomas Residential and Agrihoods.">
-  <meta property="og:image" content="https://laslomas.cr/images/land-aerial-valley.jpg">
-  <meta property="og:locale" content="en_US">
-  <meta property="og:locale:alternate" content="es_CR">
-  
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://laslomas.cr/contact">
-  <meta name="twitter:title" content="Contact Us · Las Lomas">
-  <meta name="twitter:description" content="Get in touch to receive segregation plans, project maps, and coordinate private visits to Las Lomas Residential and Agrihoods.">
-  <meta name="twitter:image" content="https://laslomas.cr/images/land-aerial-valley.jpg">
-  
-  <!-- AI / Search Engine JSON-LD Schema -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ContactPage",
-    "@id": "https://laslomas.cr/contact/#contact",
-    "name": "Contact Las Lomas",
-    "description": "Get in touch to receive segregation plans, project maps, and coordinate private visits to Las Lomas Residential and Agrihoods.",
-    "mainEntity": {
-      "@type": "RealEstateAgent",
-      "name": "RE/MAX Altitud",
-      "telephone": "+50662170977",
-      "url": "https://laslomas.cr/",
-      "image": "https://laslomas.cr/images/logo-altitud.png",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Santa Elena de El General",
-        "addressRegion": "Pérez Zeledón",
-        "addressCountry": "CR"
-      }
-    }
-  }
-  </script>
 </head>
 <body>
 
@@ -160,13 +178,6 @@
         <span class="lang-en">Request Info</span>
         <span class="lang-es">Solicitar Info</span>
       </a>
-      
-      <!-- Hamburger Menu Toggle Button -->
-      <button class="nav-menu-toggle" id="menu-toggle" aria-label="Toggle Menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
     </div>
   </nav>
 
@@ -192,136 +203,250 @@
   </section>
 
   <!-- ═══ Contact Form Section ═══ -->
-  <section class="cta-section" id="contacto" style="background: var(--white); padding: 80px 24px;">
-    <div class="cta-inner" style="background: var(--warm-gray-900); border-radius: 4px; padding: 60px 40px; max-width: 1100px; margin: 0 auto; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
-      <div class="section-tag reveal" style="text-align: center;">
-        <span class="lang-en">Information & Appointments</span>
-        <span class="lang-es">Información y Citas</span>
-      </div>
-      <h2 class="section-title reveal" style="text-align: center; color: var(--white); margin-bottom: 40px;">
-        <span class="lang-en">Connect With Us</span>
-        <span class="lang-es">Conéctate con Nosotros</span>
-      </h2>
+  <section style="background: var(--white); padding: 80px 24px;">
+    <div class="contact-form-container reveal">
       
-      <div class="contact-form-container reveal">
-        <!-- Segmented Tabs Selector -->
-        <div class="form-tabs">
-          <button id="tab-message" class="form-tab-btn active" onclick="switchTab('message')" type="button">
-            <span class="lang-en">Send a Message</span>
-            <span class="lang-es">Enviar un Mensaje</span>
-          </button>
-          <button id="tab-booking" class="form-tab-btn" onclick="switchTab('booking')" type="button">
-            <span class="lang-en">Book a Meeting/Visit</span>
-            <span class="lang-es">Agendar Reunión/Visita</span>
-          </button>
+      <!-- Segmented 3-Tabs Selector -->
+      <div class="form-tabs">
+        <button id="tab-message" class="form-tab-btn active" onclick="switchTab('message')" data-tab="message" type="button">
+          <span class="lang-en">Send Message</span>
+          <span class="lang-es">Enviar Mensaje</span>
+        </button>
+        <button id="tab-video" class="form-tab-btn" onclick="switchTab('video')" data-tab="video" type="button">
+          <span class="lang-en">Video Call</span>
+          <span class="lang-es">Reunión Virtual</span>
+        </button>
+        <button id="tab-visit" class="form-tab-btn" onclick="switchTab('visit')" data-tab="visit" type="button">
+          <span class="lang-en">Property Visit</span>
+          <span class="lang-es">Visita Presencial</span>
+        </button>
+      </div>
+
+      <div id="booking-form-container">
+        <!-- Olive/Green Step Header -->
+        <div id="step-progress-header" style="background: var(--emerald-light); padding: 12px 20px; border-radius: 2px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center;">
+          <span id="step-header-text" style="color: var(--white); font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;">
+            Step 1 of 3: Your Information
+          </span>
+          <div id="step-dots" style="display: flex; gap: 6px;">
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          </div>
         </div>
-
-        <form id="unified-contact-form" onsubmit="handleFormSubmit(event)" style="display: flex; flex-direction: column; gap: 20px; text-align: left; max-width: none; width: 100%; margin: 0;">
+        
+        <form onsubmit="handleFormSubmit(event)" style="text-align: left; display: flex; flex-direction: column; gap: 20px;">
           
-          <!-- Common Personal Fields -->
-          <div>
-            <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-              <span class="lang-en">Full Name</span>
-              <span class="lang-es">Nombre Completo</span>
-            </label>
-            <input type="text" id="contact-name" data-placeholder-en="Your name" data-placeholder-es="Tu nombre" placeholder="Your name" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-          </div>
-          
-          <div class="form-grid-2">
+          <!-- STEP 1 fields: Common Contact Fields -->
+          <div id="fields-common-contact" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Full Name -->
             <div>
               <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Email Address</span>
-                <span class="lang-es">Correo Electrónico</span>
+                <span class="lang-en">Full Name</span>
+                <span class="lang-es">Nombre Completo</span>
               </label>
-              <input type="email" id="contact-email" data-placeholder-en="email@example.com" data-placeholder-es="correo@ejemplo.com" placeholder="email@example.com" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+              <input type="text" id="book-name" required data-placeholder-en="Your name" data-placeholder-es="Tu nombre" placeholder="Your name" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
             </div>
-            <div>
-              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Phone Number</span>
-                <span class="lang-es">Teléfono</span>
-              </label>
-              <input type="text" id="contact-phone" data-placeholder-en="+506 8888 8888" data-placeholder-es="+506 8888 8888" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+            
+            <div class="form-grid-2">
+              <!-- Email -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Email Address</span>
+                  <span class="lang-es">Correo Electrónico</span>
+                </label>
+                <input type="email" id="book-email" required data-placeholder-en="email@example.com" data-placeholder-es="correo@ejemplo.com" placeholder="email@example.com" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+              </div>
+
+              <!-- Phone -->
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Phone Number</span>
+                  <span class="lang-es">Teléfono</span>
+                </label>
+                <input type="text" id="book-phone" required data-placeholder-en="+506 8888 8888" data-placeholder-es="+506 8888 8888" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+              </div>
             </div>
           </div>
 
-          <!-- Dynamic Message Fields -->
-          <div id="section-message-fields">
+          <!-- STEP 1 fields: Send a Message Fields (Tab 1 specific) -->
+          <div id="fields-message-only" style="display: none;">
             <div style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Project of Interest -->
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
                   <span class="lang-en">Project of Interest</span>
                   <span class="lang-es">Proyecto de Interés</span>
                 </label>
-                <select id="contact-project" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                <select id="book-project" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
                   <option value="Las Lomas Eco-Residencial (Lote 1 ha - $190,000)" data-text-en="Las Lomas Eco-Residential (1 Hectare - $190K)" data-text-es="Las Lomas Eco-Residencial (1 Hectárea - $190K)" style="background: var(--warm-gray-900);">Las Lomas Eco-Residential (1 Hectare - $190K)</option>
                   <option value="Las Lomas Agrihood (Lote 5-20 ha - Coming Soon)" data-text-en="Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)" data-text-es="Las Lomas Agrihood (5 a 20 Hectáreas - Coming Soon)" style="background: var(--warm-gray-900);">Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)</option>
                   <option value="Informacion General" data-text-en="General Information" data-text-es="Quiero información general" style="background: var(--warm-gray-900);">General Information</option>
                 </select>
               </div>
-              
+
+              <!-- Message -->
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
                   <span class="lang-en">Message (Optional)</span>
                   <span class="lang-es">Mensaje (Opcional)</span>
                 </label>
-                <textarea id="contact-message" rows="4" data-placeholder-en="Tell us more about what you are looking for..." data-placeholder-es="Cuéntanos más sobre lo que buscas..." placeholder="Tell us more about what you are looking for..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+                <textarea id="book-message" rows="4" data-placeholder-en="Tell us more about what you are looking for..." data-placeholder-es="Cuéntanos más sobre lo que buscas..." placeholder="Tell us more about what you are looking for..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
               </div>
             </div>
           </div>
 
-          <!-- Dynamic Booking Fields -->
-          <div id="section-booking-fields" style="display: none;">
-            <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- STEP 1 fields: Booking Prequalification & Topic (Tabs 2 & 3 specific) -->
+          <div id="fields-booking-prequal" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Prequalification Question -->
+            <div>
+              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                <span class="lang-en">Lots start at $190k, is this within your budget?</span>
+                <span class="lang-es">Los lotes comienzan en $190k, ¿está dentro de su presupuesto?</span>
+              </label>
+              <select id="book-budget" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                <option value="YES" style="background: var(--warm-gray-900);">
+                  EN: YES / ES: SÍ
+                </option>
+                <option value="FINANCING" style="background: var(--warm-gray-900);">
+                  EN: I will need financing / ES: Necesitaré financiación
+                </option>
+                <option value="DONT_KNOW" style="background: var(--warm-gray-900);">
+                  EN: I am not sure / ES: No lo sé
+                </option>
+              </select>
+            </div>
+
+            <!-- Message/Topic -->
+            <div>
+              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                <span class="lang-en">What would you like to discuss? (Optional)</span>
+                <span class="lang-es">¿De qué te gustaría conversar? (Opcional)</span>
+              </label>
+              <textarea id="book-topic" rows="3" data-placeholder-en="Tell us what you want to know..." data-placeholder-es="Cuéntanos qué deseas saber..." placeholder="Tell us what you want to know..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 2 fields: Date and Time slots picker (Tabs 2 & 3 specific) -->
+          <div id="fields-booking-datetime" style="display: none;">
+            <div class="form-grid-2" style="margin-bottom: 20px;">
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Type of Meeting / Visit</span>
-                  <span class="lang-es">Tipo de Reunión / Visita</span>
+                  <span class="lang-en">1. Select Date</span>
+                  <span class="lang-es">1. Selecciona la Fecha</span>
                 </label>
-                <select id="booking-type" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
-                  <option value="Online Meeting" data-text-en="Online Video Call Meeting" data-text-es="Reunión Virtual por Videollamada" style="background: var(--warm-gray-900);">Online Video Call Meeting</option>
-                  <option value="Property Visit" data-text-en="In-person Property Visit" data-text-es="Visita Presencial a la Propiedad" style="background: var(--warm-gray-900);">In-person Property Visit</option>
-                </select>
-              </div>
-
-              <div class="form-grid-2">
-                <div>
-                  <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                    <span class="lang-en">Preferred Date</span>
-                    <span class="lang-es">Fecha Preferida</span>
-                  </label>
-                  <input type="date" id="booking-date" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
-                </div>
-                <div>
-                  <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                    <span class="lang-en">Preferred Time</span>
-                    <span class="lang-es">Hora Preferida</span>
-                  </label>
-                  <input type="time" id="booking-time" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
-                </div>
+                <input type="date" id="book-date" onchange="generateTimeSlots()" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
               </div>
 
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Special Notes / Requests (Optional)</span>
-                  <span class="lang-es">Notas / Solicitudes Especiales (Opcional)</span>
+                  <span class="lang-en">2. Select Time (Costa Rica Time)</span>
+                  <span class="lang-es">2. Selecciona la Hora (Hora de C.R.)</span>
                 </label>
-                <textarea id="booking-notes" rows="3" data-placeholder-en="Any details or preferred lot number..." data-placeholder-es="Cualquier detalle o lote de preferencia..." placeholder="Any details or preferred lot number..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+                <div id="slots-container" class="slots-container">
+                  <div style="color: rgba(255,255,255,0.4); font-size: 0.85rem; grid-column: 1 / -1; padding-top: 6px;">
+                    <span class="lang-en">Please select a date first</span>
+                    <span class="lang-es">Por favor selecciona una fecha primero</span>
+                  </div>
+                </div>
+                <input type="hidden" id="book-time">
               </div>
             </div>
           </div>
 
-          <button type="submit" class="btn-primary" style="margin-top: 10px; cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
-            <span class="submit-msg-text">
-              <span class="lang-en">Submit Request</span>
-              <span class="lang-es">Enviar Solicitud</span>
-            </span>
-            <span class="submit-booking-text" style="display: none;">
-              <span class="lang-en">Schedule Meeting</span>
-              <span class="lang-es">Agendar Reunión</span>
-            </span>
-          </button>
+          <!-- Navigation controls -->
+          <div style="display: flex; gap: 15px; align-items: center; justify-content: flex-end; margin-top: 10px;">
+            <button id="btn-back-action" onclick="goToStep(1)" class="slot-btn" type="button" style="display: none; padding: 12px 24px;">
+              <span class="lang-en">Back</span>
+              <span class="lang-es">Atrás</span>
+            </button>
+            
+            <div id="btn-next-container" style="flex: 1;">
+              <button onclick="handleNextStep()" class="btn-primary" type="button" style="cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+                <span class="lang-en">Next Step</span>
+                <span class="lang-es">Siguiente Paso</span>
+              </button>
+            </div>
+            
+            <div id="btn-submit-container" style="display: none; flex: 1;">
+              <button type="submit" id="booking-submit-btn" class="btn-primary" style="cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+                <span class="submit-msg-text">
+                  <span class="lang-en">Send Message</span>
+                  <span class="lang-es">Enviar Mensaje</span>
+                </span>
+                <span class="submit-booking-text" style="display: none;">
+                  <span class="lang-en">Confirm Booking</span>
+                  <span class="lang-es">Confirmar Agendamiento</span>
+                </span>
+              </button>
+            </div>
+          </div>
+
         </form>
       </div>
+
+      <!-- Message Success Screen -->
+      <div id="msg-success-container" class="success-box" style="display: none;">
+        <svg viewBox="0 0 24 24" width="48" height="48" style="stroke: #8bb395; fill: none; stroke-width: 2; margin: 0 auto 15px auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <h3>
+          <span class="lang-en">Message Sent!</span>
+          <span class="lang-es">¡Mensaje Enviado!</span>
+        </h3>
+        <p style="margin-bottom: 10px; font-size: 1.05rem;">
+          <span class="lang-en">Thank you for contacting us. One of our sales agents will respond to you shortly.</span>
+          <span class="lang-es">Gracias por contactarnos. Uno de nuestros asesores te responderá a la brevedad.</span>
+        </p>
+      </div>
+
+      <!-- Booking Success Screen -->
+      <div id="booking-success-container" class="success-box" style="display: none;">
+        <svg viewBox="0 0 24 24" width="48" height="48" style="stroke: #8bb395; fill: none; stroke-width: 2; margin: 0 auto 15px auto;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        
+        <h3>
+          <span class="lang-en">Meeting Confirmed!</span>
+          <span class="lang-es">¡Reunión Confirmada!</span>
+        </h3>
+        
+        <p style="margin-bottom: 12px; font-size: 1.05rem;">
+          <span class="lang-en">Your consultation is scheduled for:</span>
+          <span class="lang-es">Tu consulta está programada para:</span>
+          <br>
+          <strong id="confirm-datetime" style="color: #fff; font-size: 1.2rem;"></strong>
+        </p>
+
+        <p style="margin-bottom: 20px; color: rgba(255,255,255,0.7); font-size: 0.95rem;">
+          <span class="lang-en">Agent Assigned:</span>
+          <span class="lang-es">Asesor Asignado:</span>
+          <strong id="confirm-agent" style="color: #fff;"></strong>
+        </p>
+
+        <!-- Video Call Success block -->
+        <div id="confirm-zoom-box" style="display: none;">
+          <p style="margin-bottom: 10px; font-size: 0.9rem;">
+            <span class="lang-en">Please use the link below to join the Zoom meeting at the scheduled time:</span>
+            <span class="lang-es">Por favor ingresa al siguiente enlace para unirte a la reunión en la fecha indicada:</span>
+          </p>
+          <a id="confirm-zoom" href="" target="_blank" class="zoom-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="fill: none; stroke: currentColor; stroke-width: 2;"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            <span class="lang-en">Open Zoom Link</span>
+            <span class="lang-es">Abrir Sala de Zoom</span>
+          </a>
+        </div>
+
+        <!-- Property Visit Success block -->
+        <div id="confirm-visit-box" style="display: none;">
+          <p style="margin-bottom: 10px; font-size: 0.9rem;">
+            <span class="lang-en">Our sales agent will contact you shortly to coordinate the meeting point at Las Lomas. Here are the Google Maps directions to the property:</span>
+            <span class="lang-es">Nuestro asesor se comunicará contigo a la brevedad para coordinar el punto de encuentro en Las Lomas. Aquí están las indicaciones de Google Maps para llegar a la propiedad:</span>
+          </p>
+          <a href="https://maps.google.com/?q=Las+Lomas+Perez+Zeledon" target="_blank" class="zoom-btn" style="background: var(--gold);">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="fill: none; stroke: currentColor; stroke-width: 2;"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <span class="lang-en">View Directions on Maps</span>
+            <span class="lang-es">Ver Mapa y Direcciones</span>
+          </a>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -351,54 +476,316 @@
         <span class="lang-es">Contacto</span>
       </a></li>
     </ul>
-    <div class="footer-contact">
-      <a href="https://wa.me/50662170977?text=Hola,%20estoy%20interesado%20en%20los%20lotes%20de%20Las%20Lomas" target="_blank" class="btn-whatsapp">
-        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        WhatsApp
-      </a>
-    </div>
   </footer>
 
   <script>
+    // Navigation transparent on scroll
     const nav = document.getElementById('main-nav');
     window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 60));
 
-    // Responsive Mobile Menu mechanism
-    const menuToggle = document.getElementById('menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    if (menuToggle && navLinks) {
-      menuToggle.addEventListener('click', () => {
-        const isOpen = menuToggle.classList.toggle('open');
-        navLinks.classList.toggle('active');
-        document.body.classList.toggle('no-scroll', isOpen);
-      });
-      // Close menu when clicking a link
-      navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          menuToggle.classList.remove('open');
-          navLinks.classList.remove('active');
-          document.body.classList.remove('no-scroll');
-        });
+    // Limit date picker to today and future
+    const dateInput = document.getElementById('book-date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+
+    // Generate timeslots hourly from 9 AM to 5 PM
+    function generateTimeSlots() {
+      const container = document.getElementById('slots-container');
+      const hiddenTimeInput = document.getElementById('book-time');
+      const selectedDate = new Date(dateInput.value);
+      
+      // Clear previous slots
+      container.innerHTML = '';
+      hiddenTimeInput.value = '';
+
+      // Check if selected date is weekend
+      const day = selectedDate.getUTCDay();
+      if (day === 0 || day === 6) { // 0 = Sunday, 6 = Saturday
+        container.innerHTML = `
+          <div style="color: #ff8888; font-size: 0.85rem; grid-column: 1 / -1; padding-top: 6px;">
+            <span class="lang-en">Please select a weekday. We operate Monday to Friday.</span>
+            <span class="lang-es">Por favor selecciona un día de semana. Atendemos de lunes a viernes.</span>
+          </div>
+        `;
+        return;
+      }
+
+      // We operate 9:00 to 17:00
+      const hours = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+      
+      hours.forEach(time => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'slot-btn';
+        btn.textContent = time;
+        btn.onclick = () => {
+          document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          hiddenTimeInput.value = time;
+        };
+        container.appendChild(btn);
       });
     }
 
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((e, i) => {
-        if (e.isIntersecting) {
-          setTimeout(() => e.target.classList.add('visible'), i * 80);
-          observer.unobserve(e.target);
-        }
+    let activeBookingTab = 'message'; // 'message', 'video', 'visit'
+    let currentStep = 1;
+
+    function switchTab(tab) {
+      if (tab === activeBookingTab) return;
+      activeBookingTab = tab;
+      
+      // Update active classes on tab buttons
+      document.querySelectorAll('.form-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
       });
-    }, { threshold: 0.15 });
-    reveals.forEach(el => observer.observe(el));
+
+      // Reset step to 1 when changing tabs
+      goToStep(1);
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+      
+      const stepHeader = document.getElementById('step-header-text');
+      const stepDots = document.getElementById('step-dots');
+      
+      const fieldsCommon = document.getElementById('fields-common-contact');
+      const fieldsMsg = document.getElementById('fields-message-only');
+      const fieldsPrequal = document.getElementById('fields-booking-prequal');
+      const fieldsDateTime = document.getElementById('fields-booking-datetime');
+      
+      const btnSubmit = document.getElementById('btn-submit-container');
+      const btnNext = document.getElementById('btn-next-container');
+      const btnBack = document.getElementById('btn-back-action');
+      
+      const activeLang = document.documentElement.getAttribute('lang') || 'en';
+      
+      // Hide all dynamic section wrappers
+      fieldsCommon.style.display = 'none';
+      fieldsMsg.style.display = 'none';
+      fieldsPrequal.style.display = 'none';
+      fieldsDateTime.style.display = 'none';
+      
+      btnSubmit.style.display = 'none';
+      btnNext.style.display = 'none';
+      if (btnBack) btnBack.style.display = 'none';
+      
+      if (activeBookingTab === 'message') {
+        // 2 Steps for Message tab: Step 1 (Form) -> Step 2 (Success)
+        if (step === 1) {
+          fieldsCommon.style.display = 'flex';
+          fieldsMsg.style.display = 'block';
+          btnSubmit.style.display = 'block';
+          
+          // Update button text for direct submission
+          const submitBtn = document.getElementById('booking-submit-btn');
+          submitBtn.querySelector('.submit-msg-text').style.display = 'inline';
+          submitBtn.querySelector('.submit-booking-text').style.display = 'none';
+          
+          // Update step header
+          stepHeader.textContent = activeLang === 'en' ? 'Step 1 of 2: Your Message' : 'Paso 1 de 2: Tu Mensaje';
+          stepDots.innerHTML = `
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          `;
+          
+          // Inputs validation rules
+          document.getElementById('book-phone').required = false;
+          document.getElementById('book-date').required = false;
+          document.getElementById('book-time').required = false;
+        }
+      } else {
+        // 3 Steps for Booking tabs (Video Call / Property Visit): Step 1 (Info) -> Step 2 (Date/Time) -> Step 3 (Success)
+        if (step === 1) {
+          fieldsCommon.style.display = 'flex';
+          fieldsPrequal.style.display = 'block';
+          btnNext.style.display = 'block';
+          
+          // Update step header
+          stepHeader.textContent = activeLang === 'en' ? 'Step 1 of 3: Your Information' : 'Paso 1 de 3: Tu Información';
+          stepDots.innerHTML = `
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          `;
+          
+          // Phone is required for booking meetings
+          document.getElementById('book-phone').required = true;
+          document.getElementById('book-date').required = false;
+          document.getElementById('book-time').required = false;
+        } else if (step === 2) {
+          fieldsDateTime.style.display = 'block';
+          btnSubmit.style.display = 'block';
+          if (btnBack) btnBack.style.display = 'inline-block';
+          
+          // Update button text for booking
+          const submitBtn = document.getElementById('booking-submit-btn');
+          submitBtn.querySelector('.submit-msg-text').style.display = 'none';
+          submitBtn.querySelector('.submit-booking-text').style.display = 'inline';
+          
+          // Update step header
+          stepHeader.textContent = activeLang === 'en' ? 'Step 2 of 3: Date & Time' : 'Paso 2 de 3: Fecha y Hora';
+          stepDots.innerHTML = `
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: var(--white); border-radius: 1px;"></span>
+            <span class="step-dot" style="width: 8px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 1px;"></span>
+          `;
+          
+          // Date & Time are now required in Step 2
+          document.getElementById('book-date').required = true;
+          document.getElementById('book-time').required = true;
+        }
+      }
+    }
+
+    function handleNextStep() {
+      const name = document.getElementById('book-name');
+      const email = document.getElementById('book-email');
+      const phone = document.getElementById('book-phone');
+      
+      // Trigger HTML5 validation checks
+      if (!name.reportValidity() || !email.reportValidity() || !phone.reportValidity()) {
+        return;
+      }
+      
+      // All valid! Move to Step 2
+      goToStep(2);
+    }
+
+    // Handle unified AJAX contact and booking submission to local CRM API
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('book-name').value;
+      const email = document.getElementById('book-email').value;
+      const phone = document.getElementById('book-phone').value;
+      
+      const btn = document.getElementById('booking-submit-btn');
+      const activeLang = document.documentElement.getAttribute('lang') || 'en';
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const utmSource = urlParams.get('utm_source') || urlParams.get('source') || 'directo';
+      
+      if (activeBookingTab === 'message') {
+        // SENDING MESSAGE ROUTE
+        const project = document.getElementById('book-project').value;
+        const msgText = document.getElementById('book-message').value;
+        
+        btn.disabled = true;
+        btn.textContent = activeLang === 'en' ? 'SENDING...' : 'ENVIANDO...';
+        
+        const details = `Proyecto Seleccionado: ${project}.\nMensaje del cliente: ${msgText ? msgText : 'Sin mensaje adicional.'}`;
+        
+        fetch('/api/leads', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            phone: phone,
+            origin: 'Website Landing',
+            details: details,
+            status: 'Nuevo',
+            language: activeLang
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('API Error');
+          return res.json();
+        })
+        .then(data => {
+          // Success! Go to Success screen (Step 3)
+          document.getElementById('booking-form-container').style.display = 'none';
+          
+          // Show Message Success Screen
+          document.getElementById('msg-success-container').style.display = 'block';
+          document.getElementById('booking-success-container').style.display = 'none';
+        })
+        .catch(err => {
+          console.error(err);
+          alert(activeLang === 'en' ? 'An error occurred. Please try again.' : 'Ocurrió un error. Intenta de nuevo.');
+          btn.disabled = false;
+          btn.innerHTML = `<span class="submit-msg-text"><span class="lang-en">Send Message</span><span class="lang-es">Enviar Mensaje</span></span>`;
+          setLanguage(activeLang);
+        });
+        
+      } else {
+        // BOOKING MEETING ROUTE
+        const date = document.getElementById('book-date').value;
+        const timeSlot = document.getElementById('book-time').value;
+        const budget = document.getElementById('book-budget').value;
+        const topic = document.getElementById('book-topic').value;
+        
+        if (!timeSlot) {
+          alert(activeLang === 'en' ? 'Please select a time slot!' : 'Por favor selecciona un horario!');
+          return;
+        }
+        
+        btn.disabled = true;
+        btn.textContent = activeLang === 'en' ? 'SCHEDULING...' : 'AGENDANDO...';
+        
+        const typeLabel = activeBookingTab === 'video' ? '[Video Call]' : '[Property Visit]';
+        const payload = {
+          name: name,
+          email: email,
+          phone: phone,
+          language: activeLang,
+          datetime: `${date} ${timeSlot}`,
+          topic: `${typeLabel} ${topic}`,
+          budget_prequalification: budget,
+          origin: utmSource
+        };
+        
+        fetch('/api/meetings/book', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('API Error');
+          return res.json();
+        })
+        .then(data => {
+          document.getElementById('booking-form-container').style.display = 'none';
+          
+          // Setup Booking Success Screen fields
+          document.getElementById('confirm-datetime').textContent = data.datetime;
+          document.getElementById('confirm-agent').textContent = data.agent_name;
+          
+          const zoomBox = document.getElementById('confirm-zoom-box');
+          const visitBox = document.getElementById('confirm-visit-box');
+          
+          if (activeBookingTab === 'video') {
+            zoomBox.style.display = 'block';
+            visitBox.style.display = 'none';
+            document.getElementById('confirm-zoom').href = data.zoom_link;
+          } else {
+            zoomBox.style.display = 'none';
+            visitBox.style.display = 'block';
+          }
+          
+          document.getElementById('msg-success-container').style.display = 'none';
+          document.getElementById('booking-success-container').style.display = 'block';
+        })
+        .catch(err => {
+          console.error(err);
+          alert(activeLang === 'en' ? 'An error occurred. Please try again.' : 'Ocurrió un error. Intenta de nuevo.');
+          btn.disabled = false;
+          btn.innerHTML = `<span class="submit-booking-text"><span class="lang-en">Confirm Booking</span><span class="lang-es">Confirmar Agendamiento</span></span>`;
+          setLanguage(activeLang);
+        });
+      }
+    }
 
     // Language Selector Mechanism
     function setLanguage(lang) {
       document.documentElement.setAttribute('lang', lang);
       localStorage.setItem('preferred-lang', lang);
       
-      // Update page metadata
       const pageTitles = {
         en: "Contact Us · Las Lomas",
         es: "Contáctanos · Las Lomas"
@@ -411,102 +798,46 @@
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', pageDescriptions[lang]);
 
-      // Update OpenGraph & Twitter tags dynamically
-      const metaOgTitle = document.querySelector('meta[property="og:title"]');
-      const metaOgDesc = document.querySelector('meta[property="og:description"]');
-      const metaTwTitle = document.querySelector('meta[name="twitter:title"]');
-      const metaTwDesc = document.querySelector('meta[name="twitter:description"]');
-      if (metaOgTitle) metaOgTitle.setAttribute('content', pageTitles[lang]);
-      if (metaOgDesc) metaOgDesc.setAttribute('content', pageDescriptions[lang]);
-      if (metaTwTitle) metaTwTitle.setAttribute('content', pageTitles[lang]);
-      if (metaTwDesc) metaTwDesc.setAttribute('content', pageDescriptions[lang]);
-
-      // Update placeholders
-      document.querySelectorAll('[data-placeholder-en]').forEach(el => {
-        el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
-      });
-      
-      // Update select option texts
-      document.querySelectorAll('option[data-text-en]').forEach(opt => {
-        opt.textContent = opt.getAttribute(`data-text-${lang}`);
-      });
-
       // Toggle active classes on language buttons
       document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
       });
+      
+      // Update placeholders
+      document.querySelectorAll('[data-placeholder-en]').forEach(el => {
+        el.placeholder = el.getAttribute(`data-placeholder-${lang}`);
+      });
+
+      // Toggle visibility of translation strings
+      document.querySelectorAll('.lang-en').forEach(el => {
+        el.style.display = lang === 'en' ? 'inline-block' : 'none';
+      });
+      document.querySelectorAll('.lang-es').forEach(el => {
+        el.style.display = lang === 'es' ? 'inline-block' : 'none';
+      });
+
+      // Force header update
+      goToStep(currentStep);
     }
 
-    // Tab switching tracker and handler
-    let activeTab = 'message';
-
-    function switchTab(tab) {
-      if (tab === activeTab) return;
-      activeTab = tab;
-      
-      const tabMsg = document.getElementById('tab-message');
-      const tabBook = document.getElementById('tab-booking');
-      const sectionMsg = document.getElementById('section-message-fields');
-      const sectionBook = document.getElementById('section-booking-fields');
-      const btnMsgText = document.querySelector('.submit-msg-text');
-      const btnBookText = document.querySelector('.submit-booking-text');
-      
-      // Inputs
-      const phoneInput = document.getElementById('contact-phone');
-      const bookingDate = document.getElementById('booking-date');
-      const bookingTime = document.getElementById('booking-time');
-      
-      if (tab === 'message') {
-        tabMsg.classList.add('active');
-        tabBook.classList.remove('active');
-        sectionMsg.style.display = 'block';
-        sectionBook.style.display = 'none';
-        btnMsgText.style.display = 'inline';
-        btnBookText.style.display = 'none';
-        
-        // Validation toggling
-        phoneInput.required = false;
-        bookingDate.required = false;
-        bookingTime.required = false;
-      } else {
-        tabMsg.classList.remove('active');
-        tabBook.classList.add('active');
-        sectionMsg.style.display = 'none';
-        sectionBook.style.display = 'block';
-        btnMsgText.style.display = 'none';
-        btnBookText.style.display = 'inline';
-        
-        // Validation toggling
-        phoneInput.required = true;
-        bookingDate.required = true;
-        bookingTime.required = true;
-      }
-    }
-
-    // Call once on page load to initialize button and content states
+    // Initialize bilinguality & setup default active tab
     document.addEventListener('DOMContentLoaded', () => {
       const currentLang = document.documentElement.getAttribute('lang') || 'en';
       setLanguage(currentLang);
-
-      // Block past dates in booking date picker
-      const bookingDateInput = document.getElementById('booking-date');
-      if (bookingDateInput) {
-        const todayStr = new Date().toISOString().split('T')[0];
-        bookingDateInput.setAttribute('min', todayStr);
-      }
-
-      // Parse URL parameters for pre-filling specific lot inquiry
+      
+      // Default contact.html page to message tab
+      switchTab('message');
+      
+      // Parse URL parameters for pre-filling specific lot inquiry (only active if starting in message mode)
       const params = new URLSearchParams(window.location.search);
       const lot = params.get('lot');
       if (lot) {
-        const select = document.getElementById('contact-project');
+        const select = document.getElementById('book-project');
         if (select) {
-          // Set to the first option: Eco-Residencial
           select.value = "Las Lomas Eco-Residencial (Lote 1 ha - $190,000)";
         }
-        const messageArea = document.getElementById('contact-message');
+        const messageArea = document.getElementById('book-message');
         if (messageArea) {
-          // Determine size and price based on lot
           const sizes = { 1: "1.7", 4: "2.0" };
           const size = sizes[lot] || "1.0";
           const prices = { 1: "$235,000", 4: "$250,000", 8: "$210,000", 9: "$210,000", 11: "$210,000", 12: "$210,000", 13: "$210,000" };
@@ -520,103 +851,6 @@
         }
       }
     });
-
-    // Handle unified AJAX contact and booking submission to local CRM API
-    function handleFormSubmit(e) {
-      e.preventDefault();
-      
-      const name = document.getElementById('contact-name').value;
-      const email = document.getElementById('contact-email').value;
-      const phone = document.getElementById('contact-phone').value;
-      
-      const btn = e.target.querySelector('button[type="submit"]');
-      const activeLang = document.documentElement.getAttribute('lang') || 'en';
-      
-      let details = '';
-      let origin = '';
-      let sendingText = '';
-      let sentText = '';
-      
-      if (activeTab === 'message') {
-        const project = document.getElementById('contact-project').value;
-        const message = document.getElementById('contact-message').value;
-        
-        sendingText = activeLang === 'en' ? 'SENDING...' : 'ENVIANDO...';
-        sentText = activeLang === 'en' ? '✓ SENT' : '✓ ENVIADO';
-        
-        details = `Proyecto Seleccionado: ${project}.\nMensaje del cliente: ${message ? message : 'Sin mensaje adicional.'}`;
-        origin = 'Website Landing';
-      } else {
-        const type = document.getElementById('booking-type').value;
-        const date = document.getElementById('booking-date').value;
-        const time = document.getElementById('booking-time').value;
-        const notes = document.getElementById('booking-notes').value;
-        
-        sendingText = activeLang === 'en' ? 'SCHEDULING...' : 'AGENDANDO...';
-        sentText = activeLang === 'en' ? '✓ SCHEDULED' : '✓ AGENDADO';
-        
-        details = `Tipo de Cita: ${type === 'Online Meeting' ? 'Reunión Virtual por Videollamada' : 'Visita Presencial a la Propiedad'}\nFecha Propuesta: ${date}\nHora Propuesta: ${time}\nNotas del cliente: ${notes ? notes : 'Sin notas adicionales.'}`;
-        origin = 'Website Booking';
-      }
-      
-      btn.disabled = true;
-      const btnSpan = activeTab === 'message' ? btn.querySelector('.submit-msg-text') : btn.querySelector('.submit-booking-text');
-      const originalText = btnSpan.innerHTML;
-      btnSpan.textContent = sendingText;
-      
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiEndpoint = isLocal ? '/api/leads' : 'https://admin.laslomas.cr/api/leads';
-      
-      fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          phone: phone,
-          origin: origin,
-          details: details,
-          status: 'New Lead'
-        })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('API Error');
-        return res.json();
-      })
-      .then(data => {
-        btnSpan.textContent = sentText;
-        btn.style.background = '#2D5A3F';
-        
-        // Reset form inputs
-        document.getElementById('contact-name').value = '';
-        document.getElementById('contact-email').value = '';
-        document.getElementById('contact-phone').value = '';
-        if (document.getElementById('contact-message')) document.getElementById('contact-message').value = '';
-        
-        if (document.getElementById('booking-date')) document.getElementById('booking-date').value = '';
-        if (document.getElementById('booking-time')) document.getElementById('booking-time').value = '';
-        if (document.getElementById('booking-notes')) document.getElementById('booking-notes').value = '';
-        
-        setTimeout(() => { 
-          btnSpan.innerHTML = originalText;
-          btn.style.background = ''; 
-          btn.disabled = false; 
-        }, 3000);
-      })
-      .catch(err => {
-        console.error('Error submitting lead:', err);
-        btnSpan.textContent = sentText;
-        btn.style.background = '#2D5A3F';
-        setTimeout(() => { 
-          btnSpan.innerHTML = originalText;
-          btn.style.background = ''; 
-          btn.disabled = false; 
-        }, 3000);
-      });
-    }
   </script>
-
 </body>
 </html>
