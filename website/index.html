@@ -222,6 +222,7 @@
 
   <!-- ═══ Hero ═══ -->
   <section class="hero" id="hero">
+    <div class="hero-bg"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <div class="hero-tag">
@@ -231,23 +232,13 @@
         <span></span>
       </div>
       <h1 class="hero-title">
-        <span class="lang-en">The same river. The same school.<br><em>Your own land</em>.</span>
-        <span class="lang-es">El mismo río. La misma escuela.<br><em>Tu propia tierra</em>.</span>
+        <span class="lang-en">The same river.<br>The same school.<br><em>Your own land</em>.</span>
+        <span class="lang-es">El mismo río.<br>La misma escuela.<br><em>Tu propia tierra</em>.</span>
       </h1>
       <p class="hero-subtitle">
         <span class="lang-en">An eco-residential community at 1,000 meters elevation in Pérez Zeledón. Enjoy the natural surroundings, mountain air, and the neighboring infrastructure of Santa Elena, with the freedom and certainty of an independent registered title.</span>
         <span class="lang-es">Una comunidad eco-residencial a 1,000 metros de altitud en Pérez Zeledón. Disfruta del entorno, el aire de montaña y la infraestructura colindante de Santa Elena, con la libertad y certeza de un título de propiedad independiente.</span>
       </p>
-      <div class="hero-actions">
-        <a href="/contact" class="btn-primary">
-          <span class="lang-en">Join the Vision</span>
-          <span class="lang-es">Únete a la Visión</span>
-        </a>
-        <a href="/residential" class="btn-secondary">
-          <span class="lang-en">Explore Phases</span>
-          <span class="lang-es">Explorar Fases</span>
-        </a>
-      </div>
     </div>
     <div class="hero-scroll">
       <span>
@@ -281,6 +272,44 @@
         <span class="lang-en">We value breathing clean air and drinking pristine well water, but we don't believe in sacrificing convenience. Located just 15 minutes from the vibrant city of San Isidro, Las Lomas offers the perfect balance: off-grid tranquility, natural abundance, and fast access to modern life, education, and commerce.</span>
         <span class="lang-es">Valoramos respirar aire puro y beber agua limpia de pozo, pero no creemos en sacrificar la comodidad. Ubicado a solo 15 minutos de la activa ciudad de San Isidro, Las Lomas ofrece el balance perfecto: tranquilidad rodeada de naturaleza y un acceso rápido a la vida moderna, educación y comercio.</span>
       </p>
+    </div>
+  </section>
+
+  <!-- ═══ Masterplan Section ═══ -->
+  <section class="section masterplan-section" style="background: var(--white); padding-top: 60px;">
+    <div class="section-inner" style="max-width: 1000px; text-align: center;">
+      <div class="section-tag reveal">
+        <span class="lang-en">Community Layout</span>
+        <span class="lang-es">Diseño de la Comunidad</span>
+      </div>
+      <h2 class="section-title reveal" style="margin-bottom: 24px;">
+        <span class="lang-en">Las Lomas Master Plan</span>
+        <span class="lang-es">Plan Maestro Las Lomas</span>
+      </h2>
+      <div class="masterplan-grid reveal">
+        <!-- Left Column: Image -->
+        <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--warm-gray-100); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='none';">
+          <a href="images/Las%20Lomas.png" target="_blank" style="display: block;">
+            <img src="images/Las%20Lomas.png" alt="Las Lomas Masterplan" style="width: 100%; height: auto; display: block; filter: contrast(1.02) saturate(1.05);">
+            <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0, 0, 0, 0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-family: 'Space Grotesk', sans-serif;">
+              <span class="lang-en">Click to enlarge</span>
+              <span class="lang-es">Clic para ampliar</span>
+            </div>
+          </a>
+        </div>
+        
+        <!-- Right Column: Text -->
+        <div style="text-align: left; display: flex; flex-direction: column; justify-content: center;">
+          <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 20px; color: var(--text-heading);">
+            <span class="lang-en">Explore the layout of our community, integrating 1-hectare residential lots and larger agrihood estates, all nested in the lush mountains of Pérez Zeledón.</span>
+            <span class="lang-es">Explora la distribución de nuestra comunidad, que integra lotes residenciales de 1 hectárea y fincas más grandes de agrihood, todo enclavado en las exuberantes montañas de Pérez Zeledón.</span>
+          </p>
+          <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-body);">
+            <span class="lang-en">Las Lomas is located across the river from the RISE property, on a public road, with 3 km of public road frontage and the river at the back. Kinkara, the airstrip, the school, and the Santa Elena public road can be accessed via a private easement.</span>
+            <span class="lang-es">Las Lomas está ubicado al otro lado del río de la propiedad de RISE sobre calle pública, con 3 km de frente a calle pública y fondo al río. Se puede acceder a Kinkara, la pista de aterrizaje, la escuela y la calle pública de Santa Elena por una servidumbre de uso privado.</span>
+          </p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -347,43 +376,6 @@
             <span class="lang-en">Explore Agrihood</span>
             <span class="lang-es">Explorar Agrihood</span>
           </a>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!-- ═══ Masterplan Section ═══ -->
-  <section class="section masterplan-section" style="background: var(--white); padding-top: 60px;">
-    <div class="section-inner" style="max-width: 1000px; text-align: center;">
-      <div class="section-tag reveal">
-        <span class="lang-en">Community Layout</span>
-        <span class="lang-es">Diseño de la Comunidad</span>
-      </div>
-      <h2 class="section-title reveal" style="margin-bottom: 24px;">
-        <span class="lang-en">Las Lomas Master Plan</span>
-        <span class="lang-es">Plan Maestro Las Lomas</span>
-      </h2>
-      <div class="masterplan-grid reveal">
-        <!-- Left Column: Image -->
-        <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid var(--warm-gray-100); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='none';">
-          <a href="images/Las%20Lomas.png" target="_blank" style="display: block;">
-            <img src="images/Las%20Lomas.png" alt="Las Lomas Masterplan" style="width: 100%; height: auto; display: block; filter: contrast(1.02) saturate(1.05);">
-            <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0, 0, 0, 0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-family: 'Space Grotesk', sans-serif;">
-              <span class="lang-en">Click to enlarge</span>
-              <span class="lang-es">Clic para ampliar</span>
-            </div>
-          </a>
-        </div>
-        
-        <!-- Right Column: Text -->
-        <div style="text-align: left; display: flex; flex-direction: column; justify-content: center;">
-          <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 20px; color: var(--text-heading);">
-            <span class="lang-en">Explore the layout of our community, integrating 1-hectare residential lots and larger agrihood estates, all nested in the lush mountains of Pérez Zeledón.</span>
-            <span class="lang-es">Explora la distribución de nuestra comunidad, que integra lotes residenciales de 1 hectárea y fincas más grandes de agrihood, todo enclavado en las exuberantes montañas de Pérez Zeledón.</span>
-          </p>
-          <p style="font-size: 1.05rem; line-height: 1.7; color: var(--text-body);">
-            <span class="lang-en">Las Lomas is located across the river from the RISE property, on a public road, with 3 km of public road frontage and the river at the back. Kinkara, the airstrip, the school, and the Santa Elena public road can be accessed via a private easement.</span>
-            <span class="lang-es">Las Lomas está ubicado al otro lado del río de la propiedad de RISE sobre calle pública, con 3 km de frente a calle pública y fondo al río. Se puede acceder a Kinkara, la pista de aterrizaje, la escuela y la calle pública de Santa Elena por una servidumbre de uso privado.</span>
-          </p>
         </div>
       </div>
     </div>
