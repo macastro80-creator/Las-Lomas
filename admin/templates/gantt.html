@@ -62,13 +62,38 @@
   .mermaid svg text {
     font-family: 'Inter', sans-serif !important;
   }
-  .mermaid svg .titleText {
+  /* Style the Gantt Title */
+  .mermaid svg .ganttTitleText {
     font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
+    fill: #2D5A3F !important;
   }
-  .mermaid svg .sectionText {
+  /* Style Section Titles */
+  .mermaid svg .sectionTitle {
     font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 11px !important;
     font-weight: 600 !important;
+    fill: #3D372F !important;
+  }
+  /* Style Task Labels (inside and outside) */
+  .mermaid svg .taskText,
+  .mermaid svg .taskTextOutsideRight,
+  .mermaid svg .taskTextOutsideLeft,
+  .mermaid svg .taskTextClickable,
+  .mermaid svg .taskTextOutside,
+  .mermaid svg .taskTextInside {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+  }
+  /* Style axis tick labels */
+  .mermaid svg .tick text,
+  .mermaid svg .grid text,
+  .mermaid svg g.tick text {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 9px !important;
+    fill: #948A7C !important;
   }
 </style>
 {% endblock %}

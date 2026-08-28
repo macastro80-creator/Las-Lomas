@@ -593,8 +593,19 @@
       const lang = document.documentElement.getAttribute('lang') || 'en';
       const sizeText = lang === 'es' ? data.sizeEs : data.sizeEn;
 
+      let sizeFormatted = sizeText;
+      if (sizeText) {
+        const haVal = parseFloat(sizeText);
+        if (!isNaN(haVal)) {
+          const acreVal = (haVal * 2.47105).toFixed(1);
+          sizeFormatted = lang === 'es'
+            ? `${haVal.toFixed(1)} ${haVal === 1 ? 'Hectárea' : 'Hectáreas'} (${acreVal} Acres)`
+            : `${haVal.toFixed(1)} ${haVal === 1 ? 'Hectare' : 'Hectares'} (${acreVal} Acres)`;
+        }
+      }
+
       document.querySelector('.lot-card-header').textContent = lang === 'es' ? `LOTE ${String(lotNum).padStart(2, '0')}` : `LOT ${String(lotNum).padStart(2, '0')}`;
-      sizeVal.textContent = sizeText;
+      sizeVal.textContent = sizeFormatted;
       priceVal.textContent = `${data.price} USD`;
 
       if (data.riverAccess) {

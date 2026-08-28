@@ -18,18 +18,67 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="canonical" href="https://laslomas.cr/contact">
   <style>
-    .contact-grid {
+    .contact-form-container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.02);
+      padding: 40px 30px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .form-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      padding: 4px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .form-tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 12px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+      text-align: center;
+    }
+    .form-tab-btn:hover {
+      color: var(--white);
+    }
+    .form-tab-btn.active {
+      background: var(--emerald);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(27, 63, 42, 0.2);
+    }
+    .form-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      gap: 20px;
     }
     @media (max-width: 900px) {
-      .contact-grid {
-        grid-template-columns: 1fr !important;
-        gap: 30px !important;
-      }
       .cta-inner {
         padding: 40px 24px !important;
+      }
+    }
+    @media (max-width: 600px) {
+      .contact-form-container {
+        padding: 30px 20px;
+      }
+      .form-tab-btn {
+        font-size: 0.72rem;
+        padding: 10px 8px;
+        letter-spacing: 0.5px;
+      }
+      .form-grid-2 {
+        grid-template-columns: 1fr !important;
       }
     }
   </style>
@@ -154,140 +203,124 @@
         <span class="lang-es">Conéctate con Nosotros</span>
       </h2>
       
-      <div class="contact-grid reveal">
-        <!-- Left Column: Contact Form -->
-        <div style="background: rgba(255,255,255,0.02); padding: 30px 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 20px;">
-          <h3 style="color: var(--white); font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin: 0; text-align: left;">
+      <div class="contact-form-container reveal">
+        <!-- Segmented Tabs Selector -->
+        <div class="form-tabs">
+          <button id="tab-message" class="form-tab-btn active" onclick="switchTab('message')" type="button">
             <span class="lang-en">Send a Message</span>
             <span class="lang-es">Enviar un Mensaje</span>
-          </h3>
-          <form class="cta-form" onsubmit="handleSubmit(event)" style="display: flex; flex-direction: column; gap: 20px; text-align: left; max-width: none; width: 100%; margin: 0;">
+          </button>
+          <button id="tab-booking" class="form-tab-btn" onclick="switchTab('booking')" type="button">
+            <span class="lang-en">Book a Meeting/Visit</span>
+            <span class="lang-es">Agendar Reunión/Visita</span>
+          </button>
+        </div>
+
+        <form id="unified-contact-form" onsubmit="handleFormSubmit(event)" style="display: flex; flex-direction: column; gap: 20px; text-align: left; max-width: none; width: 100%; margin: 0;">
+          
+          <!-- Common Personal Fields -->
+          <div>
+            <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+              <span class="lang-en">Full Name</span>
+              <span class="lang-es">Nombre Completo</span>
+            </label>
+            <input type="text" id="contact-name" data-placeholder-en="Your name" data-placeholder-es="Tu nombre" placeholder="Your name" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+          </div>
+          
+          <div class="form-grid-2">
             <div>
               <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Full Name</span>
-                <span class="lang-es">Nombre Completo</span>
+                <span class="lang-en">Email Address</span>
+                <span class="lang-es">Correo Electrónico</span>
               </label>
-              <input type="text" id="contact-name" data-placeholder-en="Your name" data-placeholder-es="Tu nombre" placeholder="Your name" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+              <input type="email" id="contact-email" data-placeholder-en="email@example.com" data-placeholder-es="correo@ejemplo.com" placeholder="email@example.com" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
             </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+            <div>
+              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                <span class="lang-en">Phone Number</span>
+                <span class="lang-es">Teléfono</span>
+              </label>
+              <input type="text" id="contact-phone" data-placeholder-en="+506 8888 8888" data-placeholder-es="+506 8888 8888" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+            </div>
+          </div>
+
+          <!-- Dynamic Message Fields -->
+          <div id="section-message-fields">
+            <div style="display: flex; flex-direction: column; gap: 20px;">
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Email Address</span>
-                  <span class="lang-es">Correo Electrónico</span>
+                  <span class="lang-en">Project of Interest</span>
+                  <span class="lang-es">Proyecto de Interés</span>
                 </label>
-                <input type="email" id="contact-email" data-placeholder-en="email@example.com" data-placeholder-es="correo@ejemplo.com" placeholder="email@example.com" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+                <select id="contact-project" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                  <option value="Las Lomas Eco-Residencial (Lote 1 ha - $190,000)" data-text-en="Las Lomas Eco-Residential (1 Hectare - $190K)" data-text-es="Las Lomas Eco-Residencial (1 Hectárea - $190K)" style="background: var(--warm-gray-900);">Las Lomas Eco-Residential (1 Hectare - $190K)</option>
+                  <option value="Las Lomas Agrihood (Lote 5-20 ha - Coming Soon)" data-text-en="Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)" data-text-es="Las Lomas Agrihood (5 a 20 Hectáreas - Coming Soon)" style="background: var(--warm-gray-900);">Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)</option>
+                  <option value="Informacion General" data-text-en="General Information" data-text-es="Quiero información general" style="background: var(--warm-gray-900);">General Information</option>
+                </select>
               </div>
+              
               <div>
                 <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Phone Number</span>
-                  <span class="lang-es">Teléfono</span>
+                  <span class="lang-en">Message (Optional)</span>
+                  <span class="lang-es">Mensaje (Opcional)</span>
                 </label>
-                <input type="text" id="contact-phone" data-placeholder-en="+506 8888 8888" data-placeholder-es="+506 8888 8888" placeholder="+506 8888 8888" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
+                <textarea id="contact-message" rows="4" data-placeholder-en="Tell us more about what you are looking for..." data-placeholder-es="Cuéntanos más sobre lo que buscas..." placeholder="Tell us more about what you are looking for..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
               </div>
             </div>
-            
-            <div>
-              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Project of Interest</span>
-                <span class="lang-es">Proyecto de Interés</span>
-              </label>
-              <select id="contact-project" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
-                <option value="Las Lomas Eco-Residencial (Lote 1 ha - $190,000)" data-text-en="Las Lomas Eco-Residential (1 Hectare - $190K)" data-text-es="Las Lomas Eco-Residencial (1 Hectárea - $190K)" style="background: var(--warm-gray-900);">Las Lomas Eco-Residential (1 Hectare - $190K)</option>
-                <option value="Las Lomas Agrihood (Lote 5-20 ha - Coming Soon)" data-text-en="Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)" data-text-es="Las Lomas Agrihood (5 a 20 Hectáreas - Coming Soon)" style="background: var(--warm-gray-900);">Las Lomas Agrihood (5 to 20 Hectares - Coming Soon)</option>
-                <option value="Informacion General" data-text-en="General Information" data-text-es="Quiero información general" style="background: var(--warm-gray-900);">General Information</option>
-              </select>
+          </div>
+
+          <!-- Dynamic Booking Fields -->
+          <div id="section-booking-fields" style="display: none;">
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Type of Meeting / Visit</span>
+                  <span class="lang-es">Tipo de Reunión / Visita</span>
+                </label>
+                <select id="booking-type" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
+                  <option value="Online Meeting" data-text-en="Online Video Call Meeting" data-text-es="Reunión Virtual por Videollamada" style="background: var(--warm-gray-900);">Online Video Call Meeting</option>
+                  <option value="Property Visit" data-text-en="In-person Property Visit" data-text-es="Visita Presencial a la Propiedad" style="background: var(--warm-gray-900);">In-person Property Visit</option>
+                </select>
+              </div>
+
+              <div class="form-grid-2">
+                <div>
+                  <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                    <span class="lang-en">Preferred Date</span>
+                    <span class="lang-es">Fecha Preferida</span>
+                  </label>
+                  <input type="date" id="booking-date" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
+                </div>
+                <div>
+                  <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                    <span class="lang-en">Preferred Time</span>
+                    <span class="lang-es">Hora Preferida</span>
+                  </label>
+                  <input type="time" id="booking-time" style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
+                </div>
+              </div>
+
+              <div>
+                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
+                  <span class="lang-en">Special Notes / Requests (Optional)</span>
+                  <span class="lang-es">Notas / Solicitudes Especiales (Opcional)</span>
+                </label>
+                <textarea id="booking-notes" rows="3" data-placeholder-en="Any details or preferred lot number..." data-placeholder-es="Cualquier detalle o lote de preferencia..." placeholder="Any details or preferred lot number..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
+              </div>
             </div>
-            
-            <div>
-              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Message (Optional)</span>
-                <span class="lang-es">Mensaje (Opcional)</span>
-              </label>
-              <textarea id="contact-message" rows="4" data-placeholder-en="Tell us more about what you are looking for..." data-placeholder-es="Cuéntanos más sobre lo que buscas..." placeholder="Tell us more about what you are looking for..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
-            </div>
-            
-            <button type="submit" class="btn-primary" style="margin-top: 10px; cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 10px; cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+            <span class="submit-msg-text">
               <span class="lang-en">Submit Request</span>
               <span class="lang-es">Enviar Solicitud</span>
-            </button>
-          </form>
-        </div>
-
-        <!-- Right Column: Booking Form -->
-        <div style="background: rgba(255,255,255,0.02); padding: 30px 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 20px;">
-          <h3 style="color: var(--white); font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin: 0; text-align: left;">
-            <span class="lang-en">Book a Meeting or Visit</span>
-            <span class="lang-es">Agendar Reunión o Visita</span>
-          </h3>
-          <form class="cta-form" onsubmit="handleBookingSubmit(event)" style="display: flex; flex-direction: column; gap: 20px; text-align: left; max-width: none; width: 100%; margin: 0;">
-            <div>
-              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Type of Meeting / Visit</span>
-                <span class="lang-es">Tipo de Reunión / Visita</span>
-              </label>
-              <select id="booking-type" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; -webkit-appearance: none;">
-                <option value="Online Meeting" data-text-en="Online Video Call Meeting" data-text-es="Reunión Virtual por Videollamada" style="background: var(--warm-gray-900);">Online Video Call Meeting</option>
-                <option value="Property Visit" data-text-en="In-person Property Visit" data-text-es="Visita Presencial a la Propiedad" style="background: var(--warm-gray-900);">In-person Property Visit</option>
-              </select>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Preferred Date</span>
-                  <span class="lang-es">Fecha Preferida</span>
-                </label>
-                <input type="date" id="booking-date" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
-              </div>
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Preferred Time</span>
-                  <span class="lang-es">Hora Preferida</span>
-                </label>
-                <input type="time" id="booking-time" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; color-scheme: dark;">
-              </div>
-            </div>
-
-            <div>
-              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Full Name</span>
-                <span class="lang-es">Nombre Completo</span>
-              </label>
-              <input type="text" id="booking-name" data-placeholder-en="Your name" data-placeholder-es="Tu nombre" placeholder="Your name" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Email Address</span>
-                  <span class="lang-es">Correo Electrónico</span>
-                </label>
-                <input type="email" id="booking-email" data-placeholder-en="email@example.com" data-placeholder-es="correo@ejemplo.com" placeholder="email@example.com" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-              </div>
-              <div>
-                <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                  <span class="lang-en">Phone Number</span>
-                  <span class="lang-es">Teléfono</span>
-                </label>
-                <input type="text" id="booking-phone" data-placeholder-en="+506 8888 8888" data-placeholder-es="+506 8888 8888" placeholder="+506 8888 8888" required style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none;">
-              </div>
-            </div>
-
-            <div>
-              <label style="color: var(--white); font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px;">
-                <span class="lang-en">Special Notes / Requests (Optional)</span>
-                <span class="lang-es">Notas / Solicitudes Especiales (Opcional)</span>
-              </label>
-              <textarea id="booking-notes" rows="3" data-placeholder-en="Any details or preferred lot number..." data-placeholder-es="Cualquier detalle o lote de preferencia..." placeholder="Any details or preferred lot number..." style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 2px; color: var(--white); outline: none; resize: none;"></textarea>
-            </div>
-
-            <button type="submit" class="btn-primary" style="margin-top: 10px; cursor: pointer; text-align: center; justify-content: center; display: flex; width: 100%;">
+            </span>
+            <span class="submit-booking-text" style="display: none;">
               <span class="lang-en">Schedule Meeting</span>
               <span class="lang-es">Agendar Reunión</span>
-            </button>
-          </form>
-        </div>
+            </span>
+          </button>
+        </form>
       </div>
     </div>
   </section>
@@ -404,6 +437,52 @@
       });
     }
 
+    // Tab switching tracker and handler
+    let activeTab = 'message';
+
+    function switchTab(tab) {
+      if (tab === activeTab) return;
+      activeTab = tab;
+      
+      const tabMsg = document.getElementById('tab-message');
+      const tabBook = document.getElementById('tab-booking');
+      const sectionMsg = document.getElementById('section-message-fields');
+      const sectionBook = document.getElementById('section-booking-fields');
+      const btnMsgText = document.querySelector('.submit-msg-text');
+      const btnBookText = document.querySelector('.submit-booking-text');
+      
+      // Inputs
+      const phoneInput = document.getElementById('contact-phone');
+      const bookingDate = document.getElementById('booking-date');
+      const bookingTime = document.getElementById('booking-time');
+      
+      if (tab === 'message') {
+        tabMsg.classList.add('active');
+        tabBook.classList.remove('active');
+        sectionMsg.style.display = 'block';
+        sectionBook.style.display = 'none';
+        btnMsgText.style.display = 'inline';
+        btnBookText.style.display = 'none';
+        
+        // Validation toggling
+        phoneInput.required = false;
+        bookingDate.required = false;
+        bookingTime.required = false;
+      } else {
+        tabMsg.classList.remove('active');
+        tabBook.classList.add('active');
+        sectionMsg.style.display = 'none';
+        sectionBook.style.display = 'block';
+        btnMsgText.style.display = 'none';
+        btnBookText.style.display = 'inline';
+        
+        // Validation toggling
+        phoneInput.required = true;
+        bookingDate.required = true;
+        bookingTime.required = true;
+      }
+    }
+
     // Call once on page load to initialize button and content states
     document.addEventListener('DOMContentLoaded', () => {
       const currentLang = document.documentElement.getAttribute('lang') || 'en';
@@ -442,32 +521,52 @@
       }
     });
 
-    // Handle AJAX contact submission to local CRM API
-    function handleSubmit(e) {
+    // Handle unified AJAX contact and booking submission to local CRM API
+    function handleFormSubmit(e) {
       e.preventDefault();
       
       const name = document.getElementById('contact-name').value;
       const email = document.getElementById('contact-email').value;
       const phone = document.getElementById('contact-phone').value;
-      const project = document.getElementById('contact-project').value;
-      const message = document.getElementById('contact-message').value;
       
-      const btn = e.target.querySelector('button');
-      
+      const btn = e.target.querySelector('button[type="submit"]');
       const activeLang = document.documentElement.getAttribute('lang') || 'en';
-      const sendingText = activeLang === 'en' ? 'SENDING...' : 'ENVIANDO...';
-      const sentText = activeLang === 'en' ? '✓ SENT' : '✓ ENVIADO';
-
-      btn.textContent = sendingText;
+      
+      let details = '';
+      let origin = '';
+      let sendingText = '';
+      let sentText = '';
+      
+      if (activeTab === 'message') {
+        const project = document.getElementById('contact-project').value;
+        const message = document.getElementById('contact-message').value;
+        
+        sendingText = activeLang === 'en' ? 'SENDING...' : 'ENVIANDO...';
+        sentText = activeLang === 'en' ? '✓ SENT' : '✓ ENVIADO';
+        
+        details = `Proyecto Seleccionado: ${project}.\nMensaje del cliente: ${message ? message : 'Sin mensaje adicional.'}`;
+        origin = 'Website Landing';
+      } else {
+        const type = document.getElementById('booking-type').value;
+        const date = document.getElementById('booking-date').value;
+        const time = document.getElementById('booking-time').value;
+        const notes = document.getElementById('booking-notes').value;
+        
+        sendingText = activeLang === 'en' ? 'SCHEDULING...' : 'AGENDANDO...';
+        sentText = activeLang === 'en' ? '✓ SCHEDULED' : '✓ AGENDADO';
+        
+        details = `Tipo de Cita: ${type === 'Online Meeting' ? 'Reunión Virtual por Videollamada' : 'Visita Presencial a la Propiedad'}\nFecha Propuesta: ${date}\nHora Propuesta: ${time}\nNotas del cliente: ${notes ? notes : 'Sin notas adicionales.'}`;
+        origin = 'Website Booking';
+      }
+      
       btn.disabled = true;
-
-      // Construct detailed notes for the CRM
-      const details = `Proyecto Seleccionado: ${project}.\nMensaje del cliente: ${message ? message : 'Sin mensaje adicional.'}`;
-
-      // Determinar la URL del API (local o subdominio de producción)
+      const btnSpan = activeTab === 'message' ? btn.querySelector('.submit-msg-text') : btn.querySelector('.submit-booking-text');
+      const originalText = btnSpan.innerHTML;
+      btnSpan.textContent = sendingText;
+      
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const apiEndpoint = isLocal ? '/api/leads' : 'https://admin.laslomas.cr/api/leads';
-
+      
       fetch(apiEndpoint, {
         method: 'POST',
         headers: {
@@ -477,7 +576,7 @@
           name: name,
           email: email,
           phone: phone,
-          origin: 'Website Landing',
+          origin: origin,
           details: details,
           status: 'New Lead'
         })
@@ -487,103 +586,31 @@
         return res.json();
       })
       .then(data => {
-        btn.textContent = sentText;
+        btnSpan.textContent = sentText;
         btn.style.background = '#2D5A3F';
         
         // Reset form inputs
         document.getElementById('contact-name').value = '';
         document.getElementById('contact-email').value = '';
         document.getElementById('contact-phone').value = '';
-        document.getElementById('contact-message').value = '';
+        if (document.getElementById('contact-message')) document.getElementById('contact-message').value = '';
+        
+        if (document.getElementById('booking-date')) document.getElementById('booking-date').value = '';
+        if (document.getElementById('booking-time')) document.getElementById('booking-time').value = '';
+        if (document.getElementById('booking-notes')) document.getElementById('booking-notes').value = '';
         
         setTimeout(() => { 
-          btn.innerHTML = activeLang === 'en' ? 'Submit Request' : 'Enviar Solicitud';
+          btnSpan.innerHTML = originalText;
           btn.style.background = ''; 
           btn.disabled = false; 
         }, 3000);
       })
       .catch(err => {
         console.error('Error submitting lead:', err);
-        btn.textContent = sentText;
+        btnSpan.textContent = sentText;
         btn.style.background = '#2D5A3F';
         setTimeout(() => { 
-          btn.innerHTML = activeLang === 'en' ? 'Submit Request' : 'Enviar Solicitud';
-          btn.style.background = ''; 
-          btn.disabled = false; 
-        }, 3000);
-      });
-    }
-
-    // Handle AJAX booking submission to local CRM API
-    function handleBookingSubmit(e) {
-      e.preventDefault();
-      
-      const name = document.getElementById('booking-name').value;
-      const email = document.getElementById('booking-email').value;
-      const phone = document.getElementById('booking-phone').value;
-      const type = document.getElementById('booking-type').value;
-      const date = document.getElementById('booking-date').value;
-      const time = document.getElementById('booking-time').value;
-      const notes = document.getElementById('booking-notes').value;
-      
-      const btn = e.target.querySelector('button');
-      
-      const activeLang = document.documentElement.getAttribute('lang') || 'en';
-      const sendingText = activeLang === 'en' ? 'SCHEDULING...' : 'AGENDANDO...';
-      const sentText = activeLang === 'en' ? '✓ SCHEDULED' : '✓ AGENDADO';
-
-      btn.textContent = sendingText;
-      btn.disabled = true;
-
-      // Construct detailed notes for the CRM
-      const details = `Tipo de Cita: ${type === 'Online Meeting' ? 'Reunión Virtual por Videollamada' : 'Visita Presencial a la Propiedad'}\nFecha Propuesta: ${date}\nHora Propuesta: ${time}\nNotas del cliente: ${notes ? notes : 'Sin notas adicionales.'}`;
-
-      // Determinar la URL del API (local o subdominio de producción)
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const apiEndpoint = isLocal ? '/api/leads' : 'https://admin.laslomas.cr/api/leads';
-
-      fetch(apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          phone: phone,
-          origin: 'Website Booking',
-          details: details,
-          status: 'New Lead'
-        })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error('API Error');
-        return res.json();
-      })
-      .then(data => {
-        btn.textContent = sentText;
-        btn.style.background = '#2D5A3F';
-        
-        // Reset form inputs
-        document.getElementById('booking-name').value = '';
-        document.getElementById('booking-email').value = '';
-        document.getElementById('booking-phone').value = '';
-        document.getElementById('booking-date').value = '';
-        document.getElementById('booking-time').value = '';
-        document.getElementById('booking-notes').value = '';
-        
-        setTimeout(() => { 
-          btn.innerHTML = activeLang === 'en' ? 'Schedule Meeting' : 'Agendar Reunión';
-          btn.style.background = ''; 
-          btn.disabled = false; 
-        }, 3000);
-      })
-      .catch(err => {
-        console.error('Error submitting booking:', err);
-        btn.textContent = sentText;
-        btn.style.background = '#2D5A3F';
-        setTimeout(() => { 
-          btn.innerHTML = activeLang === 'en' ? 'Schedule Meeting' : 'Agendar Reunión';
+          btnSpan.innerHTML = originalText;
           btn.style.background = ''; 
           btn.disabled = false; 
         }, 3000);
